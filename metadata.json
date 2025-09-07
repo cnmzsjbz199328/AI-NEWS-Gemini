@@ -1,0 +1,6 @@
+{
+  "name": "AI News Commentary Channel",
+  "description": "An automated news commentary platform featuring three AI-powered commentators discussing trending news topics in a simulated studio environment.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
