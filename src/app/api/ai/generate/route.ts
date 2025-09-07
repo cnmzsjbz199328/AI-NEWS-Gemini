@@ -45,10 +45,20 @@ export async function POST(request: NextRequest) {
 
     // 获取对应的AI提供商并生成回应
     const aiProvider = getAIProviderForSpeaker(speaker)
+    console.log(`Attempting to generate response using ${aiProvider.name} for ${speaker}`)
+    
     const text = await aiProvider.generateResponse(systemInstruction, fullPrompt)
 
-    if (!text) {
-      throw new Error(`Empty response from ${aiProvider.name} AI service`)
+    console.log(`Response from ${aiProvider.name}:`, {
+      hasText: !!text,
+      textLength: text?.length || 0,
+      textPreview: text?.substring(0, 100)
+    })
+
+    if (!text || text.trim().length === 0) {
+      console.warn(`Empty response from ${aiProvider.name}, using fallback`)
+      const fallbackText = `I appreciate this discussion and look forward to hearing different perspectives on this important topic.`
+      return NextResponse.json({ text: fallbackText })
     }
 
     console.log(`Generated response using ${aiProvider.name} for ${speaker}: ${text.substring(0, 50)}...`)

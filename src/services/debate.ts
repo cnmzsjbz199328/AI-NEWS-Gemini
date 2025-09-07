@@ -89,7 +89,7 @@ export class DebateService {
 
   private async moderatorIntroduction(): Promise<void> {
     const currentNews = this.appState.newsItems[this.appState.currentNewsIndex];
-    const moderatorPrompt = `Good evening. Tonight we're discussing: "${currentNews.title}". ${currentNews.description} Please introduce this topic briefly and set the stage for Tom and Mark's debate.`;
+    const moderatorPrompt = `Good evening. Tonight we're discussing: "${currentNews.title}". ${currentNews.description} Please introduce this topic briefly and set the stage for Tom and Mark's debate. Keep your response under 150 characters, be concise and engaging.`;
     
     const response = await this.aiService.generateResponse('moderator', moderatorPrompt);
     this.updateConversation({ speaker: 'moderator', text: response });
@@ -98,7 +98,7 @@ export class DebateService {
 
   private async conductDebateRounds(): Promise<void> {
     const speakers: Speaker[] = ['tom', 'mark'];
-    const rounds = 3;
+    const rounds = 5; // 增加到5轮以支持更多对话
 
     for (let round = 0; round < rounds; round++) {
       for (const speaker of speakers) {
@@ -120,7 +120,7 @@ export class DebateService {
 Recent conversation:
 ${recentConversation}
 
-Please provide your perspective as ${speaker}. Keep it concise but engaging.`;
+Please provide your perspective as ${speaker}. IMPORTANT: Keep your response under 150 characters. Be concise, engaging, and direct. This is a multi-round debate, so make each response count.`;
 
     const response = await this.aiService.generateResponse(speaker, prompt);
     this.updateConversation({ speaker, text: response });
@@ -135,7 +135,7 @@ Please provide your perspective as ${speaker}. Keep it concise but engaging.`;
     const prompt = `Based on this debate:
 ${recentConversation}
 
-Please provide a brief, balanced conclusion that summarizes the key points discussed.`;
+Please provide a brief, balanced conclusion that summarizes the key points discussed. Keep your response under 150 characters, be concise and impactful.`;
 
     const response = await this.aiService.generateResponse('moderator', prompt);
     this.updateConversation({ speaker: 'moderator', text: response });

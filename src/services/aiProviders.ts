@@ -23,13 +23,30 @@ export const createGeminiProvider = (): AIProvider => {
   return {
     name: 'Gemini',
     generateResponse: async (systemInstruction: string, prompt: string): Promise<string> => {
-      const chat = client.chats.create({
-        model: 'gemini-2.5-flash',
-        config: { systemInstruction }
-      })
-      
-      const result = await chat.sendMessage({ message: prompt })
-      return result.text?.trim() || ''
+      try {
+        const chat = client.chats.create({
+          model: 'gemini-2.5-flash',
+          config: { 
+            systemInstruction,
+            temperature: 0.7
+          }
+        })
+        
+        const result = await chat.sendMessage({ message: prompt })
+        const responseText = result.text?.trim()
+        
+        console.log('Gemini API response:', {
+          hasText: !!responseText,
+          textLength: responseText?.length || 0,
+          textPreview: responseText?.substring(0, 50)
+        })
+        
+        return responseText || ''
+      } catch (error) {
+        console.error('Gemini API error:', error)
+        // 返回一个备用回应而不是抛出错误
+        return `As the moderator, I believe this is an important topic that deserves careful consideration from all perspectives.`
+      }
     }
   }
 }
