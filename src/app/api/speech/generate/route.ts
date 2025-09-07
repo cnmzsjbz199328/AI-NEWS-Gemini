@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     // 生成语音
     const responseStream = await ai.models.generateContentStream({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.5-flash', // 语音生成仍需要特定模型
       contents: {
         role: 'user',
         parts: [{ text }],

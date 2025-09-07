@@ -1,10 +1,18 @@
 /**
  * AI提供商服务 - 统一管理不同的AI服务
+ * 所有模型配置集中在后端，前端通过API调用时不知道具体使用的模型
  */
 
 import { GoogleGenAI } from '@google/genai'
 import { Mistral } from '@mistralai/mistralai'
 import OpenAI from 'openai'
+
+// 模型配置 - 只在后端存在，前端不可见
+const MODEL_CONFIG = {
+  GEMINI_MODEL: 'gemini-2.5-flash',
+  MISTRAL_MODEL: 'mistral-large-latest', 
+  REKA_MODEL: 'reka-flash-research'
+} as const
 
 export interface AIProvider {
   name: string
@@ -25,7 +33,7 @@ export const createGeminiProvider = (): AIProvider => {
     generateResponse: async (systemInstruction: string, prompt: string): Promise<string> => {
       try {
         const chat = client.chats.create({
-          model: 'gemini-2.5-flash',
+          model: MODEL_CONFIG.GEMINI_MODEL,
           config: { 
             systemInstruction,
             temperature: 0.7
@@ -64,7 +72,7 @@ export const createMistralProvider = (): AIProvider => {
     name: 'Mistral',
     generateResponse: async (systemInstruction: string, prompt: string): Promise<string> => {
       const chatResponse = await client.chat.complete({
-        model: "mistral-large-latest",
+        model: MODEL_CONFIG.MISTRAL_MODEL,
         messages: [
           { role: 'system', content: systemInstruction },
           { role: 'user', content: prompt }
@@ -107,7 +115,7 @@ export const createRekaProvider = (): AIProvider => {
         });
 
         const completion = await client.chat.completions.create({
-          model: 'reka-flash-research',
+          model: MODEL_CONFIG.REKA_MODEL,
           messages: [
             { role: 'system', content: systemInstruction },
             { role: 'user', content: prompt }

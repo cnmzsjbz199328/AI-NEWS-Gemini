@@ -29,7 +29,6 @@ export const PERSONALITIES = {
 };
 
 export const API_CONFIG = {
-  GEMINI_MODEL: 'gemini-2.5-flash',
   AUDIO_SAMPLE_RATE: 24000,
   NEWS_REFRESH_INTERVAL: 600000, // 10 minutes
   SLIDESHOW_INTERVAL: 7000,
