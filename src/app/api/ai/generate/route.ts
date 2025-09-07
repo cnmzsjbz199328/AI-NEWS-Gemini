@@ -1,15 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { GoogleGenAI } from '@google/genai'
 import { PERSONALITIES } from '@/config'
-
-// 确保API密钥从环境变量获取，不暴露给前端
-const getGeminiClient = () => {
-  const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) {
-    throw new Error('GEMINI_API_KEY not found in environment variables')
-  }
-  return new GoogleGenAI({ apiKey })
-}
+import { getAIProviderForSpeaker } from '@/services/aiProviders'
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,11 +13,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-
-    const ai = getGeminiClient()
     
-    // 根据speaker选择对应的人格
+    // 根据speaker选择对应的人格和AI提供商
     let systemInstruction: string
+    
     switch (speaker) {
       case 'moderator':
         systemInstruction = PERSONALITIES.MODERATOR
@@ -44,12 +34,6 @@ export async function POST(request: NextRequest) {
         )
     }
 
-    // 创建聊天会话
-    const chat = ai.chats.create({
-      model: 'gemini-2.5-flash',
-      config: { systemInstruction }
-    })
-
     // 构建上下文
     const recentConversation = conversation.slice(-5)
       .map((entry: any) => `${entry.speaker}: ${entry.text}`)
@@ -59,15 +43,21 @@ export async function POST(request: NextRequest) {
       `Context:\n${recentConversation}\n\nNew prompt: ${prompt}` : 
       prompt
 
-    // 生成回应
-    const result = await chat.sendMessage({ message: fullPrompt })
-    const text = result.text.trim()
+    // 获取对应的AI提供商并生成回应
+    const aiProvider = getAIProviderForSpeaker(speaker)
+    const text = await aiProvider.generateResponse(systemInstruction, fullPrompt)
+
+    if (!text) {
+      throw new Error(`Empty response from ${aiProvider.name} AI service`)
+    }
+
+    console.log(`Generated response using ${aiProvider.name} for ${speaker}: ${text.substring(0, 50)}...`)
 
     return NextResponse.json({ text })
   } catch (error) {
     console.error('AI generation error:', error)
     return NextResponse.json(
-      { error: 'Failed to generate AI response' },
+      { error: `Failed to generate AI response: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     )
   }

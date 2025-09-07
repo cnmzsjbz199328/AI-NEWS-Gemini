@@ -167,6 +167,13 @@ export default function HomePage() {
 
   const speak = async (text: string, speaker: Speaker): Promise<void> => {
     try {
+      // 临时禁用语音生成以专注于修复AI文本生成
+      console.log(`${speaker} would say: ${text}`)
+      
+      // 模拟语音播放延迟
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      /* 语音生成暂时禁用
       const response = await fetch('/api/speech/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -181,6 +188,7 @@ export default function HomePage() {
       const audioUrl = URL.createObjectURL(audioBlob)
       const audio = new Audio(audioUrl)
       await audio.play()
+      */
     } catch (error) {
       console.error('Speech generation error:', error)
     }
@@ -234,7 +242,11 @@ export default function HomePage() {
         <div className={`commentator moderator ${state.currentSpeaker === 'moderator' ? 'speaking' : ''}`}>
           <h2>Moderator</h2>
           <div className="avatar">
-            <img src="/Senior Moderator.gif" alt="Moderator Avatar" />
+            {state.currentSpeaker === 'moderator' ? (
+              <img src="https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/ezgif.com-video-to-gif-converter.gif" alt="Moderator Avatar" />
+            ) : (
+              <img src="https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/1.png" alt="Moderator Avatar" />
+            )}
           </div>
         </div>
         
@@ -242,7 +254,11 @@ export default function HomePage() {
           <div className={`commentator tom ${state.currentSpeaker === 'tom' ? 'speaking' : ''}`}>
             <h2>Tom</h2>
             <div className="avatar">
-              <img src="/Tom.gif" alt="Tom Avatar" />
+              {state.currentSpeaker === 'tom' ? (
+                <img src="https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/Moving-picture-dog-flips-hot-dog-on-nose-animated-gif.gif" alt="Tom Avatar" />
+              ) : (
+                <img src="https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/3.png" alt="Tom Avatar" />
+              )}
             </div>
           </div>
 
@@ -255,7 +271,11 @@ export default function HomePage() {
           <div className={`commentator mark ${state.currentSpeaker === 'mark' ? 'speaking' : ''}`}>
             <h2>Mark</h2>
             <div className="avatar">
-              <img src="/Mark.gif" alt="Mark Avatar" />
+              {state.currentSpeaker === 'mark' ? (
+                <img src="https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/dog-ezgif.com-video-to-gif-converter%20(1).gif" alt="Mark Avatar" />
+              ) : (
+                <img src="https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/2.png" alt="Mark Avatar" />
+              )}
             </div>
           </div>
         </div>
