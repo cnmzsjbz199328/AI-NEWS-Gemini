@@ -422,7 +422,7 @@ export class AiNewsCommentary extends LitElement {
         }">
             <h2>Moderator</h2>
             <div class="avatar">
-                <img src="/moderator.gif" alt="Moderator Avatar">
+                <img src="/Senior Moderator.gif" alt="Moderator Avatar">
             </div>
         </div>
         <div class="studio-container">
@@ -431,7 +431,7 @@ export class AiNewsCommentary extends LitElement {
           }">
             <h2>Tom</h2>
             <div class="avatar">
-              <img src="/tom.gif" alt="Tom Avatar">
+              <img src="/Tom.gif" alt="Tom Avatar">
             </div>
           </div>
 
@@ -446,7 +446,7 @@ export class AiNewsCommentary extends LitElement {
           }">
             <h2>Mark</h2>
             <div class="avatar">
-               <img src="/mark.gif" alt="Mark Avatar">
+               <img src="/Mark.gif" alt="Mark Avatar">
             </div>
           </div>
         </div>
