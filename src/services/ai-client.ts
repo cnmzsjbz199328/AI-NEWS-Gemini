@@ -21,9 +21,16 @@ export interface AIError {
  * 生成 AI 回应
  * @param speaker 发言人角色
  * @param prompt 提示词
+ * @param topic 辩论主题（可选）
+ * @param conversation 对话历史（可选）
  * @returns AI 生成的文本回应
  */
-export async function generateAIResponse(speaker: Speaker, prompt: string): Promise<string> {
+export async function generateAIResponse(
+  speaker: Speaker, 
+  prompt: string,
+  topic?: string,
+  conversation?: Array<{speaker: Speaker, text: string}>
+): Promise<string> {
   try {
     const response = await fetch('/api/ai/generate', {
       method: 'POST',
@@ -33,6 +40,8 @@ export async function generateAIResponse(speaker: Speaker, prompt: string): Prom
       body: JSON.stringify({
         speaker,
         prompt,
+        topic,
+        conversation
       }),
     })
 
@@ -56,6 +65,8 @@ export async function generateAIResponse(speaker: Speaker, prompt: string): Prom
  */
 export async function generateSpeech(text: string, speaker: Speaker): Promise<Blob | null> {
   try {
+    console.log(`[AI-Client] Requesting speech generation for ${speaker}: "${text.substring(0, 30)}..."`)
+    
     const response = await fetch('/api/speech/generate', {
       method: 'POST',
       headers: {
@@ -68,13 +79,17 @@ export async function generateSpeech(text: string, speaker: Speaker): Promise<Bl
     })
 
     if (!response.ok) {
-      console.warn(`Speech generation failed: ${response.status}`)
+      const errorText = await response.text()
+      console.error(`[AI-Client] Speech generation failed: ${response.status} - ${errorText}`)
       return null
     }
 
-    return await response.blob()
+    const audioBlob = await response.blob()
+    console.log(`[AI-Client] Speech generation successful for ${speaker}, size: ${audioBlob.size} bytes`)
+    
+    return audioBlob
   } catch (error) {
-    console.error('Speech generation failed:', error)
+    console.error(`[AI-Client] Speech generation failed for ${speaker}:`, error)
     return null
   }
 }
@@ -96,8 +111,13 @@ export class AIService {
   /**
    * 生成 AI 回应（实例方法）
    */
-  async generateResponse(speaker: Speaker, prompt: string): Promise<string> {
-    return generateAIResponse(speaker, prompt)
+  async generateResponse(
+    speaker: Speaker, 
+    prompt: string,
+    topic?: string,
+    conversation?: Array<{speaker: Speaker, text: string}>
+  ): Promise<string> {
+    return generateAIResponse(speaker, prompt, topic, conversation)
   }
 
   /**

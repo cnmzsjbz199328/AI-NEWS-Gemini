@@ -1,30 +1,66 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ConversationEntry, NewsItem, Speaker } from '@/types'
-
-type AppState = {
-  status: string
-  error: string
-  currentMessage: ConversationEntry | null
-  currentSpeaker: Speaker | 'none'
-  isDebating: boolean
-  news: NewsItem[]
-  newsError: string
-  activeNewsIndex: number
-}
+import { ConversationEntry, NewsItem, Speaker, AppState, SpeakersState, AudioPlaybackInfo } from '@/types'
+import { SpeakerStateManager } from '@/utils/speaker-state-manager'
+import { AudioManager } from '@/utils/audio-manager'
+import { GenerationManager } from '@/utils/generation-manager'
 
 export default function HomePage() {
   const [state, setState] = useState<AppState>({
-    status: 'Ready to start discussion',
+    conversation: [],
+    currentNewsIndex: 0,
+    isDebating: false,
+    newsItems: [],
+    isLoading: false,
     error: '',
     currentMessage: null,
     currentSpeaker: 'none',
-    isDebating: false,
+    speakersState: {
+      moderator: { 
+        animationState: 'static', 
+        generationState: 'idle' 
+      },
+      tom: { 
+        animationState: 'static', 
+        generationState: 'idle' 
+      },
+      mark: { 
+        animationState: 'static', 
+        generationState: 'idle' 
+      }
+    },
+    audioQueue: [],
+    currentPlayingAudio: undefined,
+    nextSequenceNumber: 1,
+    // Legacy properties for compatibility
+    status: 'Ready to start discussion',
     news: [],
     newsError: '',
     activeNewsIndex: 0
   })
+
+  // Initialize managers
+  const speakerStateManager = new SpeakerStateManager()
+  speakerStateManager.setStateChangeCallback(
+    (newState: SpeakersState) => setState(prev => ({ ...prev, speakersState: newState }))
+  )
+  
+  const audioManager = new AudioManager(speakerStateManager)
+  audioManager.setStateChangeCallback(
+    (audioInfo: AudioPlaybackInfo) => setState(prev => ({ 
+      ...prev, 
+      currentPlayingAudio: audioInfo.currentSequence > 0 ? audioInfo.currentSequence.toString() : undefined
+    }))
+  )
+  
+  const generationManager = new GenerationManager(audioManager, speakerStateManager)
+  generationManager.setConversationUpdateCallback(
+    (conversation: ConversationEntry[]) => setState(prev => ({ 
+      ...prev, 
+      conversation 
+    }))
+  )
 
   const updateStatus = (msg: string) => {
     setState((prev: AppState) => ({ ...prev, status: msg }))
@@ -32,6 +68,34 @@ export default function HomePage() {
 
   const updateError = (msg: string) => {
     setState((prev: AppState) => ({ ...prev, error: msg }))
+  }
+
+  // Helper function to get speaker image based on animation state
+  const getSpeakerImage = (speaker: Speaker) => {
+    const speakerState = state.speakersState[speaker]
+    const animationState = speakerState.animationState
+    
+    // Use animated GIF when thinking or speaking, static PNG when idle
+    if (animationState === 'thinking' || animationState === 'speaking') {
+      switch (speaker) {
+        case 'moderator':
+          return "https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/ezgif.com-video-to-gif-converter.gif"
+        case 'tom':
+          return "https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/Moving-picture-dog-flips-hot-dog-on-nose-animated-gif.gif"
+        case 'mark':
+          return "https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/dog-ezgif.com-video-to-gif-converter%20(1).gif"
+      }
+    } else {
+      // Static state - use PNG images
+      switch (speaker) {
+        case 'moderator':
+          return "https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/1.png"
+        case 'tom':
+          return "https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/3.png"
+        case 'mark':
+          return "https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/2.png"
+      }
+    }
   }
 
   useEffect(() => {
@@ -74,123 +138,71 @@ export default function HomePage() {
       ...prev, 
       isDebating: true,
       currentMessage: null,
-      error: ''
+      error: '',
+      conversation: []
     }))
     updateStatus('The discussion is starting...')
 
     try {
-      await runDebate(topic)
+      await runDebateWithNewSystem(topic)
     } catch (e: any) {
       updateError(`An error occurred: ${e.message}`)
     } finally {
       setState((prev: AppState) => ({ 
         ...prev, 
-        isDebating: false,
-        currentSpeaker: 'none',
-        currentMessage: null
+        isDebating: false
       }))
+      // Reset all speakers to static state
+      speakerStateManager.setStatic('moderator')
+      speakerStateManager.setStatic('tom')
+      speakerStateManager.setStatic('mark')
       updateStatus('Discussion finished. Click Start to begin again.')
     }
   }
 
-  const runDebate = async (topic: string) => {
-    const history: { speaker: Speaker; text: string }[] = []
-    
-    const fullHistoryForContext = (currentSpeaker: Speaker, prompt: string) => {
-      const context = history
-        .map((msg) => `${msg.speaker}: ${msg.text}`)
-        .join('\n\n')
-      return `Here's the conversation so far:\n${context}\n\nAs ${currentSpeaker}, what is your response to the following prompt: "${prompt}"`
-    }
-
-    // 辩论流程
-    let prompt = `Introduce the topic for today's debate based on this news story: "${topic}". Then, ask Tom for his opening statement.`
-    let response = await generateResponse('moderator', prompt)
-    history.push({ speaker: 'moderator', text: response })
-
-    prompt = `Give your opening statement on the topic.`
-    response = await generateResponse('tom', fullHistoryForContext('tom', prompt))
-    history.push({ speaker: 'tom', text: response })
-
-    prompt = `Directly respond to Tom's last statement.`
-    response = await generateResponse('mark', fullHistoryForContext('mark', prompt))
-    history.push({ speaker: 'mark', text: response })
-
-    prompt = `Directly respond to Mark's last statement.`
-    response = await generateResponse('tom', fullHistoryForContext('tom', prompt))
-    history.push({ speaker: 'tom', text: response })
-
-    prompt = `Summarize the key points from both Tom and Mark, and provide a concluding thought to end the debate.`
-    response = await generateResponse('moderator', fullHistoryForContext('moderator', prompt))
-    history.push({ speaker: 'moderator', text: response })
-  }
-
-  const generateResponse = async (speaker: Speaker, prompt: string): Promise<string> => {
-    updateStatus(`${speaker.charAt(0).toUpperCase() + speaker.slice(1)} is thinking...`)
-
-    try {
-      const response = await fetch('/api/ai/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ speaker, prompt })
-      })
-
-      if (!response.ok) {
-        throw new Error('AI response failed')
+  const runDebateWithNewSystem = async (topic: string) => {
+    // Define the debate flow with our new system
+    const debateFlow = [
+      {
+        speaker: 'moderator' as Speaker,
+        prompt: `Introduce the topic for today's debate based on this news story: "${topic}". Then, ask Tom for his opening statement.`
+      },
+      {
+        speaker: 'tom' as Speaker,
+        prompt: `Give your opening statement on the topic.`
+      },
+      {
+        speaker: 'mark' as Speaker,
+        prompt: `Directly respond to Tom's last statement.`
+      },
+      {
+        speaker: 'tom' as Speaker,
+        prompt: `Directly respond to Mark's last statement.`
+      },
+      {
+        speaker: 'moderator' as Speaker,
+        prompt: `Summarize the key points from both Tom and Mark, and provide a concluding thought to end the debate.`
       }
+    ]
 
-      const { text } = await response.json()
+    // Execute each speaker turn using our generation manager
+    for (const turn of debateFlow) {
+      updateStatus(`${turn.speaker.charAt(0).toUpperCase() + turn.speaker.slice(1)} is preparing...`)
       
-      if (!text) {
-        console.warn(`Received empty text response for ${speaker}. Skipping speech.`)
-        return ''
+      try {
+        await generationManager.executeSpeakerTurn(
+          turn.speaker,
+          turn.prompt,
+          state.conversation
+        )
+        
+        // Small delay between speakers
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+      } catch (error: any) {
+        console.error(`Error during ${turn.speaker} turn:`, error)
+        throw new Error(`Failed to execute ${turn.speaker} turn: ${error.message}`)
       }
-
-      setState((prev: AppState) => ({ 
-        ...prev, 
-        currentMessage: { speaker, text },
-        currentSpeaker: speaker
-      }))
-
-      await speak(text, speaker)
-      
-      setState((prev: AppState) => ({ 
-        ...prev, 
-        currentSpeaker: 'none'
-      }))
-
-      return text
-    } catch (error: any) {
-      throw new Error(`Failed to generate response for ${speaker}: ${error.message}`)
-    }
-  }
-
-  const speak = async (text: string, speaker: Speaker): Promise<void> => {
-    try {
-      // 临时禁用语音生成以专注于修复AI文本生成
-      console.log(`${speaker} would say: ${text}`)
-      
-      // 模拟语音播放延迟
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      /* 语音生成暂时禁用
-      const response = await fetch('/api/speech/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, speaker })
-      })
-
-      if (!response.ok) {
-        throw new Error('Speech generation failed')
-      }
-
-      const audioBlob = await response.blob()
-      const audioUrl = URL.createObjectURL(audioBlob)
-      const audio = new Audio(audioUrl)
-      await audio.play()
-      */
-    } catch (error) {
-      console.error('Speech generation error:', error)
     }
   }
 
@@ -239,26 +251,18 @@ export default function HomePage() {
       <div id="status">{state.error || state.status}</div>
       
       <div className="main-content">
-        <div className={`commentator moderator ${state.currentSpeaker === 'moderator' ? 'speaking' : ''}`}>
+        <div className={`commentator moderator ${state.speakersState.moderator.animationState === 'speaking' ? 'speaking' : ''}`}>
           <h2>Moderator</h2>
           <div className="avatar">
-            {state.currentSpeaker === 'moderator' ? (
-              <img src="https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/ezgif.com-video-to-gif-converter.gif" alt="Moderator Avatar" />
-            ) : (
-              <img src="https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/1.png" alt="Moderator Avatar" />
-            )}
+            <img src={getSpeakerImage('moderator')} alt="Moderator Avatar" />
           </div>
         </div>
         
         <div className="studio-container">
-          <div className={`commentator tom ${state.currentSpeaker === 'tom' ? 'speaking' : ''}`}>
+          <div className={`commentator tom ${state.speakersState.tom.animationState === 'speaking' ? 'speaking' : ''}`}>
             <h2>Tom</h2>
             <div className="avatar">
-              {state.currentSpeaker === 'tom' ? (
-                <img src="https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/Moving-picture-dog-flips-hot-dog-on-nose-animated-gif.gif" alt="Tom Avatar" />
-              ) : (
-                <img src="https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/3.png" alt="Tom Avatar" />
-              )}
+              <img src={getSpeakerImage('tom')} alt="Tom Avatar" />
             </div>
           </div>
 
@@ -268,22 +272,27 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className={`commentator mark ${state.currentSpeaker === 'mark' ? 'speaking' : ''}`}>
+          <div className={`commentator mark ${state.speakersState.mark.animationState === 'speaking' ? 'speaking' : ''}`}>
             <h2>Mark</h2>
             <div className="avatar">
-              {state.currentSpeaker === 'mark' ? (
-                <img src="https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/dog-ezgif.com-video-to-gif-converter%20(1).gif" alt="Mark Avatar" />
-              ) : (
-                <img src="https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/2.png" alt="Mark Avatar" />
-              )}
+              <img src={getSpeakerImage('mark')} alt="Mark Avatar" />
             </div>
           </div>
         </div>
       </div>
 
       <div id="transcript">
-        {state.currentMessage && (
-          <div className={`message ${state.currentMessage.speaker}`}>
+        {state.conversation.map((message, index) => (
+          <div key={index} className={`message ${message.speaker}`}>
+            <div className={`speaker-name ${message.speaker}`}>
+              {message.speaker.toUpperCase()}
+            </div>
+            <div>{message.text}</div>
+          </div>
+        ))}
+        {/* Show current message if it's not in conversation yet */}
+        {state.currentMessage && !state.conversation.some(msg => msg.text === state.currentMessage?.text) && (
+          <div className={`message ${state.currentMessage.speaker} current`}>
             <div className={`speaker-name ${state.currentMessage.speaker}`}>
               {state.currentMessage.speaker.toUpperCase()}
             </div>

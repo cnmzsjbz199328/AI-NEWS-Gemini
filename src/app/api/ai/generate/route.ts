@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PERSONALITIES } from '@/config'
 import { getAIProviderForSpeaker } from '@/lib/ai-providers'
+import { PromptManager, DebateContext } from '@/lib/prompt-manager'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { speaker, prompt, conversation = [] } = body
+    const { speaker, prompt, topic, phase, conversation = [] } = body
 
     if (!speaker || !prompt) {
       return NextResponse.json(
@@ -13,47 +13,47 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    const promptManager = PromptManager.getInstance()
     
-    // 根据speaker选择对应的人格和AI提供商
-    let systemInstruction: string
+    // 获取系统指令
+    const systemInstruction = promptManager.getSystemInstruction(speaker)
     
-    switch (speaker) {
-      case 'moderator':
-        systemInstruction = PERSONALITIES.MODERATOR
-        break
-      case 'tom':
-        systemInstruction = PERSONALITIES.TOM
-        break
-      case 'mark':
-        systemInstruction = PERSONALITIES.MARK
-        break
-      default:
-        return NextResponse.json(
-          { error: 'Invalid speaker' },
-          { status: 400 }
-        )
+    // 构建上下文（如果提供了topic和conversation）
+    let finalPrompt = prompt
+    if (topic && conversation.length >= 0) {
+      const context: DebateContext = {
+        topic,
+        currentTurn: conversation.length,
+        history: conversation
+      }
+      finalPrompt = promptManager.buildContextualPrompt(speaker, prompt, context)
     }
 
-    // 构建上下文
-    const recentConversation = conversation.slice(-5)
-      .map((entry: any) => `${entry.speaker}: ${entry.text}`)
-      .join('\n')
-
-    const fullPrompt = recentConversation ? 
-      `Context:\n${recentConversation}\n\nNew prompt: ${prompt}` : 
-      prompt
+    // 添加严格的字符限制提醒
+    finalPrompt = promptManager.addStrictLimitPrefix(finalPrompt)
 
     // 获取对应的AI提供商并生成回应
     const aiProvider = getAIProviderForSpeaker(speaker)
     console.log(`Attempting to generate response using ${aiProvider.name} for ${speaker}`)
+    console.log(`Final prompt length: ${finalPrompt.length} characters`)
     
-    const text = await aiProvider.generateResponse(systemInstruction, fullPrompt)
+    let text = await aiProvider.generateResponse(systemInstruction, finalPrompt)
 
     console.log(`Response from ${aiProvider.name}:`, {
       hasText: !!text,
       textLength: text?.length || 0,
-      textPreview: text?.substring(0, 1000)
+      textPreview: text?.substring(0, 50)
     })
+
+    // 验证回应质量
+    const validation = promptManager.validateResponse(text, speaker)
+    if (!validation.isValid) {
+      console.warn(`Response validation failed:`, validation.issues)
+    }
+
+    // 使用处理后的文本
+    text = validation.processedResponse
 
     if (!text || text.trim().length === 0) {
       console.warn(`Empty response from ${aiProvider.name}, using fallback`)

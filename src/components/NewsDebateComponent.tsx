@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { AppState } from '@/types'
+import { AppState, Speaker } from '@/types'
 
 interface NewsDebateComponentProps {
   appState: AppState
@@ -21,6 +21,34 @@ export function NewsDebateComponent({
   const currentNews = appState.newsItems[appState.currentNewsIndex]
 
   const getSpeakerImage = (speaker: string) => {
+    // 检查是否有角色状态信息
+    if (appState.speakersState && appState.speakersState[speaker as Speaker]) {
+      const speakerState = appState.speakersState[speaker as Speaker]
+      
+      // 根据动画状态选择图片
+      const isAnimated = speakerState.animationState === 'thinking' || 
+                        speakerState.animationState === 'speaking'
+      
+      if (isAnimated) {
+        // 显示动态GIF
+        const gifMap: { [key: string]: string } = {
+          'moderator': '/Senior Moderator.gif',
+          'tom': '/Tom.gif',
+          'mark': '/Mark.gif'
+        }
+        return gifMap[speaker] || '/Senior Moderator.gif'
+      } else {
+        // 显示静态图片
+        const staticMap: { [key: string]: string } = {
+          'moderator': '/Senior Moderator-static.png',
+          'tom': '/Tom-static.png',
+          'mark': '/Mark-static.png'
+        }
+        return staticMap[speaker] || '/Senior Moderator.gif' // 备用到GIF
+      }
+    }
+    
+    // 备用逻辑：使用GIF
     const imageMap: { [key: string]: string } = {
       'moderator': '/Senior Moderator.gif',
       'tom': '/Tom.gif',
@@ -133,11 +161,16 @@ export function NewsDebateComponent({
           </div>
         )}
 
-        {/* 正在辩论指示器 */}
-        {appState.isDebating && (
-          <div className="mt-4 flex items-center justify-center space-x-2 text-white">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-            <span>Debate in progress...</span>
+        {/* Debug info - 可选显示当前状态 */}
+        {process.env.NODE_ENV === 'development' && appState.speakersState && (
+          <div className="mt-4 p-3 bg-black/20 rounded text-xs text-gray-300">
+            <div className="font-semibold mb-1">Speaker States (Debug):</div>
+            {Object.entries(appState.speakersState).map(([speaker, state]) => (
+              <div key={speaker} className="flex justify-between">
+                <span>{speaker}:</span>
+                <span>{state.animationState}/{state.generationState}</span>
+              </div>
+            ))}
           </div>
         )}
       </div>
