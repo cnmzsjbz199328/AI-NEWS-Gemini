@@ -282,23 +282,46 @@ export default function HomePage() {
       </div>
 
       <div id="transcript">
-        {state.conversation.map((message, index) => (
-          <div key={index} className={`message ${message.speaker}`}>
-            <div className={`speaker-name ${message.speaker}`}>
-              {message.speaker.toUpperCase()}
+        {/* 只显示当前正在播放语音的字幕 */}
+        {(() => {
+          // 找到正在播放语音的角色
+          const activeSpeaker = Object.keys(state.speakersState).find(speaker => 
+            state.speakersState[speaker as Speaker]?.animationState === 'speaking'
+          ) as Speaker | undefined;
+          
+          if (activeSpeaker) {
+            // 从对话记录中找到该角色的最新发言
+            const currentEntry = [...state.conversation]
+              .reverse()
+              .find(entry => entry.speaker === activeSpeaker);
+            
+            if (currentEntry) {
+              return (
+                <div key={`${activeSpeaker}-speaking`} className={`message ${activeSpeaker} current speaking`}>
+                  <div className={`speaker-name ${activeSpeaker}`}>
+                    {activeSpeaker.toUpperCase()}
+                  </div>
+                  <div className="subtitle-text">{currentEntry.text}</div>
+                </div>
+              );
+            }
+          }
+          
+          // 如果没有人在说话，显示提示信息
+          return (
+            <div className="no-current-speaker">
+              <p style={{ color: '#666', textAlign: 'center', padding: '20px', opacity: 0.7 }}>
+                {state.conversation.length === 0 
+                  ? 'Press Start Discussion to begin...' 
+                  : (Object.values(state.speakersState).some(s => s.animationState === 'thinking')
+                      ? 'Generating response...'
+                      : 'Preparing next speaker...'
+                    )
+                }
+              </p>
             </div>
-            <div>{message.text}</div>
-          </div>
-        ))}
-        {/* Show current message if it's not in conversation yet */}
-        {state.currentMessage && !state.conversation.some(msg => msg.text === state.currentMessage?.text) && (
-          <div className={`message ${state.currentMessage.speaker} current`}>
-            <div className={`speaker-name ${state.currentMessage.speaker}`}>
-              {state.currentMessage.speaker.toUpperCase()}
-            </div>
-            <div>{state.currentMessage.text}</div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       <div className="controls">
