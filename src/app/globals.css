@@ -330,7 +330,31 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
+
 .controls button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Add this animation to your global CSS file */
+@keyframes scroll-vertical {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+.scrolling-container {
+  animation: scroll-vertical 40s linear infinite;
+}
+
+.scrolling-container:hover {
+  animation-play-state: paused;
+}
+

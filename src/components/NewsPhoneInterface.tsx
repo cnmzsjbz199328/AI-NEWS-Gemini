@@ -176,53 +176,55 @@ export function NewsPhoneInterface({
 
             {/* 新闻列表 */}
             <div className="px-4 space-y-3 flex-1 overflow-y-auto max-h-[320px]">
-              {appState.newsItems.slice(0, 6).map((news, index) => {
-                // 定义不同的AI服务图标和颜色
-                const aiServices = [
-                  { name: 'Reka AI', icon: '⏰', color: 'from-purple-500 to-pink-500' },
-                  { name: 'Teka 5 AI', icon: '👥', color: 'from-blue-500 to-cyan-500' },
-                  { name: 'Gov. Muhies', icon: '☁️', color: 'from-green-500 to-teal-500' },
-                  { name: 'Nestcan Li', icon: '⚙️', color: 'from-orange-500 to-red-500' },
-                  { name: 'Serha AI El', icon: '👤', color: 'from-indigo-500 to-purple-500' },
-                  { name: 'Leurtore', icon: '🔄', color: 'from-pink-500 to-rose-500' }
-                ];
-                
-                const service = aiServices[index % aiServices.length];
-                
-                return (
-                  <div 
-                    key={index}
-                    className={`flex items-center space-x-3 p-3 rounded-xl transition-all cursor-pointer hover:scale-[1.02] ${
-                      index === appState.currentNewsIndex 
-                        ? 'bg-blue-600/30 border border-blue-400 shadow-lg' 
-                        : 'bg-black/20 hover:bg-black/30'
-                    }`}
-                    onClick={() => {
-                      // 这里可以添加选择新闻的逻辑
-                    }}
-                  >
-                    {/* AI服务图标 */}
-                    <div className={`w-12 h-12 bg-gradient-to-br ${service.color} rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                      <span className="text-lg">{service.icon}</span>
+              <div className="scrolling-container">
+                {[...appState.newsItems, ...appState.newsItems].slice(0, 12).map((news, index) => {
+                  // 定义不同的AI服务图标和颜色
+                  const aiServices = [
+                    { name: 'Reka AI', icon: '⏰', color: 'from-purple-500 to-pink-500' },
+                    { name: 'Teka 5 AI', icon: '👥', color: 'from-blue-500 to-cyan-500' },
+                    { name: 'Gov. Muhies', icon: '☁️', color: 'from-green-500 to-teal-500' },
+                    { name: 'Nestcan Li', icon: '⚙️', color: 'from-orange-500 to-red-500' },
+                    { name: 'Serha AI El', icon: '👤', color: 'from-indigo-500 to-purple-500' },
+                    { name: 'Leurtore', icon: '🔄', color: 'from-pink-500 to-rose-500' }
+                  ];
+                  
+                  const service = aiServices[index % aiServices.length];
+                  
+                  return (
+                    <div 
+                      key={index}
+                      className={`flex items-center space-x-3 p-3 rounded-xl transition-all cursor-pointer hover:scale-[1.02] mb-3 ${
+                        index % appState.newsItems.length === appState.currentNewsIndex 
+                          ? 'bg-blue-600/30 border border-blue-400 shadow-lg' 
+                          : 'bg-black/20 hover:bg-black/30'
+                      }`}
+                      onClick={() => {
+                        // 这里可以添加选择新闻的逻辑
+                      }}
+                    >
+                      {/* AI服务图标 */}
+                      <div className={`w-12 h-12 bg-gradient-to-br ${service.color} rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                        <span className="text-lg">{service.icon}</span>
+                      </div>
+                      
+                      {/* 新闻内容 */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-white font-semibold text-sm mb-1 leading-tight">
+                          {service.name}
+                        </h3>
+                        <p className="text-cyan-300 text-xs truncate font-medium">
+                          {news.title.length > 25 ? news.title.substring(0, 25) + '...' : news.title}
+                        </p>
+                      </div>
+                      
+                      {/* 指示器 */}
+                      {index % appState.newsItems.length === appState.currentNewsIndex && (
+                        <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                      )}
                     </div>
-                    
-                    {/* 新闻内容 */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-white font-semibold text-sm mb-1 leading-tight">
-                        {service.name}
-                      </h3>
-                      <p className="text-cyan-300 text-xs truncate font-medium">
-                        {news.title.length > 25 ? news.title.substring(0, 25) + '...' : news.title}
-                      </p>
-                    </div>
-                    
-                    {/* 指示器 */}
-                    {index === appState.currentNewsIndex && (
-                      <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-                    )}
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
             </div>
 
             {/* 底部控制按钮 */}

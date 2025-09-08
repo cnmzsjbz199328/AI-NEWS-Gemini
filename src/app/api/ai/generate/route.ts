@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PERSONALITIES } from '@/config'
-import { getAIProviderForSpeaker } from '@/services/aiProviders'
+import { getAIProviderForSpeaker } from '@/lib/ai-providers'
 
 export async function POST(request: NextRequest) {
   try {
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     console.log(`Response from ${aiProvider.name}:`, {
       hasText: !!text,
       textLength: text?.length || 0,
-      textPreview: text?.substring(0, 100)
+      textPreview: text?.substring(0, 1000)
     })
 
     if (!text || text.trim().length === 0) {

@@ -1,17 +1,20 @@
 /**
- * AI提供商服务 - 统一管理不同的AI服务
- * 所有模型配置集中在后端，前端通过API调用时不知道具体使用的模型
+ * AI提供商服务 - 服务器端专用
+ * 此文件只能在 API 路由中使用，包含敏感的 API 密钥和配置
+ * 
+ * 位置: src/lib/ 表明这是服务器端库文件
+ * 使用: 只能在 src/app/api/ 路由中导入使用
  */
 
 import { GoogleGenAI } from '@google/genai'
 import { Mistral } from '@mistralai/mistralai'
 import OpenAI from 'openai'
 
-// 模型配置 - 只在后端存在，前端不可见
+// 模型配置 - 服务器端专用，前端永远无法访问
 const MODEL_CONFIG = {
   GEMINI_MODEL: 'gemini-2.5-flash',
   MISTRAL_MODEL: 'mistral-large-latest', 
-  REKA_MODEL: 'reka-flash-research'
+  REKA_MODEL: 'reka-flash' // 使用公共可用的基础模型
 } as const
 
 export interface AIProvider {
@@ -46,7 +49,7 @@ export const createGeminiProvider = (): AIProvider => {
         console.log('Gemini API response:', {
           hasText: !!responseText,
           textLength: responseText?.length || 0,
-          textPreview: responseText?.substring(0, 50)
+          textPreview: responseText?.substring(0, 500)
         })
         
         return responseText || ''
@@ -103,72 +106,43 @@ export const createRekaProvider = (): AIProvider => {
     throw new Error('REKA_API_KEY not found in environment variables')
   }
 
+  const client = new OpenAI({
+    baseURL: 'https://api.reka.ai/v1',
+    apiKey: apiKey,
+  });
+
   return {
     name: 'Reka',
     generateResponse: async (systemInstruction: string, prompt: string): Promise<string> => {
       try {
-        console.log('Attempting Reka API call using OpenAI client...');
-        
-        const client = new OpenAI({
-          baseURL: 'https://api.reka.ai/v1',
-          apiKey: apiKey,
-        });
-
         const completion = await client.chat.completions.create({
           model: MODEL_CONFIG.REKA_MODEL,
           messages: [
-            { role: 'system', content: systemInstruction },
-            { role: 'user', content: prompt }
+            { 
+              role: 'user', 
+              content: `${systemInstruction}\n\n${prompt}` 
+            }
           ],
           max_tokens: 150,
           temperature: 0.7
         });
 
-        console.log('Reka response received successfully');
+        const content = completion.choices[0]?.message?.content?.trim();
         
-        const content = completion.choices[0]?.message?.content;
+        console.log('Reka API response:', {
+          hasContent: !!content,
+          contentLength: content?.length || 0,
+          contentPreview: content?.substring(0, 50)
+        });
         
-        if (content) {
-          return content;
-        } else {
-          console.warn('Reka API returned empty content');
-          return generateFallbackResponse(systemInstruction, prompt);
-        }
+        return content || '';
         
       } catch (error) {
         console.error('Reka API error:', error);
-        return generateFallbackResponse(systemInstruction, prompt);
+        throw error; // 让API路由处理错误
       }
     }
   }
-}
-
-// 智能备用回应生成器
-function generateFallbackResponse(systemInstruction: string, prompt: string): string {
-  // 基于Mark的保守、传统的特征生成合理的回应
-  const responses = [
-    "I believe we need to approach this with caution and consider the long-term implications.",
-    "Traditional methods have proven their worth over time, and we shouldn't rush into untested solutions.",
-    "While innovation has its place, we must prioritize stability and proven approaches.",
-    "Experience teaches us that hasty decisions often lead to unintended consequences.",
-    "Let's not forget the value of time-tested principles in addressing this challenge.",
-    "I'm concerned about the potential risks of moving too quickly without proper consideration."
-  ]
-  
-  // 简单的关键词匹配选择合适的回应
-  const lowerPrompt = prompt.toLowerCase()
-  if (lowerPrompt.includes('technology') || lowerPrompt.includes('ai')) {
-    return "While technology offers possibilities, we must carefully weigh its benefits against potential risks to human judgment."
-  }
-  if (lowerPrompt.includes('change') || lowerPrompt.includes('reform')) {
-    return "Change is inevitable, but it should be gradual and well-considered rather than rushed."
-  }
-  if (lowerPrompt.includes('economy') || lowerPrompt.includes('business')) {
-    return "Economic stability requires proven strategies, not experimental approaches that could harm established systems."
-  }
-  
-  // 默认保守回应
-  return responses[Math.floor(Math.random() * responses.length)]
 }
 
 // 获取对应角色的AI提供商
