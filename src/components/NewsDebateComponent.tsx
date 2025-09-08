@@ -129,36 +129,74 @@ export function NewsDebateComponent({
       <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 min-h-[400px] max-h-[600px] overflow-y-auto">
         <h2 className="text-xl font-bold text-white mb-4">Live Debate</h2>
         
+        {/* 当前发言人区域 */}
+        {appState.conversation.length > 0 && (() => {
+          // 找到当前正在播放或最新的发言
+          const currentEntry = appState.conversation[appState.conversation.length - 1]
+          const currentSpeaker = currentEntry.speaker as Speaker
+          const isCurrentSpeaking = appState.speakersState[currentSpeaker]?.animationState === 'speaking'
+          
+          return (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-white mb-3">Current Speaker</h3>
+              <div className={`flex items-start space-x-4 p-4 rounded-lg border-l-4 ${getSpeakerStyle(currentEntry.speaker)}`}>
+                <img
+                  src={getSpeakerImage(currentEntry.speaker)}
+                  alt={currentEntry.speaker}
+                  className="w-16 h-16 rounded-full border-2 border-white shadow-lg flex-shrink-0"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <h4 className="font-semibold text-gray-800 capitalize">
+                      {currentEntry.speaker}
+                    </h4>
+                    <span className="text-xs text-gray-500">
+                      {isCurrentSpeaking ? 'Speaking...' : 'Recently spoke'}
+                    </span>
+                  </div>
+                  <p className="text-gray-700 leading-relaxed">{currentEntry.text}</p>
+                </div>
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* 对话历史（可折叠） */}
         {appState.conversation.length === 0 ? (
           <div className="text-center text-gray-300 py-8">
             <p>No conversation yet. Start a debate to begin!</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {appState.conversation.map((entry, index) => (
-              <div
-                key={index}
-                className={`flex items-start space-x-4 p-4 rounded-lg border-l-4 ${getSpeakerStyle(entry.speaker)}`}
-              >
-                <img
-                  src={getSpeakerImage(entry.speaker)}
-                  alt={entry.speaker}
-                  className="w-12 h-12 rounded-full border-2 border-white shadow-lg flex-shrink-0"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <h3 className="font-semibold text-gray-800 capitalize">
-                      {entry.speaker}
-                    </h3>
-                    <span className="text-xs text-gray-500">
-                      {new Date().toLocaleTimeString()}
-                    </span>
+          <details className="mt-4">
+            <summary className="text-white cursor-pointer hover:text-gray-300 mb-4">
+              View Full Conversation History ({appState.conversation.length} entries)
+            </summary>
+            <div className="space-y-4 max-h-64 overflow-y-auto">
+              {appState.conversation.map((entry, index) => (
+                <div
+                  key={index}
+                  className={`flex items-start space-x-4 p-3 rounded-lg border-l-4 ${getSpeakerStyle(entry.speaker)} opacity-75`}
+                >
+                  <img
+                    src={getSpeakerImage(entry.speaker)}
+                    alt={entry.speaker}
+                    className="w-8 h-8 rounded-full border-2 border-white shadow-lg flex-shrink-0"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h4 className="font-semibold text-gray-800 capitalize text-sm">
+                        {entry.speaker}
+                      </h4>
+                      <span className="text-xs text-gray-500">
+                        Entry #{index + 1}
+                      </span>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed text-sm">{entry.text}</p>
                   </div>
-                  <p className="text-gray-700 leading-relaxed">{entry.text}</p>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </details>
         )}
 
         {/* Debug info - 可选显示当前状态 */}

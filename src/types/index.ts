@@ -45,6 +45,7 @@ export interface AudioItem {
   sequenceNumber: number;
   state: AudioPlaybackState;
   timestamp: number;
+  onPlaybackStart?: () => void;
 }
 
 // 角色状态

@@ -93,6 +93,12 @@ export class AudioManager {
       this.audioQueue.set(audioItem.sequenceNumber, audioItem)
       this.currentPlayingSequence = audioItem.sequenceNumber
 
+      // 调用播放开始回调（更新对话记录）
+      if (audioItem.onPlaybackStart) {
+        console.log(`[AudioManager] Calling onPlaybackStart for ${audioItem.speaker}`)
+        audioItem.onPlaybackStart()
+      }
+
       // 设置角色为发言状态
       this.speakerStateManager.setSpeaking(audioItem.speaker, audioItem.id)
 
@@ -135,6 +141,7 @@ export class AudioManager {
     
     const audioItem = this.audioQueue.get(sequenceNumber)
     if (audioItem) {
+      console.log(`[AudioManager] Setting ${audioItem.speaker} back to static after audio completion`)
       // 设置角色为静态状态
       this.speakerStateManager.setStatic(audioItem.speaker)
       
@@ -144,6 +151,7 @@ export class AudioManager {
 
     // 清理当前播放
     this.currentAudio = null
+    console.log(`[AudioManager] Cleared current audio, notifying state change`)
     this.notifyStateChange()
 
     // 尝试播放下一个

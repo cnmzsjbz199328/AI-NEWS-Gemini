@@ -88,7 +88,7 @@ export class GenerationManager {
       const audioBlob = await generateSpeech(text, speaker)
       
       if (audioBlob) {
-        // 创建音频项目
+        // 创建音频项目（带回调）
         const audioItem: AudioItem = {
           id: `${speaker}-${sequenceNumber}-${Date.now()}`,
           speaker,
@@ -96,7 +96,11 @@ export class GenerationManager {
           audioBlob,
           sequenceNumber,
           state: 'ready',
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          onPlaybackStart: () => {
+            console.log(`[GenerationManager] Audio playback started for ${speaker}, updating conversation`)
+            this.updateConversation(speaker, text)
+          }
         }
 
         // 添加到播放队列
@@ -140,6 +144,7 @@ export class GenerationManager {
   async executeSpeakerTurn(speaker: Speaker, topic: string, context: ConversationEntry[] = []): Promise<void> {
     try {
       console.log(`[GenerationManager] Executing turn for ${speaker}`)
+      console.log(`[GenerationManager] SpeakerStateManager instance:`, !!this.speakerStateManager)
       
       // 检查是否可以开始
       if (!this.speakerStateManager.canStartThinking(speaker)) {
@@ -148,16 +153,15 @@ export class GenerationManager {
         return
       }
 
+      console.log(`[GenerationManager] About to call generateText for ${speaker}`)
+      
       // 1. 生成文本
       const text = await this.generateText(speaker, topic, context)
       
-      // 2. 立即更新对话记录
-      this.updateConversation(speaker, text)
-      
-      // 3. 获取序列号
+      // 2. 获取序列号
       const sequenceNumber = this.getNextSequenceNumber()
       
-      // 4. 并行启动两个流程
+      // 3. 并行启动两个流程
       const audioPromise = this.generateAudio(speaker, text, sequenceNumber)
       const nextSpeakerPromise = Promise.resolve().then(() => {
         this.triggerNextSpeaker(speaker, text, topic)

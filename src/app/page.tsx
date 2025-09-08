@@ -7,6 +7,8 @@ import { AudioManager } from '@/utils/audio-manager'
 import { GenerationManager } from '@/utils/generation-manager'
 
 export default function HomePage() {
+  console.log('[UI] ===== MAIN PAGE COMPONENT RENDERED =====')
+  
   const [state, setState] = useState<AppState>({
     conversation: [],
     currentNewsIndex: 0,
@@ -75,8 +77,11 @@ export default function HomePage() {
     const speakerState = state.speakersState[speaker]
     const animationState = speakerState.animationState
     
+    console.log(`[UI] getSpeakerImage for ${speaker}: animationState = ${animationState}`)
+    
     // Use animated GIF when thinking or speaking, static PNG when idle
     if (animationState === 'thinking' || animationState === 'speaking') {
+      console.log(`[UI] ${speaker} using ANIMATED image (state: ${animationState})`)
       switch (speaker) {
         case 'moderator':
           return "https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/ezgif.com-video-to-gif-converter.gif"
@@ -86,6 +91,7 @@ export default function HomePage() {
           return "https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/dog-ezgif.com-video-to-gif-converter%20(1).gif"
       }
     } else {
+      console.log(`[UI] ${speaker} using STATIC image (state: ${animationState})`)
       // Static state - use PNG images
       switch (speaker) {
         case 'moderator':
@@ -104,6 +110,12 @@ export default function HomePage() {
     const interval = setInterval(fetchNews, 600000)
     return () => clearInterval(interval)
   }, [])
+
+  // 监控状态变化的useEffect
+  useEffect(() => {
+    console.log(`[UI] State changed - conversation length: ${state.conversation.length}`);
+    console.log(`[UI] Speaker states:`, state.speakersState);
+  }, [state.speakersState, state.conversation])
 
   const fetchNews = async () => {
     try {
@@ -129,7 +141,22 @@ export default function HomePage() {
   }
 
   const startDiscussion = async () => {
-    if (state.isDebating || state.news.length === 0) return
+    console.log('[UI] startDiscussion called!')
+    if (state.isDebating || state.news.length === 0) {
+      console.log('[UI] Early return - isDebating:', state.isDebating, 'news.length:', state.news.length)
+      return
+    }
+
+    console.log('[UI] Starting discussion...')
+
+    // 启用音频上下文（处理浏览器自动播放策略）
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      await audioContext.resume()
+      console.log('[UI] Audio context enabled successfully')
+    } catch (error) {
+      console.warn('[UI] Failed to enable audio context:', error)
+    }
 
     const currentNews = state.news[state.activeNewsIndex]
     const topic = `Title: ${currentNews.title}. Summary: ${currentNews.description}`
@@ -161,6 +188,8 @@ export default function HomePage() {
   }
 
   const runDebateWithNewSystem = async (topic: string) => {
+    console.log('[UI] Starting debate with new system, topic:', topic)
+    
     // Define the debate flow with our new system
     const debateFlow = [
       {
@@ -284,16 +313,27 @@ export default function HomePage() {
       <div id="transcript">
         {/* 只显示当前正在播放语音的字幕 */}
         {(() => {
+          // 记录当前所有角色的状态
+          console.log(`[UI] Current speaker states:`, {
+            moderator: state.speakersState.moderator.animationState,
+            tom: state.speakersState.tom.animationState,
+            mark: state.speakersState.mark.animationState
+          });
+          
           // 找到正在播放语音的角色
           const activeSpeaker = Object.keys(state.speakersState).find(speaker => 
             state.speakersState[speaker as Speaker]?.animationState === 'speaking'
           ) as Speaker | undefined;
+          
+          console.log(`[UI] Active speaker (speaking): ${activeSpeaker}`);
           
           if (activeSpeaker) {
             // 从对话记录中找到该角色的最新发言
             const currentEntry = [...state.conversation]
               .reverse()
               .find(entry => entry.speaker === activeSpeaker);
+            
+            console.log(`[UI] Found subtitle for ${activeSpeaker}:`, currentEntry?.text?.substring(0, 50));
             
             if (currentEntry) {
               return (
@@ -307,14 +347,21 @@ export default function HomePage() {
             }
           }
           
+          // 检查是否有人在思考
+          const thinkingSpeakers = Object.keys(state.speakersState).filter(speaker => 
+            state.speakersState[speaker as Speaker]?.animationState === 'thinking'
+          );
+          
+          console.log(`[UI] Thinking speakers:`, thinkingSpeakers);
+          
           // 如果没有人在说话，显示提示信息
           return (
             <div className="no-current-speaker">
               <p style={{ color: '#666', textAlign: 'center', padding: '20px', opacity: 0.7 }}>
                 {state.conversation.length === 0 
                   ? 'Press Start Discussion to begin...' 
-                  : (Object.values(state.speakersState).some(s => s.animationState === 'thinking')
-                      ? 'Generating response...'
+                  : (thinkingSpeakers.length > 0
+                      ? `Generating response (${thinkingSpeakers.join(', ')})...`
                       : 'Preparing next speaker...'
                     )
                 }

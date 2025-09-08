@@ -48,6 +48,12 @@ export class SpeakerStateManager {
    * 通知状态变化
    */
   private notifyStateChange(): void {
+    // 记录状态变化
+    const currentStates = Object.entries(this.speakersState).map(([speaker, state]) => 
+      `${speaker}:${state.animationState}`
+    ).join(', ');
+    console.log(`[SpeakerStateManager] State changed - ${currentStates}`);
+    
     if (this.onStateChange) {
       this.onStateChange({ ...this.speakersState })
     }
@@ -57,6 +63,11 @@ export class SpeakerStateManager {
    * 更新角色状态
    */
   private updateSpeakerState(speaker: Speaker, updates: Partial<SpeakerState>): void {
+    const oldState = this.speakersState[speaker].animationState;
+    const newState = updates.animationState || oldState;
+    
+    console.log(`[SpeakerStateManager] ${speaker}: ${oldState} → ${newState}`);
+    
     this.speakersState[speaker] = {
       ...this.speakersState[speaker],
       ...updates
