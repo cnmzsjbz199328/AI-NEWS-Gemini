@@ -122,6 +122,29 @@ body {
   z-index: 20;
 }
 
+.news-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.news-indicator {
+  font-weight: bold;
+  color: #2c3e50;
+  font-size: 14px;
+}
+
+.news-status {
+  font-size: 12px;
+  color: #7f8c8d;
+  font-style: italic;
+}
+
 .news-header h1 {
   color: #333;
   font-size: 24px;
@@ -135,7 +158,7 @@ body {
 
 #news-content {
   position: relative;
-  height: calc(100% - 95px);
+  height: calc(100% - 135px);
 }
 
 .loading {

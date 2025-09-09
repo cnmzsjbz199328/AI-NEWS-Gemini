@@ -28,15 +28,22 @@ export class NewsService {
 
   async fetchBBCNews(): Promise<NewsItem[]> {
     try {
-      const response = await fetch(
-        RSS_CONFIG.API_URL + encodeURIComponent(RSS_CONFIG.BBC_RSS_URL)
-      );
+      // 添加时间戳参数避免缓存
+      const timestamp = Date.now();
+      const rssUrl = `${RSS_CONFIG.API_URL}${encodeURIComponent(RSS_CONFIG.BBC_RSS_URL)}&_t=${timestamp}`;
+      
+      console.log('[NEWS SERVICE] Fetching from URL:', rssUrl);
+      
+      const response = await fetch(rssUrl);
       
       if (!response.ok) {
         throw new Error('Failed to fetch RSS feed.');
       }
 
       const data = await response.json();
+      console.log('[NEWS SERVICE] RSS API response status:', data.status);
+      console.log('[NEWS SERVICE] RSS feed lastBuildDate:', data.feed?.lastBuildDate);
+      console.log('[NEWS SERVICE] First item pubDate:', data.items?.[0]?.pubDate);
       
       if (data.status !== 'ok' || !data.items) {
         throw new Error('Failed to parse RSS feed.');
@@ -52,6 +59,8 @@ export class NewsService {
   private processNewsItems(items: any[]): NewsItem[] {
     const newsItems: NewsItem[] = [];
     
+    console.log('[NEWS SERVICE] Processing RSS items, total count:', items.length);
+    
     for (let i = 0; i < Math.min(API_CONFIG.MAX_NEWS_ITEMS, items.length); i++) {
       const item = items[i];
       const title = item.title || 'No title';
@@ -61,6 +70,12 @@ export class NewsService {
 
       const cleanDescription = TextUtils.cleanDescription(description);
       const date = TextUtils.formatDate(pubDate);
+      
+      console.log(`[NEWS SERVICE] Item ${i + 1}:`, {
+        title: title.substring(0, 50) + '...',
+        pubDate,
+        formattedDate: date
+      });
 
       newsItems.push({
         title,

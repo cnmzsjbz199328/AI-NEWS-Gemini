@@ -111,6 +111,20 @@ export default function HomePage() {
     return () => clearInterval(interval)
   }, [])
 
+  // 自动新闻滚动功能
+  useEffect(() => {
+    if (state.news.length > 0 && !state.isDebating) {
+      const interval = setInterval(() => {
+        setState(prev => ({
+          ...prev,
+          activeNewsIndex: (prev.activeNewsIndex + 1) % prev.news.length
+        }))
+      }, 5000) // 每5秒切换一个新闻
+
+      return () => clearInterval(interval)
+    }
+  }, [state.news.length, state.isDebating])
+
   // 监控状态变化的useEffect
   useEffect(() => {
     console.log(`[UI] State changed - conversation length: ${state.conversation.length}`);
@@ -127,6 +141,12 @@ export default function HomePage() {
       }
       
       const newsItems: NewsItem[] = await response.json()
+      console.log('[NEWS DEBUG] Fetched news items:', newsItems.map(item => ({
+        title: item.title.substring(0, 50) + '...',
+        date: item.date,
+        description: item.description.substring(0, 50) + '...'
+      })))
+      
       setState((prev: AppState) => ({ 
         ...prev, 
         news: newsItems,
@@ -233,6 +253,14 @@ export default function HomePage() {
         throw new Error(`Failed to execute ${turn.speaker} turn: ${error.message}`)
       }
     }
+
+    // 讨论结束后，自动切换到下一个新闻话题
+    setTimeout(() => {
+      setState(prev => ({
+        ...prev,
+        activeNewsIndex: (prev.activeNewsIndex + 1) % prev.news.length
+      }))
+    }, 2000) // 讨论结束2秒后切换到下一个话题
   }
 
   const renderNewsContent = () => {
@@ -296,6 +324,14 @@ export default function HomePage() {
           </div>
 
           <div className="news-panel">
+            <div className="news-navigation">
+              <span className="news-indicator">
+                {state.news.length > 0 ? `${state.activeNewsIndex + 1} / ${state.news.length}` : 'Loading...'}
+              </span>
+              <span className="news-status">
+                {state.isDebating ? `Discussing Topic ${state.activeNewsIndex + 1}` : 'Auto-rotating topics'}
+              </span>
+            </div>
             <div id="news-content">
               {renderNewsContent()}
             </div>

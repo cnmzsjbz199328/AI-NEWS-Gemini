@@ -16,6 +16,7 @@ export class TextUtils {
   static formatDate(pubDate: string): string {
     return pubDate
       ? new Date(pubDate).toLocaleDateString('en-US', {
+          year: 'numeric',
           month: 'short',
           day: 'numeric',
         })
