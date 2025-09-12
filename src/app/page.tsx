@@ -391,19 +391,7 @@ export default function HomePage() {
           console.log(`[UI] Thinking speakers:`, thinkingSpeakers);
           
           // 如果没有人在说话，显示提示信息
-          return (
-            <div className="no-current-speaker">
-              <p style={{ color: '#666', textAlign: 'center', padding: '20px', opacity: 0.7 }}>
-                {state.conversation.length === 0 
-                  ? 'Press Start Discussion to begin...' 
-                  : (thinkingSpeakers.length > 0
-                      ? `Generating response (${thinkingSpeakers.join(', ')})...`
-                      : 'Preparing next speaker...'
-                    )
-                }
-              </p>
-            </div>
-          );
+          return null;
         })()}
       </div>
 

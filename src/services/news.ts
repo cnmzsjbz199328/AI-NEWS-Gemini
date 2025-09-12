@@ -23,7 +23,43 @@ export class NewsService {
   }
 
   async getNews(): Promise<NewsItem[]> {
-    return this.fetchBBCNews();
+    // 并行获取ABC和BBC新闻，ABC在前，BBC在后
+    const [abcNews, bbcNews] = await Promise.all([
+      this.fetchABCNews(),
+      this.fetchBBCNews()
+    ]);
+    
+    // 合并新闻，ABC（前5条）+ BBC（后5条）
+    return [...abcNews, ...bbcNews];
+  }
+
+  async fetchABCNews(): Promise<NewsItem[]> {
+    try {
+      // 添加时间戳参数避免缓存
+      const timestamp = Date.now();
+      const rssUrl = `${RSS_CONFIG.API_URL}${encodeURIComponent(RSS_CONFIG.ABC_RSS_URL)}&_t=${timestamp}`;
+      
+      console.log('[NEWS SERVICE] Fetching ABC news from URL:', rssUrl);
+      
+      const response = await fetch(rssUrl);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch ABC RSS feed.');
+      }
+
+      const data = await response.json();
+      console.log('[NEWS SERVICE] ABC RSS API response status:', data.status);
+      
+      if (data.status !== 'ok' || !data.items) {
+        throw new Error('Failed to parse ABC RSS feed.');
+      }
+
+      return this.processNewsItems(data.items, 'ABC News', API_CONFIG.ABC_NEWS_COUNT);
+    } catch (error) {
+      console.error('Error fetching ABC news:', error);
+      // 如果ABC获取失败，返回空数组而不是抛出错误
+      return [];
+    }
   }
 
   async fetchBBCNews(): Promise<NewsItem[]> {
@@ -32,36 +68,35 @@ export class NewsService {
       const timestamp = Date.now();
       const rssUrl = `${RSS_CONFIG.API_URL}${encodeURIComponent(RSS_CONFIG.BBC_RSS_URL)}&_t=${timestamp}`;
       
-      console.log('[NEWS SERVICE] Fetching from URL:', rssUrl);
+      console.log('[NEWS SERVICE] Fetching BBC news from URL:', rssUrl);
       
       const response = await fetch(rssUrl);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch RSS feed.');
+        throw new Error('Failed to fetch BBC RSS feed.');
       }
 
       const data = await response.json();
-      console.log('[NEWS SERVICE] RSS API response status:', data.status);
-      console.log('[NEWS SERVICE] RSS feed lastBuildDate:', data.feed?.lastBuildDate);
-      console.log('[NEWS SERVICE] First item pubDate:', data.items?.[0]?.pubDate);
+      console.log('[NEWS SERVICE] BBC RSS API response status:', data.status);
       
       if (data.status !== 'ok' || !data.items) {
-        throw new Error('Failed to parse RSS feed.');
+        throw new Error('Failed to parse BBC RSS feed.');
       }
 
-      return this.processNewsItems(data.items);
+      return this.processNewsItems(data.items, 'BBC News', API_CONFIG.BBC_NEWS_COUNT);
     } catch (error) {
-      console.error('Error fetching news:', error);
-      throw new Error('Unable to load BBC news. There was an error fetching the news feed.');
+      console.error('Error fetching BBC news:', error);
+      // 如果BBC获取失败，返回空数组而不是抛出错误
+      return [];
     }
   }
 
-  private processNewsItems(items: any[]): NewsItem[] {
+  private processNewsItems(items: any[], source: string, maxCount: number): NewsItem[] {
     const newsItems: NewsItem[] = [];
     
-    console.log('[NEWS SERVICE] Processing RSS items, total count:', items.length);
+    console.log(`[NEWS SERVICE] Processing ${source} RSS items, total count:`, items.length);
     
-    for (let i = 0; i < Math.min(API_CONFIG.MAX_NEWS_ITEMS, items.length); i++) {
+    for (let i = 0; i < Math.min(maxCount, items.length); i++) {
       const item = items[i];
       const title = item.title || 'No title';
       const description = item.description || 'No description available';
@@ -71,17 +106,19 @@ export class NewsService {
       const cleanDescription = TextUtils.cleanDescription(description);
       const date = TextUtils.formatDate(pubDate);
       
-      console.log(`[NEWS SERVICE] Item ${i + 1}:`, {
+      console.log(`[NEWS SERVICE] ${source} Item ${i + 1}:`, {
         title: title.substring(0, 50) + '...',
         pubDate,
-        formattedDate: date
+        formattedDate: date,
+        source
       });
 
       newsItems.push({
         title,
         description: cleanDescription,
         date,
-        thumbnailUrl
+        thumbnailUrl,
+        source // 添加新闻来源标识
       });
     }
 

@@ -32,10 +32,13 @@ export const API_CONFIG = {
   AUDIO_SAMPLE_RATE: 24000,
   NEWS_REFRESH_INTERVAL: 600000, // 10 minutes
   SLIDESHOW_INTERVAL: 7000,
-  MAX_NEWS_ITEMS: 5
+  MAX_NEWS_ITEMS: 10, // 总共10条新闻
+  ABC_NEWS_COUNT: 5,  // ABC新闻数量（前5条）
+  BBC_NEWS_COUNT: 5   // BBC新闻数量（后5条）
 };
 
 export const RSS_CONFIG = {
   API_URL: 'https://api.rss2json.com/v1/api.json?rss_url=',
-  BBC_RSS_URL: 'https://feeds.bbci.co.uk/news/rss.xml'
+  ABC_RSS_URL: 'https://www.abc.net.au/news/feed/51120/rss.xml', // 澳大利亚ABC新闻
+  BBC_RSS_URL: 'https://feeds.bbci.co.uk/news/rss.xml'           // 英国BBC新闻
 };

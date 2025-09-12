@@ -15,6 +15,7 @@ export interface NewsItem {
   description: string;
   date: string;
   thumbnailUrl: string;
+  source?: string; // 新闻来源（ABC News 或 BBC News）
 }
 
 export interface DebateHistory {
