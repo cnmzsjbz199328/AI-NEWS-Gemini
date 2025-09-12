@@ -11,7 +11,8 @@ import {
   DebateScript,
   AudioPlaylist,
   AIWorkerState,
-  PipelineState
+  PipelineState,
+  SupportedLanguage
 } from '@/types'
 import { aiWorkerPool, WorkerResult } from './ai-worker-pool'
 
@@ -59,7 +60,8 @@ export class PipelineOrchestrator {
   public async startPipeline(
     newsTopics: string[], 
     debateRounds: number = 3,
-    voiceConfig?: Partial<VoiceConfig>
+    voiceConfig?: Partial<VoiceConfig>,
+    language: SupportedLanguage = 'zh-CN'
   ): Promise<void> {
     if (this.isActive) {
       throw new Error('Pipeline is already active')
@@ -110,6 +112,7 @@ export class PipelineOrchestrator {
         voiceConfig: finalVoiceConfig,
         assignedWorker: null,
         debateRounds,
+        language,
         createdAt: Date.now(),
         updatedAt: Date.now()
       }
@@ -117,11 +120,17 @@ export class PipelineOrchestrator {
     })
 
     console.log(`🚀 Pipeline started with ${this.tasks.length} tasks`)
-    console.log(`📋 Tasks created:`, this.tasks.map(t => `${t.id}:${t.status}`).join(', '))
+    console.log(`📋 Tasks created:`, this.tasks.map(t => `${t.id}:${t.status}:${t.language}`).join(', '))
     
     // 开始处理任务
     console.log(`🔄 Starting task processing...`)
-    this.processTasks()
+    try {
+      this.processTasks()
+      console.log(`✅ processTasks() called successfully`)
+    } catch (error) {
+      console.error(`❌ Error in processTasks():`, error)
+      throw error
+    }
   }
 
   /**
@@ -307,21 +316,30 @@ export class PipelineOrchestrator {
    * 处理任务队列 - 核心调度逻辑
    */
   private async processTasks(): Promise<void> {
-    console.log(`🔄 processTasks called, isActive: ${this.isActive}`)
+    console.log(`🔄 processTasks called, isActive: ${this.isActive}, tasks: ${this.tasks.length}`)
     
     if (!this.isActive) {
       console.log(`⏹️ Pipeline not active, stopping processTasks`)
       return
     }
 
+    if (this.tasks.length === 0) {
+      console.log(`📭 No tasks to process`)
+      return
+    }
+
     // 查找待处理的文本生成任务
     const pendingTextTasks = this.tasks.filter(task => task.status === 'PENDING_TEXT')
+    console.log(`📝 Found ${pendingTextTasks.length} pending text tasks`)
     
     for (const task of pendingTextTasks) {
       const idleWorkers = aiWorkerPool.getIdleWorkers()
+      console.log(`👥 Available idle workers: ${idleWorkers.join(', ')}`)
+      
       if (idleWorkers.length > 0) {
         const selectedWorker = idleWorkers[0] // 简单的轮询策略
         
+        console.log(`🎯 Assigning task ${task.id} to worker ${selectedWorker}`)
         this.assignWorker(task.id, selectedWorker)
         this.updateTaskStatus(task.id, 'GENERATING_TEXT')
         
@@ -333,6 +351,8 @@ export class PipelineOrchestrator {
             console.error(`❌ Unhandled error in AI task execution:`, error)
           })
         })
+      } else {
+        console.log(`⏳ No idle workers available for task ${task.id}`)
       }
     }
 
@@ -404,30 +424,67 @@ export class PipelineOrchestrator {
   }
 
   /**
-   * 执行TTS音频生成任务（占位符，将在后续迭代中实现）
+   * 执行TTS音频生成任务
    */
   private async executeTTSTask(task: PipelineTask): Promise<void> {
+    console.log(`🎵 Starting TTS generation for task: ${task.id} in language: ${task.language}`)
+    
     try {
-      // 模拟TTS处理时间
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const { cosyVoiceTTSService } = await import('./cosyvoice-tts-service')
       
-      // 创建模拟的音频播放列表
-      const mockAudioPlaylist: AudioPlaylist = {
-        moderator_intro: '/api/mock-audio/intro.mp3',
-        conversation: task.script!.conversation.map((item, index) => ({
-          speaker: item.speaker,
-          audioUrl: `/api/mock-audio/${item.speaker}-${index}.mp3`,
-          text: item.text
-        })),
-        moderator_outro: '/api/mock-audio/outro.mp3'
+      if (!task.script) {
+        throw new Error('No script available for TTS generation')
       }
+
+      // 准备所有需要生成语音的文本项
+      const ttsItems = [
+        { speaker: 'moderator' as const, text: task.script.moderator_intro },
+        ...task.script.conversation,
+        { speaker: 'moderator' as const, text: task.script.moderator_outro }
+      ]
+
+      console.log(`🎵 Generating ${ttsItems.length} audio items for task: ${task.id}`)
+
+      // 批量生成语音（添加超时保护）
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('TTS generation timeout after 60 seconds')), 60000)
+      })
       
-      this.setTaskAudioPlaylist(task.id, mockAudioPlaylist)
+      const batchResult = await Promise.race([
+        cosyVoiceTTSService.generateBatchSpeech(ttsItems, task.language, task.voiceConfig),
+        timeoutPromise
+      ]) as any
+
+      if (batchResult.failureCount > 0) {
+        console.warn(`⚠️ ${batchResult.failureCount}/${ttsItems.length} TTS generations failed for task: ${task.id}`)
+      }
+
+      // 构建音频播放列表
+      const audioPlaylist: AudioPlaylist = {
+        moderator_intro: batchResult.results[0]?.audioUrl || '',
+        conversation: batchResult.results.slice(1, -1).map((result: any, index: number) => ({
+          speaker: result.speaker,
+          audioUrl: result.audioUrl,
+          text: result.text
+        })),
+        moderator_outro: batchResult.results[batchResult.results.length - 1]?.audioUrl || ''
+      }
+
+      // 检查是否有关键音频缺失
+      const missingAudio = batchResult.results.filter((r: any) => !r.success)
+      if (missingAudio.length > 0) {
+        console.error(`❌ Critical audio missing for task ${task.id}:`, missingAudio.map((r: any) => r.speaker))
+        throw new Error(`Failed to generate ${missingAudio.length} audio items`)
+      }
+
+      this.setTaskAudioPlaylist(task.id, audioPlaylist)
       this.updateTaskStatus(task.id, 'READY_TO_PLAY')
-      console.log(`🎵 Audio generation completed for task: ${task.id}`)
+      
+      console.log(`✅ TTS generation completed for task: ${task.id} (${batchResult.successCount}/${ttsItems.length} successful)`)
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      console.log(`💥 TTS generation failed for task ${task.id}:`, errorMessage)
       this.updateTaskStatus(task.id, 'PENDING_AUDIO', errorMessage)
       console.error(`❌ TTS task execution failed for task: ${task.id}`, errorMessage)
     }

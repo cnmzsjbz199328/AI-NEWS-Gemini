@@ -4,83 +4,38 @@
  */
 
 import { NextResponse } from 'next/server'
-import { AvailableVoice } from '@/types'
+import { AvailableVoice, SupportedLanguage } from '@/types'
+import { cosyVoiceTTSService, LANGUAGE_CONFIGS } from '@/lib/cosyvoice-tts-service'
 
-// 预定义的可用音色列表
-// 基于CosyVoice API文档中的音色选项
-const AVAILABLE_VOICES: AvailableVoice[] = [
-  // 中文音色
-  {
-    id: 'cosy-zh-female-1',
-    name: '中文女声 1',
-    language: 'zh-CN',
-    gender: 'female',
-    description: '温和专业的中文女声，适合主持人'
-  },
-  {
-    id: 'cosy-zh-male-1',
-    name: '中文男声 1',
-    language: 'zh-CN',
-    gender: 'male',
-    description: '沉稳权威的中文男声'
-  },
+// 动态生成可用音色列表
+function generateAvailableVoices(): AvailableVoice[] {
+  const voices: AvailableVoice[] = []
   
-  // 英文音色
-  {
-    id: 'cosy-en-female-1',
-    name: 'English Female 1',
-    language: 'en-US',
-    gender: 'female',
-    description: 'Professional English female voice'
-  },
-  {
-    id: 'cosy-en-male-1',
-    name: 'English Male 1',
-    language: 'en-US',
-    gender: 'male',
-    description: 'Energetic English male voice, suitable for Tom'
-  },
-  {
-    id: 'cosy-en-male-2',
-    name: 'English Male 2',
-    language: 'en-US',
-    gender: 'male',
-    description: 'Calm and mature English male voice, suitable for Mark'
-  },
+  Object.values(LANGUAGE_CONFIGS).forEach(langConfig => {
+    const voicesForLang = cosyVoiceTTSService.getAvailableVoicesForLanguage(langConfig.code)
+    
+    voicesForLang.forEach(voice => {
+      voices.push({
+        id: voice.voiceId,
+        name: voice.name,
+        language: voice.language,
+        gender: voice.voiceId.includes('女') || voice.voiceId.includes('Female') ? 'female' : 'male',
+        description: `${langConfig.nativeName} voice for ${voice.speaker}`
+      })
+    })
+  })
   
-  // 日语音色
-  {
-    id: 'cosy-ja-male-1',
-    name: 'Japanese Male 1',
-    language: 'ja-JP',
-    gender: 'male',
-    description: 'Professional Japanese male voice'
-  },
-  
-  // 粤语音色
-  {
-    id: 'cosy-yue-female-1',
-    name: '粤语女声 1',
-    language: 'yue-CN',
-    gender: 'female',
-    description: '标准粤语女声'
-  },
-  
-  // 韩语音色
-  {
-    id: 'cosy-ko-female-1',
-    name: 'Korean Female 1',
-    language: 'ko-KR',
-    gender: 'female',
-    description: 'Standard Korean female voice'
-  }
-]
+  return voices
+}
 
-// 根据角色推荐的默认音色
-const ROLE_RECOMMENDATIONS = {
-  moderator: ['cosy-zh-female-1', 'cosy-en-female-1', 'cosy-zh-male-1'],
-  tom: ['cosy-en-male-1', 'cosy-zh-male-1'],
-  mark: ['cosy-en-male-2', 'cosy-zh-male-1']
+// 根据角色和语言推荐的默认音色
+function getRoleRecommendations(language?: string, role?: string) {
+  if (!language || !role || !cosyVoiceTTSService.isLanguageSupported(language)) return null
+  
+  const voicesForLang = cosyVoiceTTSService.getAvailableVoicesForLanguage(language as SupportedLanguage)
+  return voicesForLang
+    .filter(v => v.speaker === role)
+    .map(v => v.voiceId)
 }
 
 export async function GET(request: Request) {
@@ -90,12 +45,12 @@ export async function GET(request: Request) {
     const gender = url.searchParams.get('gender')
     const role = url.searchParams.get('role')
 
-    let filteredVoices = [...AVAILABLE_VOICES]
+    let filteredVoices = generateAvailableVoices()
 
     // 按语言过滤
     if (language) {
       filteredVoices = filteredVoices.filter(voice => 
-        voice.language.toLowerCase().includes(language.toLowerCase())
+        voice.language.toLowerCase() === language.toLowerCase()
       )
     }
 
@@ -105,11 +60,11 @@ export async function GET(request: Request) {
     }
 
     // 按角色推荐排序
-    if (role && role in ROLE_RECOMMENDATIONS) {
-      const recommendedIds = ROLE_RECOMMENDATIONS[role as keyof typeof ROLE_RECOMMENDATIONS]
+    const roleRecommendations = getRoleRecommendations(language || undefined, role || undefined)
+    if (roleRecommendations && roleRecommendations.length > 0) {
       filteredVoices.sort((a, b) => {
-        const aIndex = recommendedIds.indexOf(a.id)
-        const bIndex = recommendedIds.indexOf(b.id)
+        const aIndex = roleRecommendations.indexOf(a.id as any)
+        const bIndex = roleRecommendations.indexOf(b.id as any)
         
         // 推荐的音色排在前面
         if (aIndex !== -1 && bIndex === -1) return -1
@@ -124,12 +79,13 @@ export async function GET(request: Request) {
       success: true,
       voices: filteredVoices,
       total: filteredVoices.length,
+      supportedLanguages: cosyVoiceTTSService.getSupportedLanguages(),
       filters: {
         language: language || null,
         gender: gender || null,
         role: role || null
       },
-      roleRecommendations: role ? ROLE_RECOMMENDATIONS[role as keyof typeof ROLE_RECOMMENDATIONS] : null
+      roleRecommendations: roleRecommendations || null
     }
 
     return NextResponse.json(response)

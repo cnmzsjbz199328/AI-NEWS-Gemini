@@ -3,15 +3,17 @@
  * 负责任务分配、错误处理、重试机制等
  */
 
-import { AIWorkerType, PipelineTask, DebateScript, Speaker } from '@/types'
+import { AIWorkerType, PipelineTask, DebateScript, Speaker, SupportedLanguage } from '@/types'
 import { getAIProviderForSpeaker, AIProvider } from './ai-providers'
 import { PromptManager, DebateContext } from './prompt-manager'
+import { LANGUAGE_CONFIGS } from './cosyvoice-tts-service'
 
 export interface WorkerTask {
   taskId: string
   newsTopic: string
   debateRounds: number
   workerType: AIWorkerType
+  language: SupportedLanguage
   startTime: number
   retryCount: number
 }
@@ -61,6 +63,7 @@ export class AIWorkerPool {
       newsTopic: task.newsTopic,
       debateRounds: task.debateRounds,
       workerType,
+      language: task.language,
       startTime: Date.now(),
       retryCount: 0
     }
@@ -91,7 +94,8 @@ export class AIWorkerPool {
       const script = await this.generateDebateScript(
         provider,
         workerTask.newsTopic,
-        workerTask.debateRounds
+        workerTask.debateRounds,
+        workerTask.language
       )
 
       const duration = Date.now() - startTime
@@ -154,17 +158,24 @@ export class AIWorkerPool {
   private async generateDebateScript(
     provider: AIProvider,
     newsTopic: string,
-    debateRounds: number
+    debateRounds: number,
+    language: SupportedLanguage = 'zh-CN'
   ): Promise<DebateScript> {
     const promptManager = PromptManager.getInstance()
     const conversation: Array<{speaker: Speaker, text: string}> = []
     
     // 1. 生成主持人开场白
+    const languageConfig = LANGUAGE_CONFIGS[language]
     const moderatorIntro = await this.generateSpeakerResponse(
       'moderator',
-      `Please introduce a debate about: ${newsTopic}`,
+      this.buildLanguageSpecificPrompt(
+        `Please introduce a debate about: ${newsTopic}`,
+        language,
+        'moderator_intro'
+      ),
       newsTopic,
-      []
+      [],
+      language
     )
 
     // 2. 生成辩论对话
@@ -176,9 +187,10 @@ export class AIWorkerPool {
       
       const tomResponse = await this.generateSpeakerResponse(
         'tom',
-        tomPrompt,
+        this.buildLanguageSpecificPrompt(tomPrompt, language, 'debate_point'),
         newsTopic,
-        conversation
+        conversation,
+        language
       )
       
       conversation.push({ speaker: 'tom', text: tomResponse })
@@ -188,9 +200,10 @@ export class AIWorkerPool {
       
       const markResponse = await this.generateSpeakerResponse(
         'mark',
-        markPrompt,
+        this.buildLanguageSpecificPrompt(markPrompt, language, 'debate_response'),
         newsTopic,
-        conversation
+        conversation,
+        language
       )
       
       conversation.push({ speaker: 'mark', text: markResponse })
@@ -199,9 +212,14 @@ export class AIWorkerPool {
     // 3. 生成主持人结束语
     const moderatorOutro = await this.generateSpeakerResponse(
       'moderator',
-      `Please conclude the debate about: ${newsTopic}`,
+      this.buildLanguageSpecificPrompt(
+        `Please conclude the debate about: ${newsTopic}`,
+        language,
+        'moderator_outro'
+      ),
       newsTopic,
-      conversation
+      conversation,
+      language
     )
 
     return {
@@ -218,7 +236,8 @@ export class AIWorkerPool {
     speaker: Speaker,
     prompt: string,
     topic: string,
-    conversation: Array<{speaker: Speaker, text: string}>
+    conversation: Array<{speaker: Speaker, text: string}>,
+    language: SupportedLanguage = 'zh-CN'
   ): Promise<string> {
     const promptManager = PromptManager.getInstance()
     const provider = getAIProviderForSpeaker(speaker)
@@ -246,6 +265,55 @@ export class AIWorkerPool {
     const validation = promptManager.validateResponse(response, speaker)
     
     return validation.processedResponse || response.trim()
+  }
+
+  /**
+   * 构建语言特定的提示词
+   */
+  private buildLanguageSpecificPrompt(
+    basePrompt: string,
+    language: SupportedLanguage,
+    promptType: 'moderator_intro' | 'moderator_outro' | 'debate_point' | 'debate_response'
+  ): string {
+    const languageConfig = LANGUAGE_CONFIGS[language]
+    
+    // 语言特定的指令
+    const languageInstructions = {
+      'zh-CN': {
+        moderator_intro: '请用中文主持辩论开场，介绍辩论主题和参与者。',
+        moderator_outro: '请用中文总结辩论要点并做结束语。',
+        debate_point: '请用中文表达你的观点，保持专业和客观。',
+        debate_response: '请用中文回应对方观点并提出你的看法。'
+      },
+      'en-US': {
+        moderator_intro: 'Please moderate the debate opening in English, introduce the topic and participants.',
+        moderator_outro: 'Please summarize the debate points and conclude in English.',
+        debate_point: 'Please express your viewpoint in English, maintain professionalism and objectivity.',
+        debate_response: 'Please respond to the opposing viewpoint and present your perspective in English.'
+      },
+      'ja-JP': {
+        moderator_intro: '日本語で討論の司会をし、トピックと参加者を紹介してください。',
+        moderator_outro: '日本語で討論のポイントをまとめ、結論を述べてください。',
+        debate_point: '日本語で専門的かつ客観的に意見を述べてください。',
+        debate_response: '日本語で相手の意見に応答し、あなたの見解を示してください。'
+      },
+      'ko-KR': {
+        moderator_intro: '한국어로 토론을 사회하며 주제와 참가자를 소개해 주세요.',
+        moderator_outro: '한국어로 토론 요점을 정리하고 결론을 내려 주세요.',
+        debate_point: '한국어로 전문적이고 객관적으로 의견을 표현해 주세요.',
+        debate_response: '한국어로 상대방 의견에 응답하고 당신의 관점을 제시해 주세요.'
+      },
+      'yue-CN': {
+        moderator_intro: '請用粵語主持辯論開場，介紹辯論主題同參與者。',
+        moderator_outro: '請用粵語總結辯論要點並做結束語。',
+        debate_point: '請用粵語表達你嘅觀點，保持專業同客觀。',
+        debate_response: '請用粵語回應對方觀點並提出你嘅睇法。'
+      }
+    }
+
+    const specificInstruction = languageInstructions[language]?.[promptType] || ''
+    
+    return `${specificInstruction}\n\n${basePrompt}\n\nIMPORTANT: Please respond in ${languageConfig.nativeName} (${language}) only.`
   }
 
 

@@ -140,6 +140,7 @@ export interface PipelineTask {
   voiceConfig: VoiceConfig;
   assignedWorker: AIWorkerType | null;
   debateRounds: number;
+  language: SupportedLanguage; // 新增语言字段
   createdAt: number;
   updatedAt: number;
   error?: string;
@@ -173,11 +174,23 @@ export interface AIWorkerState {
   errorCount: number;
 }
 
+// 支持的语言类型
+export type SupportedLanguage = 'zh-CN' | 'en-US' | 'ja-JP' | 'ko-KR' | 'yue-CN';
+
+// 语言配置
+export interface LanguageConfig {
+  code: SupportedLanguage;
+  name: string;
+  nativeName: string;
+  voicePrefix: string; // CosyVoice API中的音色前缀
+}
+
 // 流水线启动参数
 export interface PipelineStartParams {
   newsTopics: string[];
   debateRounds?: number;
   voiceConfig?: Partial<VoiceConfig>;
+  language?: SupportedLanguage; // 新增语言参数
 }
 
 export interface AppState {

@@ -5,12 +5,14 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { pipelineOrchestrator } from '@/lib/pipeline-orchestrator'
-import { PipelineStartParams, VoiceConfig } from '@/types'
+import { PipelineStartParams, VoiceConfig, SupportedLanguage } from '@/types'
+import { cosyVoiceTTSService } from '@/lib/cosyvoice-tts-service'
 
 interface StartPipelineRequest {
   newsTopics: string[]
   debateRounds?: number
   voiceConfig?: Partial<VoiceConfig>
+  language?: SupportedLanguage
 }
 
 export async function POST(request: NextRequest) {
@@ -57,6 +59,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 验证语言参数
+    const language = body.language || 'zh-CN'
+    if (!cosyVoiceTTSService.isLanguageSupported(language)) {
+      const supportedLanguages = cosyVoiceTTSService.getSupportedLanguages().map(l => l.code).join(', ')
+      return NextResponse.json(
+        { error: `Unsupported language: ${language}. Supported languages are: ${supportedLanguages}` },
+        { status: 400 }
+      )
+    }
+
     // 验证音色配置（基础验证，详细验证在后续迭代中完善）
     if (body.voiceConfig) {
       const validVoiceKeys = ['moderator', 'tom', 'mark']
@@ -83,7 +95,8 @@ export async function POST(request: NextRequest) {
     await pipelineOrchestrator.startPipeline(
       body.newsTopics,
       debateRounds,
-      body.voiceConfig
+      body.voiceConfig,
+      language as SupportedLanguage
     )
 
     // 返回成功响应
