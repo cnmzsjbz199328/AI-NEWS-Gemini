@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { ConversationEntry, NewsItem, Speaker, AppState, SpeakersState, AudioPlaybackInfo } from '@/types'
-import { SpeakerStateManager } from '@/utils/speaker-state-manager'
-import { AudioManager } from '@/utils/audio-manager'
-import { GenerationManager } from '@/utils/generation-manager'
+import { SpeakerStateManager } from '@/lib/managers/speaker-state-manager'
+import { AudioManager } from '@/lib/managers/audio-manager'
+import { GenerationManager } from '@/lib/managers/generation-manager'
+import { SettingsPanel } from '@/components/settings'
 
 export default function HomePage() {
   console.log('[UI] ===== MAIN PAGE COMPONENT RENDERED =====')
@@ -41,6 +42,9 @@ export default function HomePage() {
     newsError: '',
     activeNewsIndex: 0
   })
+
+  // 设置面板状态
+  const [isSettingsPanelVisible, setIsSettingsPanelVisible] = useState(false)
 
   // Initialize managers
   const speakerStateManager = new SpeakerStateManager()
@@ -79,9 +83,9 @@ export default function HomePage() {
     
     console.log(`[UI] getSpeakerImage for ${speaker}: animationState = ${animationState}`)
     
-    // Use animated GIF when thinking or speaking, static PNG when idle
-    if (animationState === 'thinking' || animationState === 'speaking') {
-      console.log(`[UI] ${speaker} using ANIMATED image (state: ${animationState})`)
+    // Use animated GIF ONLY when speaking (audio playing), static PNG otherwise
+    if (animationState === 'speaking') {
+      console.log(`[UI] ${speaker} using ANIMATED image (state: ${animationState}) - AUDIO PLAYING`)
       switch (speaker) {
         case 'moderator':
           return "https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/ezgif.com-video-to-gif-converter.gif"
@@ -91,8 +95,8 @@ export default function HomePage() {
           return "https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/dog-ezgif.com-video-to-gif-converter%20(1).gif"
       }
     } else {
-      console.log(`[UI] ${speaker} using STATIC image (state: ${animationState})`)
-      // Static state - use PNG images
+      console.log(`[UI] ${speaker} using STATIC image (state: ${animationState}) - ${animationState === 'thinking' ? 'THINKING' : 'IDLE'}`)
+      // Static state - use PNG images (for both 'static' and 'thinking' states)
       switch (speaker) {
         case 'moderator':
           return "https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/1.png"
@@ -302,7 +306,15 @@ export default function HomePage() {
   }
 
   return (
-    <div className="ai-news-commentary">
+    <div className={`flex min-h-screen ${isSettingsPanelVisible ? 'settings-panel-open' : ''}`}>
+      {/* 设置面板 */}
+      <SettingsPanel 
+        isVisible={isSettingsPanelVisible}
+        onToggle={() => setIsSettingsPanelVisible(!isSettingsPanelVisible)}
+      />
+      
+      {/* 主内容区域 */}
+      <div className="flex-1 ai-news-commentary">
       <div className="aitv-logo">AITV</div>
       
       <div id="status">{state.error || state.status}</div>
@@ -395,10 +407,11 @@ export default function HomePage() {
         })()}
       </div>
 
-      <div className="controls">
-        <button onClick={startDiscussion} disabled={state.isDebating}>
-          Start Discussion
-        </button>
+        <div className="controls">
+          <button onClick={startDiscussion} disabled={state.isDebating}>
+            Start Discussion
+          </button>
+        </div>
       </div>
     </div>
   )

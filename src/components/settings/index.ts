@@ -1,0 +1,5 @@
+export { default as SettingsPanel } from './SettingsPanel'
+export { default as SettingsTabs } from './SettingsTabs'
+export { default as GeneralSettings } from './GeneralSettings'
+export { default as VoiceSettings } from './VoiceSettings'
+export { default as AdvancedSettings } from './AdvancedSettings'

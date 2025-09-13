@@ -15,6 +15,12 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-fill-color: transparent;
+  transition: left 0.5s ease-in-out;
+}
+
+/* 当设置面板打开时，调整Logo位置 */
+.settings-panel-open .aitv-logo {
+  left: 352px; /* 320px面板宽度 + 32px原始左边距 */
 }
 
 body {

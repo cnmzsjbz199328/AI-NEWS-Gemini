@@ -10,6 +10,7 @@
 
 import { Speaker, AudioItem, AudioPlaybackState, AudioPlaybackInfo } from '@/types'
 import { SpeakerStateManager } from './speaker-state-manager'
+import { FallbackTTS } from '@/utils/fallback-tts'
 
 export class AudioManager {
   private audioQueue: Map<number, AudioItem> = new Map()
@@ -17,9 +18,21 @@ export class AudioManager {
   private currentAudio: HTMLAudioElement | null = null
   private speakerStateManager: SpeakerStateManager
   private onStateChange?: (state: AudioPlaybackInfo) => void
+  private fallbackTTS: FallbackTTS | null = null
+  private useFallbackTTS: boolean = false
 
   constructor(speakerStateManager: SpeakerStateManager) {
     this.speakerStateManager = speakerStateManager
+    
+    // 初始化备用 TTS
+    if (typeof window !== 'undefined') {
+      try {
+        this.fallbackTTS = new FallbackTTS()
+        console.log('[AudioManager] Fallback TTS initialized successfully')
+      } catch (error) {
+        console.warn('[AudioManager] Fallback TTS not available:', error)
+      }
+    }
   }
 
   /**
@@ -55,6 +68,27 @@ export class AudioManager {
   }
 
   /**
+   * 添加文本语音项目（使用备用 TTS）
+   */
+  addTextAudioItem(text: string, speaker: Speaker, sequenceNumber: number, id: string, onPlaybackStart?: () => void): void {
+    console.log(`[AudioManager] Adding text audio item for ${speaker}, sequence: ${sequenceNumber}`)
+    
+    const audioItem: AudioItem = {
+      id,
+      speaker,
+      sequenceNumber,
+      text,
+      state: 'ready',
+      onPlaybackStart,
+      useFallbackTTS: true
+    }
+    
+    this.audioQueue.set(sequenceNumber, audioItem)
+    this.notifyStateChange()
+    this.tryPlayNext()
+  }
+
+  /**
    * 检查并播放下一个语音
    */
   async tryPlayNext(): Promise<void> {
@@ -72,7 +106,7 @@ export class AudioManager {
       return
     }
 
-    if (!nextItem.audioBlob) {
+    if (!nextItem.audioBlob && !nextItem.useFallbackTTS) {
       console.warn(`[AudioManager] No audio blob for sequence ${nextSequence}`)
       this.markAsCompleted(nextSequence)
       return
@@ -102,35 +136,70 @@ export class AudioManager {
       // 设置角色为发言状态
       this.speakerStateManager.setSpeaking(audioItem.speaker, audioItem.id)
 
-      // 创建音频元素
-      const audioUrl = URL.createObjectURL(audioItem.audioBlob!)
-      this.currentAudio = new Audio(audioUrl)
-
-      // 设置播放结束回调
-      this.currentAudio.onended = () => {
-        console.log(`[AudioManager] Playback completed for ${audioItem.speaker}`)
-        this.onAudioComplete(audioItem.sequenceNumber)
-        
-        // 清理资源
-        URL.revokeObjectURL(audioUrl)
-      }
-
-      // 设置错误处理
-      this.currentAudio.onerror = () => {
-        console.error(`[AudioManager] Playback error for ${audioItem.speaker}`)
-        this.onAudioComplete(audioItem.sequenceNumber)
-        URL.revokeObjectURL(audioUrl)
-      }
-
       this.notifyStateChange()
 
-      // 开始播放
-      await this.currentAudio.play()
+      // 判断使用哪种播放方式
+      if (audioItem.useFallbackTTS && audioItem.text && this.fallbackTTS) {
+        console.log(`[AudioManager] Using fallback TTS for ${audioItem.speaker}`)
+        await this.playWithFallbackTTS(audioItem)
+      } else if (audioItem.audioBlob) {
+        console.log(`[AudioManager] Using audio blob for ${audioItem.speaker}`)
+        await this.playWithAudioBlob(audioItem)
+      } else {
+        throw new Error('No audio source available')
+      }
 
     } catch (error) {
       console.error(`[AudioManager] Error playing audio for ${audioItem.speaker}:`, error)
       this.onAudioComplete(audioItem.sequenceNumber)
     }
+  }
+
+  /**
+   * 使用备用 TTS 播放
+   */
+  private async playWithFallbackTTS(audioItem: AudioItem): Promise<void> {
+    if (!this.fallbackTTS || !audioItem.text) {
+      throw new Error('Fallback TTS not available or no text provided')
+    }
+
+    try {
+      await this.fallbackTTS.speak(audioItem.text, audioItem.speaker)
+      console.log(`[AudioManager] Fallback TTS playback completed for ${audioItem.speaker}`)
+      this.onAudioComplete(audioItem.sequenceNumber)
+    } catch (error) {
+      console.error(`[AudioManager] Fallback TTS error for ${audioItem.speaker}:`, error)
+      this.onAudioComplete(audioItem.sequenceNumber)
+    }
+  }
+
+  /**
+   * 使用音频 Blob 播放
+   */
+  private async playWithAudioBlob(audioItem: AudioItem): Promise<void> {
+    if (!audioItem.audioBlob) {
+      throw new Error('No audio blob provided')
+    }
+
+    const audioUrl = URL.createObjectURL(audioItem.audioBlob)
+    this.currentAudio = new Audio(audioUrl)
+
+    // 设置播放结束回调
+    this.currentAudio.onended = () => {
+      console.log(`[AudioManager] Audio blob playback completed for ${audioItem.speaker}`)
+      this.onAudioComplete(audioItem.sequenceNumber)
+      URL.revokeObjectURL(audioUrl)
+    }
+
+    // 设置错误处理
+    this.currentAudio.onerror = () => {
+      console.error(`[AudioManager] Audio blob playback error for ${audioItem.speaker}`)
+      this.onAudioComplete(audioItem.sequenceNumber)
+      URL.revokeObjectURL(audioUrl)
+    }
+
+    // 开始播放
+    await this.currentAudio.play()
   }
 
   /**

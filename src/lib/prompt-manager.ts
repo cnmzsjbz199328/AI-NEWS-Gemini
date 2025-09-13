@@ -26,9 +26,9 @@ const SYSTEM_INSTRUCTIONS = {
   moderator: `You are a professional news debate moderator. 
 
 CRITICAL RULES:
-- Your response MUST be exactly 200 characters or less
+- Your response MUST be 300 characters or less
 - Count every character including spaces and punctuation
-- If you exceed 200 characters, your response will be rejected
+- If you exceed 300 characters, your response will be truncated
 - Use concise, professional language
 - End responses naturally, no trailing text
 
@@ -39,14 +39,14 @@ Your role:
 - Summarize key points at the end
 - Remain neutral and professional
 
-STRICT LIMIT: 200 characters maximum. This is non-negotiable.`,
+STRICT LIMIT: 300 characters maximum. Keep it concise.`,
 
   tom: `You are Tom, a progressive news analyst.
 
 CRITICAL RULES:
-- Your response MUST be exactly 200 characters or less
+- Your response MUST be 300 characters or less
 - Count every character including spaces and punctuation  
-- If you exceed 200 characters, your response will be rejected
+- If you exceed 300 characters, your response will be truncated
 - Use concise, impactful language
 - End responses naturally, no trailing text
 
@@ -57,14 +57,14 @@ Your perspective:
 - Engage directly with your debate partner's points
 - Stay strictly on the news topic being discussed
 
-STRICT LIMIT: 200 characters maximum. This is non-negotiable.`,
+STRICT LIMIT: 300 characters maximum. Keep it concise.`,
 
   mark: `You are Mark, a conservative news analyst.
 
 CRITICAL RULES:
-- Your response MUST be exactly 200 characters or less
+- Your response MUST be 300 characters or less
 - Count every character including spaces and punctuation
-- If you exceed 200 characters, your response will be rejected
+- If you exceed 300 characters, your response will be truncated
 - Use concise, impactful language
 - End responses naturally, no trailing text
 
@@ -75,7 +75,7 @@ Your perspective:
 - Engage directly with your debate partner's points
 - Stay strictly on the news topic being discussed
 
-STRICT LIMIT: 200 characters maximum. This is non-negotiable.`
+STRICT LIMIT: 300 characters maximum. Keep it concise.`
 } as const
 
 // 辩论阶段定义
@@ -90,19 +90,19 @@ export enum DebatePhase {
 // 为每个阶段定义特定的prompt模板，都包含严格的字符限制
 const PHASE_PROMPTS = {
   [DebatePhase.INTRODUCTION]: (topic: string) => 
-    `Introduce today's debate topic: "${topic}". Briefly explain the key issue and ask Tom for his opening perspective. CRITICAL: Keep under 200 characters total.`,
+    `Introduce today's debate topic: "${topic}". Briefly explain the key issue and ask Tom for his opening perspective. CRITICAL: Keep under 300 characters total.`,
     
   [DebatePhase.TOM_OPENING]: (topic: string) => 
-    `Give your opening perspective on: "${topic}". Focus on the main benefits or opportunities you see. CRITICAL: Keep under 200 characters total.`,
+    `Give your opening perspective on: "${topic}". Focus on the main benefits or opportunities you see. CRITICAL: Keep under 300 characters total.`,
     
   [DebatePhase.MARK_RESPONSE]: (topic: string, tomStatement: string) => 
-    `Respond to Tom's perspective on "${topic}". Tom said: "${tomStatement}". Present your concerns or alternative viewpoint. CRITICAL: Keep under 200 characters total.`,
+    `Respond to Tom's perspective on "${topic}". Tom said: "${tomStatement}". Present your concerns or alternative viewpoint. CRITICAL: Keep under 300 characters total.`,
     
   [DebatePhase.TOM_COUNTER]: (topic: string, markStatement: string) => 
-    `Counter Mark's concerns about "${topic}". Mark said: "${markStatement}". Address his points while maintaining your position. CRITICAL: Keep under 200 characters total.`,
+    `Counter Mark's concerns about "${topic}". Mark said: "${markStatement}". Address his points while maintaining your position. CRITICAL: Keep under 300 characters total.`,
     
   [DebatePhase.CONCLUSION]: (topic: string, tomView: string, markView: string) => 
-    `Summarize the key debate points about "${topic}". Tom emphasized: "${tomView}". Mark highlighted: "${markView}". Provide a balanced conclusion. CRITICAL: Keep under 200 characters total.`
+    `Summarize the key debate points about "${topic}". Tom emphasized: "${tomView}". Mark highlighted: "${markView}". Provide a balanced conclusion. CRITICAL: Keep under 300 characters total.`
 }
 
 export class PromptManager {
@@ -169,9 +169,9 @@ export class PromptManager {
     const characterLimit = `
 
 🚨 ABSOLUTE REQUIREMENT 🚨
-Your response MUST be 200 characters or less.
+Your response MUST be 300 characters or less.
 Character count includes spaces, punctuation, everything.
-Responses over 200 characters will be automatically rejected.
+Responses over 300 characters will be automatically truncated.
 Be concise and impactful.`
 
     return `Topic: "${topic}"${conversationContext}\n\nYour task: ${basePrompt}${characterLimit}`
@@ -188,17 +188,20 @@ Be concise and impactful.`
     const issues: string[] = []
     let processedResponse = response.trim()
 
-    // 更严格的长度检查：200字符限制
-    if (processedResponse.length > 200) {
-      console.log(`Response too long (${processedResponse.length} chars), applying strict truncation...`)
+    // 更智能的长度检查：300字符限制（放宽一些）
+    if (processedResponse.length > 300) {
+      console.log(`Response too long (${processedResponse.length} chars), applying intelligent truncation...`)
       
-      // 智能截断：优先在句子结尾截断，但更严格
+      // 智能截断：优先在句子结尾截断
       const sentences = processedResponse.split(/[.!?]+/)
       let truncated = ''
       
       for (const sentence of sentences) {
-        const testSentence = (truncated + sentence + '.').trim()
-        if (testSentence.length <= 195) { // 留出5字符余量
+        const cleanSentence = sentence.trim()
+        if (!cleanSentence) continue
+        
+        const testSentence = truncated ? `${truncated}. ${cleanSentence}` : cleanSentence
+        if (testSentence.length <= 280) { // 留出20字符余量
           truncated = testSentence
         } else {
           break
@@ -206,13 +209,13 @@ Be concise and impactful.`
       }
       
       // 如果智能截断后仍然为空或太短，使用词汇边界截断
-      if (truncated.length < 30) {
+      if (truncated.length < 50) {
         const words = processedResponse.split(' ')
         let wordTruncated = ''
         
         for (const word of words) {
-          const testLength = (wordTruncated + ' ' + word).trim()
-          if (testLength.length <= 195) {
+          const testLength = wordTruncated ? `${wordTruncated} ${word}` : word
+          if (testLength.length <= 280) {
             wordTruncated = testLength
           } else {
             break
@@ -220,11 +223,16 @@ Be concise and impactful.`
         }
         
         // 如果还是太短，使用强制截断
-        if (wordTruncated.length < 30) {
-          truncated = processedResponse.substring(0, 195) + '...'
+        if (wordTruncated.length < 50) {
+          truncated = processedResponse.substring(0, 280)
         } else {
-          truncated = wordTruncated + '.'
+          truncated = wordTruncated
         }
+      }
+      
+      // 确保以适当的标点结尾
+      if (truncated && !truncated.match(/[.!?]$/)) {
+        truncated += '.'
       }
       
       processedResponse = truncated
@@ -255,25 +263,25 @@ Be concise and impactful.`
   getCharacterLimitReminder(): string {
     return `
 ⚠️ CRITICAL CONSTRAINT ⚠️
-- Maximum 200 characters TOTAL
+- Maximum 300 characters TOTAL
 - Count includes ALL characters: letters, spaces, punctuation
-- Exceeding 200 characters = AUTOMATIC REJECTION
+- Exceeding 300 characters = AUTOMATIC TRUNCATION
 - Write concisely and end naturally
 - No trailing text or explanations
 
-CONFIRM: Your response will be exactly 200 characters or less.`
+CONFIRM: Your response will be 300 characters or less.`
   }
 
   /**
    * 为API调用添加强制性前缀
    */
   addStrictLimitPrefix(originalPrompt: string): string {
-    const prefix = `URGENT: Respond in 200 characters or less. Count every character.
+    const prefix = `URGENT: Respond in 300 characters or less. Count every character.
 
 `
     return prefix + originalPrompt + `
 
-Remember: 200 character limit is MANDATORY. Count carefully.`
+Remember: 300 character limit is MANDATORY. Count carefully.`
   }
 }
 

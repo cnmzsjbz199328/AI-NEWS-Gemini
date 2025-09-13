@@ -45,8 +45,9 @@ export interface AudioItem {
   audioBlob?: Blob;
   sequenceNumber: number;
   state: AudioPlaybackState;
-  timestamp: number;
+  timestamp?: number;
   onPlaybackStart?: () => void;
+  useFallbackTTS?: boolean; // 是否使用备用 TTS
 }
 
 // 角色状态

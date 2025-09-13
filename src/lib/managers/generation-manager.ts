@@ -9,9 +9,10 @@
  */
 
 import { Speaker, AudioItem, ConversationEntry } from '@/types'
-import { generateAIResponse, generateSpeech } from '@/services/ai-client'
+import { generateAIResponse } from '@/services/ai-client'
 import { AudioManager } from './audio-manager'
 import { SpeakerStateManager } from './speaker-state-manager'
+import { ttsServiceManager } from '@/lib/tts-service-manager'
 
 export class GenerationManager {
   private audioManager: AudioManager
@@ -75,7 +76,7 @@ export class GenerationManager {
   }
 
   /**
-   * 启动语音生成（并行）
+   * 启动语音生成（使用三层 TTS 架构）
    */
   async generateAudio(speaker: Speaker, text: string, sequenceNumber: number): Promise<void> {
     console.log(`[GenerationManager] Starting audio generation for ${speaker}, sequence: ${sequenceNumber}`)
@@ -84,37 +85,70 @@ export class GenerationManager {
     this.speakerStateManager.setGeneratingAudio(speaker)
 
     try {
-      // 调用语音生成API
-      const audioBlob = await generateSpeech(text, speaker)
+      // 使用三层 TTS 服务管理器
+      const result = await ttsServiceManager.generateSpeech(text, speaker)
       
-      if (audioBlob) {
-        // 创建音频项目（带回调）
-        const audioItem: AudioItem = {
-          id: `${speaker}-${sequenceNumber}-${Date.now()}`,
-          speaker,
-          text,
-          audioBlob,
-          sequenceNumber,
-          state: 'ready',
-          timestamp: Date.now(),
-          onPlaybackStart: () => {
-            console.log(`[GenerationManager] Audio playback started for ${speaker}, updating conversation`)
-            this.updateConversation(speaker, text)
-          }
-        }
-
-        // 添加到播放队列
-        this.audioManager.addAudioItem(audioItem)
+      if (result.success) {
+        console.log(`[GenerationManager] Audio generated using ${result.serviceUsed} for ${speaker}`)
         
-        console.log(`[GenerationManager] Audio generated for ${speaker}, added to queue`)
+        if (result.serviceUsed === 'webSpeech') {
+          // Web Speech API 直接播放，不需要音频文件
+          this.handleWebSpeechPlayback(speaker, text, sequenceNumber)
+        } else {
+          // IndexTTS 或 CosyVoice 返回音频文件
+          const audioItem: AudioItem = {
+            id: `${speaker}-${sequenceNumber}-${Date.now()}`,
+            speaker,
+            text,
+            audioBlob: result.audioBlob,
+            sequenceNumber,
+            state: 'ready',
+            onPlaybackStart: () => {
+              console.log(`[GenerationManager] Audio playback started for ${speaker}, updating conversation`)
+              this.updateConversation(speaker, text)
+            }
+          }
+
+          // 添加到播放队列
+          this.audioManager.addAudioItem(audioItem)
+          console.log(`[GenerationManager] Audio generated for ${speaker}, added to queue`)
+        }
       } else {
-        console.warn(`[GenerationManager] No audio generated for ${speaker}`)
+        console.error(`[GenerationManager] All TTS services failed for ${speaker}:`, result.error)
+        // 即使所有服务都失败，也要让角色回到静态状态
+        setTimeout(() => this.speakerStateManager.setStatic(speaker), 3000)
       }
     } catch (error) {
-      console.error(`[GenerationManager] Audio generation failed for ${speaker}:`, error)
-      // 即使语音生成失败，也要让角色进入静态状态
+      console.error(`[GenerationManager] TTS generation error for ${speaker}:`, error)
+      // 出错时确保角色回到静态状态
       setTimeout(() => this.speakerStateManager.setStatic(speaker), 3000)
     }
+  }
+
+  /**
+   * 处理 Web Speech API 播放
+   */
+  private handleWebSpeechPlayback(speaker: Speaker, text: string, sequenceNumber: number): void {
+    console.log(`[GenerationManager] Handling Web Speech API playback for ${speaker}`)
+    
+    // 创建使用 Web Speech API 的音频项目
+    const audioItem: AudioItem = {
+      id: `${speaker}-${sequenceNumber}-${Date.now()}`,
+      speaker,
+      text,
+      sequenceNumber,
+      state: 'ready',
+      useFallbackTTS: true,
+      onPlaybackStart: () => {
+        console.log(`[GenerationManager] Web Speech API playback started for ${speaker}, updating conversation`)
+        this.updateConversation(speaker, text)
+      }
+    }
+
+    // 添加到播放队列
+    this.audioManager.addTextAudioItem(text, speaker, sequenceNumber, audioItem.id, audioItem.onPlaybackStart)
+    
+    console.log(`[GenerationManager] Web Speech API item added to queue for ${speaker}`)
   }
 
   /**
