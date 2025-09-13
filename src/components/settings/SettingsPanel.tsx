@@ -26,7 +26,7 @@ interface AppSettings {
   debateSpeed: 'slow' | 'normal' | 'fast'
   useFallbackTTS: boolean
   showDebugInfo: boolean
-  ttsService: 'indexTTS' | 'cosyVoice' | 'webSpeech'
+  ttsService: 'indexTTS' | 'cosyVoice'
 }
 
 const DEFAULT_SETTINGS: AppSettings = {

@@ -5,8 +5,8 @@ import { VoiceConfig } from '../../types/voice'
 import { TTS_SERVICE_OPTIONS } from '../ui/constants'
 
 interface VoiceSettingsProps {
-  ttsService: 'indexTTS' | 'cosyVoice' | 'webSpeech'
-  onTtsServiceChange: (service: 'indexTTS' | 'cosyVoice' | 'webSpeech') => void
+  ttsService: 'indexTTS' | 'cosyVoice'
+  onTtsServiceChange: (service: 'indexTTS' | 'cosyVoice') => void
   voices: VoiceConfig[]
   onVoiceUpload: (voiceConfig: VoiceConfig) => void
   onVoiceDelete: (voiceId: string) => void
@@ -45,7 +45,7 @@ export default function VoiceSettings({
         <h3 className="text-sm font-medium text-gray-700">TTS服务偏好</h3>
         <Select
           value={ttsService}
-          onChange={(value) => onTtsServiceChange(value as 'indexTTS' | 'cosyVoice' | 'webSpeech')}
+          onChange={(value) => onTtsServiceChange(value as 'indexTTS' | 'cosyVoice')}
           options={ttsServiceOptions}
         />
         <p className="text-xs text-gray-500">

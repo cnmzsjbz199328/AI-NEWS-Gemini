@@ -74,8 +74,8 @@ export default function VoicePreview({
       // 使用自定义文本或默认文本
       const textToSpeak = showCustomText ? customText : previewText
       
-      // 调用音色预览生成
-      await onPreview(voiceConfig.id, textToSpeak)
+      // 调用音色预览生成 - 传递整个voiceConfig对象
+      await onPreview(voiceConfig.id, textToSpeak, voiceConfig.audioUrl, voiceConfig)
       
       // 这里应该从API获得生成的音频URL，暂时使用原始音频文件作为演示
       if (voiceConfig.audioUrl) {

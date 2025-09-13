@@ -31,22 +31,47 @@ export default function PresetVoices({ onSelectPreset, existingVoices }: PresetV
   const [downloading, setDownloading] = useState<string | null>(null)
   const [previewing, setPreviewing] = useState<string | null>(null)
 
-  const handleSelectPreset = async (preset: PresetVoice) => {
-    // 检查是否已有相同角色的音色
-    const existingVoice = existingVoices.find(v => v.character === preset.character)
-    if (existingVoice) {
-      alert(`${preset.character} 角色已有音色配置，请先删除现有配置`)
+    const handleUse = async (preset: PresetVoice) => {
+    // 检查是否已存在相同的预设音色
+    const existing = existingVoices.find(v => v.id === `preset_${preset.id}_*` || v.name === preset.name)
+    if (existing) {
+      alert('该预设音色已存在')
       return
     }
 
+    console.log('[PresetVoices] 开始下载预设音色:', preset)
     setDownloading(preset.id)
     try {
-      // 下载音频文件
-      const response = await fetch(preset.audioUrl)
-      if (!response.ok) throw new Error('Failed to download preset voice')
+      console.log('[PresetVoices] 发送API请求到:', `/api/voice/preset?id=${preset.id}`)
+      
+      // 通过API代理下载音频文件
+      const response = await fetch(`/api/voice/preset?id=${preset.id}`)
+      console.log('[PresetVoices] API响应:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: Array.from(response.headers.entries())
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('[PresetVoices] API错误:', errorData)
+        throw new Error(errorData.error || `HTTP ${response.status}`)
+      }
       
       const blob = await response.blob()
+      console.log('[PresetVoices] 音频blob获取成功:', {
+        size: blob.size,
+        type: blob.type
+      })
+      
       const file = new File([blob], `${preset.name}.m4a`, { type: 'audio/m4a' })
+      console.log('[PresetVoices] File对象创建成功:', {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified
+      })
 
       // 创建音色配置
       const voiceConfig: VoiceConfig = {
@@ -61,9 +86,20 @@ export default function PresetVoices({ onSelectPreset, existingVoices }: PresetV
         duration: 0 // 可以后续获取
       }
 
+      console.log('[PresetVoices] VoiceConfig创建成功:', {
+        id: voiceConfig.id,
+        name: voiceConfig.name,
+        character: voiceConfig.character,
+        hasAudioFile: !!voiceConfig.audioFile,
+        audioUrl: voiceConfig.audioUrl?.substring(0, 50) + '...',
+        fileSize: voiceConfig.fileSize
+      })
+
+      console.log('[PresetVoices] 调用onSelectPreset...')
       onSelectPreset(voiceConfig)
+      console.log('[PresetVoices] onSelectPreset调用完成')
     } catch (error) {
-      console.error('Failed to download preset voice:', error)
+      console.error('[PresetVoices] 下载预设音色失败:', error)
       alert('下载预设音色失败，请重试')
     } finally {
       setDownloading(null)
@@ -109,7 +145,7 @@ export default function PresetVoices({ onSelectPreset, existingVoices }: PresetV
                     <Play className={`w-4 h-4 ${isPreviewing ? 'animate-pulse' : ''}`} />
                   </button>
                   <button
-                    onClick={() => handleSelectPreset(preset)}
+                    onClick={() => handleUse(preset)}
                     disabled={isDownloading || hasExistingVoice}
                     className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     title={hasExistingVoice ? `${preset.character} 角色已有音色配置` : '使用此音色'}

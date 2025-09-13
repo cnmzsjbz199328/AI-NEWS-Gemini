@@ -21,7 +21,7 @@ export interface VoiceUploadProps {
 
 export interface VoicePreviewProps {
   voiceConfig: VoiceConfig
-  onPreview: (voiceId: string, text: string) => Promise<void>
+  onPreview: (voiceId: string, text: string, audioUrl?: string, voiceConfig?: VoiceConfig) => Promise<void>
   isPlaying: boolean
   previewText?: string
 }

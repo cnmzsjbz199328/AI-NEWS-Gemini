@@ -6,9 +6,8 @@
 import { Speaker } from '@/types'
 import { indexTTSService, type IndexTTSResult } from './indexTTS-service'
 import { cosyVoiceTTSService } from './cosyvoice-tts-service'
-import { FallbackTTS } from '@/utils/fallback-tts'
 
-export type TTSServiceType = 'indexTTS' | 'cosyVoice' | 'webSpeech'
+export type TTSServiceType = 'indexTTS' | 'cosyVoice'
 
 export interface TTSGenerationResult {
   success: boolean
@@ -22,38 +21,19 @@ export interface TTSGenerationResult {
 export interface TTSServiceStatus {
   indexTTS: boolean
   cosyVoice: boolean
-  webSpeech: boolean
 }
 
 export class TTSServiceManager {
-  private fallbackTTS: FallbackTTS | null = null
   private serviceStatus: TTSServiceStatus = {
     indexTTS: false,
-    cosyVoice: false,
-    webSpeech: false
+    cosyVoice: false
   }
 
   constructor() {
     console.log('[TTSManager] Initializing TTS Service Manager')
-    this.initializeFallbackTTS()
     this.checkServiceAvailability()
   }
 
-  /**
-   * 初始化浏览器 TTS
-   */
-  private initializeFallbackTTS(): void {
-    if (typeof window !== 'undefined') {
-      try {
-        this.fallbackTTS = new FallbackTTS()
-        this.serviceStatus.webSpeech = true
-        console.log('[TTSManager] Web Speech API initialized')
-      } catch (error) {
-        console.warn('[TTSManager] Web Speech API not available:', error)
-        this.serviceStatus.webSpeech = false
-      }
-    }
-  }
 
   /**
    * 检查所有服务可用性
@@ -95,7 +75,7 @@ export class TTSServiceManager {
     console.log(`[TTSManager] Generating speech for ${speaker} with preferred service: ${preferredService || 'auto'}`)
 
     // 定义服务优先级
-    const allServices: TTSServiceType[] = ['indexTTS', 'cosyVoice', 'webSpeech']
+    const allServices: TTSServiceType[] = ['indexTTS', 'cosyVoice']
     const serviceOrder: TTSServiceType[] = preferredService 
       ? [preferredService, ...allServices.filter(s => s !== preferredService)]
       : allServices
@@ -117,9 +97,6 @@ export class TTSServiceManager {
           
           case 'cosyVoice':
             return await this.tryCosyVoice(text, speaker)
-          
-          case 'webSpeech':
-            return await this.tryWebSpeech(text, speaker)
         }
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Unknown error'
@@ -183,28 +160,6 @@ export class TTSServiceManager {
     }
   }
 
-  /**
-   * 尝试使用 Web Speech API
-   */
-  private async tryWebSpeech(text: string, speaker: Speaker): Promise<TTSGenerationResult> {
-    if (!this.fallbackTTS) {
-      throw new Error('Web Speech API not available')
-    }
-
-    const startTime = Date.now()
-    
-    // Web Speech API 不返回音频文件，直接播放
-    await this.fallbackTTS.speak(text, speaker)
-    
-    const duration = Date.now() - startTime
-    
-    return {
-      success: true,
-      duration,
-      serviceUsed: 'webSpeech'
-      // 注意：Web Speech API 不提供 audioUrl 或 audioBlob
-    }
-  }
 
   /**
    * 下载音频文件并转换为 Blob
@@ -289,7 +244,6 @@ export class TTSServiceManager {
   getBestAvailableService(): TTSServiceType | null {
     if (this.serviceStatus.indexTTS) return 'indexTTS'
     if (this.serviceStatus.cosyVoice) return 'cosyVoice'
-    if (this.serviceStatus.webSpeech) return 'webSpeech'
     return null
   }
 }

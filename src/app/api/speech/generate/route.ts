@@ -43,14 +43,6 @@ export async function POST(request: NextRequest) {
 
       console.log(`[TTS API] Speech generated successfully for ${speaker} using ${result.serviceUsed}`)
 
-      // 如果使用 Web Speech API，返回特殊响应
-      if (result.serviceUsed === 'webSpeech') {
-        return NextResponse.json({
-          success: true,
-          serviceUsed: 'webSpeech',
-          message: 'Speech played directly via Web Speech API'
-        })
-      }
 
       // 返回音频数据
       if (result.audioBlob) {
