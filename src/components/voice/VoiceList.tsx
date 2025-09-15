@@ -4,7 +4,7 @@ import VoiceCard from './VoiceCard'
 interface VoiceListProps {
   voices: VoiceConfig[]
   onVoiceDelete: (voiceId: string) => void
-  onVoicePreview: (voiceId: string, text: string, audioUrl?: string, voiceConfig?: VoiceConfig) => Promise<void>
+  onVoicePreview: (voiceId: string, text: string, audioUrl?: string, voiceConfig?: VoiceConfig) => Promise<string | null>
   previewingVoice: string | null
 }
 

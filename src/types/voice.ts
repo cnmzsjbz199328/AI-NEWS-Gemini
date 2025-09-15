@@ -2,8 +2,11 @@
 export interface VoiceConfig {
   id: string
   name: string
+  description?: string
   character: 'moderator' | 'tom' | 'mark'
-  audioFile: File | null
+  gender?: 'male' | 'female'
+  language?: string
+  audioFile?: File | null
   audioUrl?: string
   isDefault: boolean
   uploadedAt: string
@@ -21,7 +24,7 @@ export interface VoiceUploadProps {
 
 export interface VoicePreviewProps {
   voiceConfig: VoiceConfig
-  onPreview: (voiceId: string, text: string, audioUrl?: string, voiceConfig?: VoiceConfig) => Promise<void>
+  onPreview: (voiceId: string, text: string, audioUrl?: string, voiceConfig?: VoiceConfig) => Promise<string | null>
   isPlaying: boolean
   previewText?: string
 }

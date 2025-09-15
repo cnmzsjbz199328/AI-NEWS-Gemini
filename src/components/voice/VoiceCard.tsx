@@ -7,7 +7,7 @@ import VoicePreview from './VoicePreview'
 interface VoiceCardProps {
   voice: VoiceConfig
   onDelete: (voiceId: string) => void
-  onPreview: (voiceId: string, text: string, audioUrl?: string, voiceConfig?: VoiceConfig) => Promise<void>
+  onPreview: (voiceId: string, text: string, audioUrl?: string, voiceConfig?: VoiceConfig) => Promise<string | null>
   isPlaying: boolean
 }
 

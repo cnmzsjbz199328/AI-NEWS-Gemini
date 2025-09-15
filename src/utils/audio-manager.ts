@@ -9,21 +9,17 @@
  */
 
 import { Speaker, AudioItem, AudioPlaybackState, AudioPlaybackInfo } from '@/types'
-import { SpeakerStateManager } from './speaker-state-manager'
 import { FallbackTTS } from './fallback-tts'
 
 export class AudioManager {
   private audioQueue: Map<number, AudioItem> = new Map()
   private currentPlayingSequence: number = -1
   private currentAudio: HTMLAudioElement | null = null
-  private speakerStateManager: SpeakerStateManager
   private onStateChange?: (state: AudioPlaybackInfo) => void
   private fallbackTTS: FallbackTTS | null = null
   private useFallbackTTS: boolean = false
 
-  constructor(speakerStateManager: SpeakerStateManager) {
-    this.speakerStateManager = speakerStateManager
-    
+  constructor() {
     // 初始化备用 TTS
     if (typeof window !== 'undefined') {
       try {
@@ -134,7 +130,7 @@ export class AudioManager {
       }
 
       // 设置角色为发言状态
-      this.speakerStateManager.setSpeaking(audioItem.speaker, audioItem.id)
+      // this.speakerStateManager.setSpeaking(audioItem.speaker, audioItem.id)
 
       this.notifyStateChange()
 
@@ -233,7 +229,7 @@ export class AudioManager {
     if (audioItem) {
       console.log(`[AudioManager] Setting ${audioItem.speaker} back to static after audio completion`)
       // 设置角色为静态状态
-      this.speakerStateManager.setStatic(audioItem.speaker)
+      // this.speakerStateManager.setStatic(audioItem.speaker)
       
       // 标记为已完成
       this.markAsCompleted(sequenceNumber)
@@ -285,7 +281,7 @@ export class AudioManager {
     }
 
     // 重置所有角色状态
-    this.speakerStateManager.resetAllStates()
+    // this.speakerStateManager.resetAllStates()
     this.notifyStateChange()
   }
 
@@ -333,12 +329,9 @@ export class AudioManager {
 // 单例实例
 let instance: AudioManager | null = null
 
-export function getAudioManager(speakerStateManager?: SpeakerStateManager): AudioManager {
-  if (!instance && speakerStateManager) {
-    instance = new AudioManager(speakerStateManager)
-  }
+export function getAudioManager(): AudioManager {
   if (!instance) {
-    throw new Error('AudioManager not initialized. Please provide SpeakerStateManager.')
+    instance = new AudioManager()
   }
   return instance
 }

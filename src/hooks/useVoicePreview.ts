@@ -1,12 +1,16 @@
 import { useState, useCallback } from 'react'
 import { VoiceConfig } from '../types/voice'
 
+// 添加音频缓存
+const audioCache = new Map<string, string>() // voiceId + text -> generatedAudioUrl
+
 export function useVoicePreview() {
   const [previewingVoice, setPreviewingVoice] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [generatedAudioCache, setGeneratedAudioCache] = useState<Map<string, string>>(new Map())
 
-    // 处理音色预览
-  const handleVoicePreview = useCallback(async (voiceId: string, text: string, audioUrl?: string, voiceConfig?: VoiceConfig): Promise<void> => {
+    // 处理音色预览 - 只生成音频，不直接播放
+  const handleVoicePreview = useCallback(async (voiceId: string, text: string, audioUrl?: string, voiceConfig?: VoiceConfig): Promise<string | null> => {
     try {
       setPreviewingVoice(voiceId)
       setError(null)
@@ -24,6 +28,17 @@ export function useVoicePreview() {
           audioFileSize: voiceConfig?.audioFile?.size
         }
       })
+      
+      // 🔧 检查缓存，避免重复生成
+      const cacheKey = `${voiceId}_${text}`
+      const cachedAudio = audioCache.get(cacheKey)
+      if (cachedAudio) {
+        console.log('🎯 Using cached generated audio for:', cacheKey)
+        setPreviewingVoice(null)
+        return cachedAudio // 返回缓存的音频URL
+      }
+      
+      console.log('🎵 Generating new audio for:', cacheKey)
       
       let voiceData: string
       
@@ -160,25 +175,19 @@ export function useVoicePreview() {
       const audioBlob = await response.blob()
       const generatedAudioUrl = URL.createObjectURL(audioBlob)
 
-      // 播放生成的音频
-      const audio = new Audio(generatedAudioUrl)
-      
-      audio.addEventListener('ended', () => {
-        URL.revokeObjectURL(generatedAudioUrl)
-      })
+      // 🔧 缓存生成的音频URL
+      audioCache.set(cacheKey, generatedAudioUrl)
+      console.log('✅ Audio generated and cached for:', cacheKey)
 
-      audio.addEventListener('error', (e) => {
-        console.error('Audio playback error:', e)
-        URL.revokeObjectURL(generatedAudioUrl)
-      })
-
-      await audio.play()
+      // 返回生成的音频URL，让调用者决定是否播放
+      setPreviewingVoice(null)
+      return generatedAudioUrl
       
     } catch (error) {
       console.error('Voice preview error:', error)
       setError(`预览失败: ${error instanceof Error ? error.message : '未知错误'}`)
-    } finally {
       setPreviewingVoice(null)
+      return null
     }
   }, [])
 
@@ -186,10 +195,20 @@ export function useVoicePreview() {
     setError(null)
   }, [])
 
+  const clearCache = useCallback(() => {
+    // 清理所有缓存的音频URL
+    audioCache.forEach((url) => {
+      URL.revokeObjectURL(url)
+    })
+    audioCache.clear()
+    console.log('🗑️ Audio cache cleared')
+  }, [])
+
   return {
     previewingVoice,
     error,
     handleVoicePreview,
-    clearError
+    clearError,
+    clearCache
   }
 }

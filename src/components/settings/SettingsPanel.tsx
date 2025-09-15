@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Settings, X } from 'lucide-react'
 import { VoiceConfig } from '../../types/voice'
 import { VoiceStorageManager } from '../../storage/voice-storage'
+import { getVoiceConfigManager, VoiceConfig as PresetVoiceConfig } from '../../lib/voice-config-manager'
 import { useAutoCollapse } from '../../hooks/useAutoCollapse'
 import SettingsTabs from './SettingsTabs'
 import GeneralSettings from './GeneralSettings'
@@ -49,6 +50,7 @@ export default function SettingsPanel({
 }: SettingsPanelProps) {
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS)
   const [voices, setVoices] = useState<VoiceConfig[]>([])
+  const [presetVoices, setPresetVoices] = useState<PresetVoiceConfig[]>([])
   const [activeTab, setActiveTab] = useState<'general' | 'voice' | 'advanced'>('general')
 
   const { handleUserInteraction } = useAutoCollapse({
@@ -58,11 +60,39 @@ export default function SettingsPanel({
     onCollapse: onToggle
   })
 
-  // 加载音色配置
+  // 初始化音色数据
   useEffect(() => {
-    const loadedVoices = VoiceStorageManager.getVoiceConfigs()
-    setVoices(loadedVoices)
+    // 加载用户上传的音色
+    const userVoices = VoiceStorageManager.getVoiceConfigs()
+    setVoices(userVoices)
+    
+    // 加载预设音色
+    const voiceManager = getVoiceConfigManager()
+    const presets = voiceManager.getAllPresetVoices()
+    setPresetVoices(presets)
+    
+    console.log('Loaded preset voices:', presets)
+    console.log('Loaded user voices:', userVoices)
   }, [])
+
+  // 合并预设音色和用户音色供组件使用
+  const allVoices: VoiceConfig[] = [
+    // 将预设音色转换为VoiceConfig格式
+    ...presetVoices.map(preset => ({
+      id: preset.id,
+      name: preset.name,
+      description: preset.description,
+      character: 'moderator' as const, // 预设音色可以被任何角色使用
+      gender: preset.gender as 'male' | 'female',
+      language: preset.language,
+      audioUrl: preset.url,
+      isDefault: true,
+      uploadedAt: new Date().toISOString(),
+      fileSize: 0,
+    })),
+    // 用户上传的音色
+    ...voices
+  ]
 
   // 更新设置
   const updateSetting = <K extends keyof AppSettings>(
@@ -159,7 +189,7 @@ export default function SettingsPanel({
               <VoiceSettings
                 ttsService={settings.ttsService}
                 onTtsServiceChange={(service) => updateSetting('ttsService', service)}
-                voices={voices}
+                voices={allVoices}
                 onVoiceUpload={handleVoiceUpload}
                 onVoiceDelete={handleVoiceDelete}
               />

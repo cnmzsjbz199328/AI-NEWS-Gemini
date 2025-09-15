@@ -74,43 +74,46 @@ export default function VoicePreview({
       // 使用自定义文本或默认文本
       const textToSpeak = showCustomText ? customText : previewText
       
-      // 调用音色预览生成 - 传递整个voiceConfig对象
-      await onPreview(voiceConfig.id, textToSpeak, voiceConfig.audioUrl, voiceConfig)
+      // 🔧 调用音色预览生成，获取生成的音频URL
+      const generatedAudioUrl = await onPreview(voiceConfig.id, textToSpeak, voiceConfig.audioUrl, voiceConfig)
       
-      // 这里应该从API获得生成的音频URL，暂时使用原始音频文件作为演示
-      if (voiceConfig.audioUrl) {
-        const audio = new Audio(voiceConfig.audioUrl)
-        setCurrentAudio(audio)
-        audioRef.current = audio
-
-        // 设置音频事件监听
-        audio.addEventListener('loadedmetadata', () => {
-          setDuration(audio.duration)
-        })
-
-        audio.addEventListener('play', () => {
-          startProgressTracking()
-        })
-
-        audio.addEventListener('pause', () => {
-          stopProgressTracking()
-        })
-
-        audio.addEventListener('ended', () => {
-          stopProgressTracking()
-          setPlaybackProgress(0)
-          setCurrentAudio(null)
-        })
-
-        audio.addEventListener('error', (e) => {
-          console.error('Audio playback error:', e)
-          stopProgressTracking()
-          setCurrentAudio(null)
-        })
-
-        // 开始播放
-        await audio.play()
+      if (!generatedAudioUrl) {
+        console.error('Failed to generate audio')
+        return
       }
+
+      // 🎵 播放生成的音频（不是原始音频文件）
+      const audio = new Audio(generatedAudioUrl)
+      setCurrentAudio(audio)
+      audioRef.current = audio
+
+      // 设置音频事件监听
+      audio.addEventListener('loadedmetadata', () => {
+        setDuration(audio.duration)
+      })
+
+      audio.addEventListener('play', () => {
+        startProgressTracking()
+      })
+
+      audio.addEventListener('pause', () => {
+        stopProgressTracking()
+      })
+
+      audio.addEventListener('ended', () => {
+        stopProgressTracking()
+        setPlaybackProgress(0)
+        setCurrentAudio(null)
+      })
+
+      audio.addEventListener('error', (e) => {
+        console.error('Audio playback error:', e)
+        stopProgressTracking()
+        setCurrentAudio(null)
+      })
+
+      // 开始播放
+      await audio.play()
     } catch (error) {
       console.error('Voice preview error:', error)
     } finally {

@@ -172,7 +172,7 @@ export default function VoiceUpload({
   }
 
   // 处理音色预览
-  const handleVoicePreview = async (voiceId: string, text: string): Promise<void> => {
+  const handleVoicePreview = async (voiceId: string, text: string, audioUrl?: string, voiceConfig?: VoiceConfig): Promise<string | null> => {
     try {
       setPreviewingVoice(voiceId)
       
@@ -214,9 +214,12 @@ export default function VoiceUpload({
 
       await audio.play()
       
+      return audioUrl  // 返回生成的音频URL
+      
     } catch (error) {
       console.error('Voice preview error:', error)
       setError(`预览失败: ${error instanceof Error ? error.message : '未知错误'}`)
+      return null  // 出错时返回null
     } finally {
       setPreviewingVoice(null)
     }
