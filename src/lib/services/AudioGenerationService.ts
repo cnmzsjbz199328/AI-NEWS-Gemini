@@ -9,7 +9,6 @@ export interface AudioGenerationResult {
   success: boolean
   audioPlaylist?: AudioPlaylist
   error?: string
-  shouldRetry: boolean
 }
 
 export class AudioGenerationService {
@@ -25,8 +24,7 @@ export class AudioGenerationService {
       if (!task.script) {
         return {
           success: false,
-          error: 'No script available for TTS generation',
-          shouldRetry: false
+          error: 'No script available for TTS generation'
         }
       }
 
@@ -68,8 +66,7 @@ export class AudioGenerationService {
       if (successfulResults.length === 0) {
         return {
           success: false,
-          error: `All IndexTTS generations failed for task: ${task.id}`,
-          shouldRetry: true
+          error: `All IndexTTS generations failed for task: ${task.id}`
         }
       }
 
@@ -99,8 +96,7 @@ export class AudioGenerationService {
         console.error(`❌ Critical audio missing for task ${task.id}`)
         return {
           success: false,
-          error: 'Failed to generate critical audio components',
-          shouldRetry: true
+          error: 'Failed to generate critical audio components'
         }
       }
 
@@ -108,8 +104,7 @@ export class AudioGenerationService {
       
       return {
         success: true,
-        audioPlaylist,
-        shouldRetry: false
+        audioPlaylist
       }
       
     } catch (error) {
@@ -118,8 +113,7 @@ export class AudioGenerationService {
       
       return {
         success: false,
-        error: errorMessage,
-        shouldRetry: true
+        error: errorMessage
       }
     }
   }

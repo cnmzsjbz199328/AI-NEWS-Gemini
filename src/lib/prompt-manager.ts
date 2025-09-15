@@ -1,114 +1,25 @@
 /**
- * 统一的Prompt管理系统
+ * 一次性生成提示词管理器
  * 
  * 职责：
- * 1. 管理所有角色的系统指令
- * 2. 构建对话上下文
- * 3. 生成针对性的提示词
- * 4. 确保辩论围绕新闻主题进行
+ * 1. 构建用于一次性生成完整辩论剧本的提示词
+ * 2. 整合来自 config/index.ts 的角色定义
+ * 3. 生成符合 DebateScript 格式的 JSON 输出指令
  */
 
-import { Speaker } from '@/types'
+import { SupportedLanguage } from '@/types'
+import { PERSONALITIES } from '@/config'
 
-export interface ConversationTurn {
-  speaker: Speaker
-  text: string
-}
-
-export interface DebateContext {
-  topic: string
-  currentTurn: number
-  history: ConversationTurn[]
-}
-
-// 简化和重新设计的角色定义，重点强调新闻辩论功能
-const SYSTEM_INSTRUCTIONS = {
-  moderator: `You are a professional news debate moderator. 
-
-CRITICAL RULES:
-- Your response MUST be 150 characters or less (20-25 seconds of speech)
-- Count every character including spaces and punctuation
-- If you exceed 150 characters, your response will be truncated
-- Use very concise, professional language
-- End responses naturally, no trailing text
-
-Your role:
-- Introduce news topics clearly
-- Guide structured debates between panelists
-- Ask follow-up questions focused on the news topic
-- Summarize key points at the end
-- Remain neutral and professional
-
-STRICT LIMIT: 150 characters maximum. Keep it very concise.`,
-
-  tom: `You are Tom, a progressive news analyst.
-
-CRITICAL RULES:
-- Your response MUST be 150 characters or less (20-25 seconds of speech)
-- Count every character including spaces and punctuation  
-- If you exceed 150 characters, your response will be truncated
-- Use very concise, impactful language
-- End responses naturally, no trailing text
-
-Your perspective:
-- Present optimistic, forward-looking perspectives
-- Support arguments with logical reasoning
-- Focus on potential benefits and opportunities
-- Engage directly with your debate partner's points
-- Stay strictly on the news topic being discussed
-
-STRICT LIMIT: 150 characters maximum. Keep it very concise.`,
-
-  mark: `You are Mark, a conservative news analyst.
-
-CRITICAL RULES:
-- Your response MUST be 150 characters or less (20-25 seconds of speech)
-- Count every character including spaces and punctuation
-- If you exceed 150 characters, your response will be truncated
-- Use very concise, impactful language
-- End responses naturally, no trailing text
-
-Your perspective:
-- Present cautious, traditional perspectives
-- Highlight potential risks and challenges
-- Value established practices and proven approaches
-- Engage directly with your debate partner's points
-- Stay strictly on the news topic being discussed
-
-STRICT LIMIT: 150 characters maximum. Keep it very concise.`
-} as const
-
-// 辩论阶段定义
-export enum DebatePhase {
-  INTRODUCTION = 'introduction',
-  TOM_OPENING = 'tom_opening', 
-  MARK_RESPONSE = 'mark_response',
-  TOM_COUNTER = 'tom_counter',
-  CONCLUSION = 'conclusion'
-}
-
-// 为每个阶段定义特定的prompt模板，都包含严格的字符限制
-const PHASE_PROMPTS = {
-  [DebatePhase.INTRODUCTION]: (topic: string) => 
-    `Introduce today's debate topic: "${topic}". Briefly explain the key issue and ask Tom for his opening perspective. CRITICAL: Keep under 150 characters total.`,
-    
-  [DebatePhase.TOM_OPENING]: (topic: string) => 
-    `Give your opening perspective on: "${topic}". Focus on the main benefits or opportunities you see. CRITICAL: Keep under 150 characters total.`,
-    
-  [DebatePhase.MARK_RESPONSE]: (topic: string, tomStatement: string) => 
-    `Respond to Tom's perspective on "${topic}". Tom said: "${tomStatement}". Present your concerns or alternative viewpoint. CRITICAL: Keep under 150 characters total.`,
-    
-  [DebatePhase.TOM_COUNTER]: (topic: string, markStatement: string) => 
-    `Counter Mark's concerns about "${topic}". Mark said: "${markStatement}". Address his points while maintaining your position. CRITICAL: Keep under 150 characters total.`,
-    
-  [DebatePhase.CONCLUSION]: (topic: string, tomView: string, markView: string) => 
-    `Summarize the key debate points about "${topic}". Tom emphasized: "${tomView}". Mark highlighted: "${markView}". Provide a balanced conclusion. CRITICAL: Keep under 150 characters total.`
+export interface OneShotPromptOptions {
+  newsTopic: string
+  debateRounds: number
+  language: SupportedLanguage
 }
 
 export class PromptManager {
-  private static instance: PromptManager
+  private static instance: PromptManager | null = null
 
-  static getInstance(): PromptManager {
+  public static getInstance(): PromptManager {
     if (!PromptManager.instance) {
       PromptManager.instance = new PromptManager()
     }
@@ -116,189 +27,120 @@ export class PromptManager {
   }
 
   /**
-   * 获取角色的系统指令
+   * 构建一次性生成完整辩论剧本的提示词
    */
-  getSystemInstruction(speaker: Speaker): string {
-    return SYSTEM_INSTRUCTIONS[speaker]
+  public buildOneShotDebatePrompt(options: OneShotPromptOptions): string {
+    const { newsTopic, debateRounds, language } = options
+
+    const languageInstructions = this.getLanguageInstructions(language)
+    const jsonFormat = this.getExpectedJsonFormat(debateRounds)
+
+    return `You are an expert scriptwriter creating a news debate show. Generate a complete debate script in JSON format.
+
+## TOPIC
+${newsTopic}
+
+## CHARACTERS
+${this.formatCharacterDescriptions()}
+
+## REQUIREMENTS
+- Generate exactly ${debateRounds} rounds of debate between Tom and Mark
+- Each response must be under 150 characters (including spaces and punctuation)
+- ${languageInstructions}
+- The moderator introduces the topic, facilitates the debate, and provides a conclusion
+- Tom and Mark should have opposing viewpoints and engage with each other's arguments
+- Keep the debate focused on the news topic provided
+
+## OUTPUT FORMAT
+Return ONLY a valid JSON object in this exact structure:
+${jsonFormat}
+
+## IMPORTANT
+- Do not include any text outside the JSON object
+- Ensure all character limits are respected
+- Make the debate engaging and substantive despite the length constraints
+- Each speaker should maintain their distinct personality and viewpoint`
   }
 
   /**
-   * 根据辩论阶段生成特定的prompt
+   * 格式化角色描述
    */
-  generatePhasePrompt(phase: DebatePhase, context: DebateContext): string {
-    const { topic, history } = context
-
-    switch (phase) {
-      case DebatePhase.INTRODUCTION:
-        return PHASE_PROMPTS[DebatePhase.INTRODUCTION](topic)
-
-      case DebatePhase.TOM_OPENING:
-        return PHASE_PROMPTS[DebatePhase.TOM_OPENING](topic)
-
-      case DebatePhase.MARK_RESPONSE:
-        const tomOpening = history.find(h => h.speaker === 'tom')?.text || ''
-        return PHASE_PROMPTS[DebatePhase.MARK_RESPONSE](topic, tomOpening)
-
-      case DebatePhase.TOM_COUNTER:
-        const markResponse = history.filter(h => h.speaker === 'mark').slice(-1)[0]?.text || ''
-        return PHASE_PROMPTS[DebatePhase.TOM_COUNTER](topic, markResponse)
-
-      case DebatePhase.CONCLUSION:
-        const tomPoints = history.filter(h => h.speaker === 'tom').map(h => h.text).join(' ')
-        const markPoints = history.filter(h => h.speaker === 'mark').map(h => h.text).join(' ')
-        return PHASE_PROMPTS[DebatePhase.CONCLUSION](topic, tomPoints, markPoints)
-
-      default:
-        throw new Error(`Unknown debate phase: ${phase}`)
-    }
-  }
-
-  /**
-   * 构建包含必要上下文的完整prompt
-   */
-  buildContextualPrompt(speaker: Speaker, basePrompt: string, context: DebateContext): string {
-    const { topic, history } = context
-    
-    // 只包含最近几轮对话作为上下文，避免prompt过长
-    const recentHistory = history.slice(-3)
-    const conversationContext = recentHistory.length > 0 
-      ? `\n\nRecent conversation:\n${recentHistory.map(h => `${h.speaker}: ${h.text}`).join('\n')}`
-      : ''
-
-    // 强制性字符限制提醒
-    const characterLimit = `
-
-🚨 ABSOLUTE REQUIREMENT 🚨
-Your response MUST be 300 characters or less.
-Character count includes spaces, punctuation, everything.
-Responses over 300 characters will be automatically truncated.
-Be concise and impactful.`
-
-    return `Topic: "${topic}"${conversationContext}\n\nYour task: ${basePrompt}${characterLimit}`
-  }
-
-  /**
-   * 验证回应是否符合要求
-   */
-  validateResponse(response: string, speaker: Speaker): {
-    isValid: boolean
-    issues: string[]
-    processedResponse: string
-  } {
-    const issues: string[] = []
-    let processedResponse = response.trim()
-
-    // 更智能的长度检查：300字符限制（放宽一些）
-    if (processedResponse.length > 300) {
-      console.log(`Response too long (${processedResponse.length} chars), applying intelligent truncation...`)
-      
-      // 智能截断：优先在句子结尾截断
-      const sentences = processedResponse.split(/[.!?]+/)
-      let truncated = ''
-      
-      for (const sentence of sentences) {
-        const cleanSentence = sentence.trim()
-        if (!cleanSentence) continue
-        
-        const testSentence = truncated ? `${truncated}. ${cleanSentence}` : cleanSentence
-        if (testSentence.length <= 280) { // 留出20字符余量
-          truncated = testSentence
-        } else {
-          break
-        }
-      }
-      
-      // 如果智能截断后仍然为空或太短，使用词汇边界截断
-      if (truncated.length < 50) {
-        const words = processedResponse.split(' ')
-        let wordTruncated = ''
-        
-        for (const word of words) {
-          const testLength = wordTruncated ? `${wordTruncated} ${word}` : word
-          if (testLength.length <= 280) {
-            wordTruncated = testLength
-          } else {
-            break
-          }
-        }
-        
-        // 如果还是太短，使用强制截断
-        if (wordTruncated.length < 50) {
-          truncated = processedResponse.substring(0, 280)
-        } else {
-          truncated = wordTruncated
-        }
-      }
-      
-      // 确保以适当的标点结尾
-      if (truncated && !truncated.match(/[.!?]$/)) {
-        truncated += '.'
-      }
-      
-      processedResponse = truncated
-      console.log(`Response truncated from ${response.length} to ${processedResponse.length} characters`)
-      issues.push(`Response truncated from ${response.length} to ${processedResponse.length} characters`)
-    }
-
-    // 检查是否为空
-    if (!processedResponse.trim()) {
-      issues.push('Empty response')
-    }
-
-    // 检查是否包含角色表演（避免"as Mark"等表述）
-    if (processedResponse.toLowerCase().includes(`as ${speaker}`)) {
-      issues.push('Contains meta-commentary about role')
-    }
-
-    return {
-      isValid: issues.length === 0,
-      processedResponse,
-      issues
-    }
-  }
-
-  /**
-   * 生成强制性字符限制提醒
-   */
-  getCharacterLimitReminder(): string {
+  private formatCharacterDescriptions(): string {
     return `
-⚠️ CRITICAL CONSTRAINT ⚠️
-- Maximum 300 characters TOTAL
-- Count includes ALL characters: letters, spaces, punctuation
-- Exceeding 300 characters = AUTOMATIC TRUNCATION
-- Write concisely and end naturally
-- No trailing text or explanations
+**MODERATOR**: ${PERSONALITIES.MODERATOR}
 
-CONFIRM: Your response will be 300 characters or less.`
+**TOM**: ${PERSONALITIES.TOM}
+
+**MARK**: ${PERSONALITIES.MARK}
+    `.trim()
   }
 
   /**
-   * 为API调用添加强制性前缀
+   * 获取语言特定的指令
    */
-  addStrictLimitPrefix(originalPrompt: string): string {
-    const prefix = `URGENT: Respond in 300 characters or less. Count every character.
-
-`
-    return prefix + originalPrompt + `
-
-Remember: 300 character limit is MANDATORY. Count carefully.`
+  private getLanguageInstructions(language: SupportedLanguage): string {
+    switch (language) {
+      case 'zh-CN':
+        return 'All dialogue must be in Chinese (Simplified)'
+      case 'en-US':
+        return 'All dialogue must be in English'
+      default:
+        return 'All dialogue must be in English'
+    }
   }
-}
 
-// 预定义的辩论流程
-export const DEBATE_FLOW: DebatePhase[] = [
-  DebatePhase.INTRODUCTION,
-  DebatePhase.TOM_OPENING,
-  DebatePhase.MARK_RESPONSE,
-  DebatePhase.TOM_COUNTER,
-  DebatePhase.CONCLUSION
-]
+  /**
+   * 获取期望的JSON格式示例
+   */
+  private getExpectedJsonFormat(debateRounds: number): string {
+    const conversationExample = []
+    
+    for (let i = 0; i < debateRounds; i++) {
+      conversationExample.push(
+        `    {"speaker": "tom", "text": "Tom's argument for round ${i + 1} (under 150 chars)"}`,
+        `    {"speaker": "mark", "text": "Mark's counter-argument for round ${i + 1} (under 150 chars)"}`
+      )
+    }
 
-// 阶段与发言人的映射
-export const PHASE_SPEAKERS: Record<DebatePhase, Speaker> = {
-  [DebatePhase.INTRODUCTION]: 'moderator',
-  [DebatePhase.TOM_OPENING]: 'tom',
-  [DebatePhase.MARK_RESPONSE]: 'mark',
-  [DebatePhase.TOM_COUNTER]: 'tom',
-  [DebatePhase.CONCLUSION]: 'moderator'
+    return `{
+  "moderator_intro": "Moderator's introduction (under 150 characters)",
+  "conversation": [
+${conversationExample.join(',\n')}
+  ],
+  "moderator_outro": "Moderator's conclusion (under 150 characters)"
+}`
+  }
+
+  /**
+   * 验证生成的脚本格式
+   */
+  public validateDebateScript(scriptText: string): { isValid: boolean; error?: string } {
+    try {
+      const script = JSON.parse(scriptText)
+      
+      // 检查必需字段
+      if (!script.moderator_intro || !script.conversation || !script.moderator_outro) {
+        return { isValid: false, error: 'Missing required fields: moderator_intro, conversation, or moderator_outro' }
+      }
+
+      // 检查对话数组
+      if (!Array.isArray(script.conversation)) {
+        return { isValid: false, error: 'conversation must be an array' }
+      }
+
+      // 检查对话项格式
+      for (const item of script.conversation) {
+        if (!item.speaker || !item.text) {
+          return { isValid: false, error: 'Each conversation item must have speaker and text fields' }
+        }
+        if (!['tom', 'mark'].includes(item.speaker)) {
+          return { isValid: false, error: 'Speaker must be either "tom" or "mark"' }
+        }
+      }
+
+      return { isValid: true }
+    } catch (error) {
+      return { isValid: false, error: 'Invalid JSON format' }
+    }
+  }
 }

@@ -184,10 +184,10 @@ export class PipelineScheduler {
    * 处理任务队列 - 核心调度逻辑（简化版）
    */
   private async processTasks(): Promise<void> {
-    console.log(`🔄 processTasks called, isActive: ${this.isActive}`)
+    //console.log(`🔄 processTasks called, isActive: ${this.isActive}`)
     
     if (!this.isActive) {
-      console.log(`⏹️ Pipeline not active, stopping processTasks`)
+      //console.log(`⏹️ Pipeline not active, stopping processTasks`)
       return
     }
 
@@ -216,7 +216,7 @@ export class PipelineScheduler {
    */
   private async processTextTasks(): Promise<void> {
     const pendingTextTasks = this.taskManager.getTasksByStatus('PENDING_TEXT')
-    console.log(`📝 Found ${pendingTextTasks.length} pending text tasks`)
+    //console.log(`📝 Found ${pendingTextTasks.length} pending text tasks`)
     
     for (const task of pendingTextTasks) {
       const idleWorker = this.workerManager.getIdleWorker()
@@ -308,16 +308,16 @@ export class PipelineScheduler {
         await this.notificationService.publishTaskCompleted(task.id, { status: 'READY_TO_PLAY' })
         console.log(`✅ Audio generation completed for task: ${task.id}`)
       } else {
-        // 处理失败
-        this.taskManager.updateTaskStatus(task.id, 'PENDING_AUDIO', result.error)
-        await this.notificationService.publishTaskUpdate(task.id, { status: 'PENDING_AUDIO', error: result.error })
+        // 处理失败 - 直接标记为失败，不重试
+        this.taskManager.updateTaskStatus(task.id, 'FAILED', result.error)
+        await this.notificationService.publishTaskFailed(task.id, { status: 'FAILED', error: result.error })
         console.error(`❌ Audio generation failed for task: ${task.id}`, result.error)
       }
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      this.taskManager.updateTaskStatus(task.id, 'PENDING_AUDIO', errorMessage)
-      await this.notificationService.publishTaskUpdate(task.id, { status: 'PENDING_AUDIO', error: errorMessage })
+      this.taskManager.updateTaskStatus(task.id, 'FAILED', errorMessage)
+      await this.notificationService.publishTaskFailed(task.id, { status: 'FAILED', error: errorMessage })
       console.error(`❌ Audio generation failed for task: ${task.id}`, errorMessage)
     }
   }

@@ -1,11 +1,126 @@
-✅ Worker Gemini completed task task-1757943706367-0 in 121075ms
-📋 AI task result for task-1757943706367-0: { success: true, hasScript: true, error: undefined, duration: 121075 }
-✅ Setting script for task: task-1757943706367-0
-Script set for task: task-1757943706367-0
+ processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+[IndexTTS-Client] 📊 Parsing API response...
+[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/afc7990a0b6df49359b0a69d2d6f451fb0e8f09763174f602a36717fb5ec100a/spk_1757944219.wav
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+[IndexTTS-Client] ✅ Processing completed in 43424ms
+[IndexTTS-Integrated] ✅ Segment 4 completed successfully
+[IndexTTS-Integrated] 📋 Processing segment 5/8
+[IndexTTS-Integrated] 🎯 Generating speech for mark: "Delayed trials risk underminin..."   
+[IndexTTS-Integrated] 🎵 Using voice: Cillian Murphy (cillian)
+[IndexTTS-Client] 🚀 Starting speech generation: "Delayed trials risk undermining trust; we must ens..."
+[IndexTTS-Client] 📋 Attempt 1/3
+[IndexTTS-Client] 📥 Downloading network file...
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+[IndexTTS-Client] ✅ Downloaded 178560 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+[IndexTTS-Client] ❌ Attempt 1 failed: You have exceeded your Pro GPU quota (60s requested vs. 49s left). Try again in 23:23:34
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+[IndexTTS-Client] 📋 Attempt 2/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 216960 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+[IndexTTS-Client] ❌ Attempt 1 failed: You have exceeded your Pro GPU quota (60s requested vs. 49s left). Try again in 23:23:33
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+[IndexTTS-Client] 📋 Attempt 2/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 178560 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+[IndexTTS-Client] ❌ Attempt 2 failed: You have exceeded your Pro GPU quota (60s requested vs. 49s left). Try again in 23:23:30
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+[IndexTTS-Client] ❌ Attempt 2 failed: You have exceeded your Pro GPU quota (60s requested vs. 49s left). Try again in 23:23:29
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+[IndexTTS-Client] 📋 Attempt 3/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 216960 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+[IndexTTS-Client] 📋 Attempt 3/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 178560 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+[IndexTTS-Client] ❌ Attempt 3 failed: You have exceeded your Pro GPU quota (60s requested vs. 49s left). Try again in 23:23:26
+[IndexTTS-Integrated] ⚠️ Segment 5 attempt 1 failed: All 3 attempts failed. Last error: Youu have exceeded your Pro GPU quota (60s requested vs. 49s left). Try again in 23:23:26      
+[IndexTTS-Integrated] 🔄 Retry 1/2 for segment 5
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+[IndexTTS-Client] 📊 Parsing API response...
+[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/85e7cdd4881c077414397599ca64f3f0f7cbc2fcd23cc715afdf2627f804e65c/spk_1757944234.wav
+[IndexTTS-Client] ✅ Processing completed in 24675ms
+[IndexTTS-Integrated] ✅ Segment 8 completed successfully
+[IndexTTS-Integrated] ✅ Batch completed: 8/8 successful
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+[IndexTTS-Integrated] 🎯 Generating speech for mark: "Delayed trials risk underminin..."
+[IndexTTS-Integrated] 🎵 Using voice: Cillian Murphy (cillian)
+[IndexTTS-Client] 🚀 Starting speech generation: "Delayed trials risk undermining trust; we must ens..."
+[IndexTTS-Client] 📋 Attempt 1/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 178560 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+[IndexTTS-Client] ❌ Attempt 1 failed: You have exceeded your Pro GPU quota (60s requested vs. 38s left). Try again in 23:23:22
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+💥 TTS generation failed for task task-1757943706367-0: TTS generation timeout after 60 seconds
 Task task-1757943706367-0 status updated to: PENDING_AUDIO
 [WebSocket] Task task-1757943706367-0 updated
-Worker Gemini released
-✅ Text generation completed for task: task-1757943706367-0
+❌ TTS task execution failed for task: task-1757943706367-0 TTS generation timeout after 60 seconds
 🔄 processTasks called, isActive: true, tasks: 1
 📝 Found 0 pending text tasks
 Task task-1757943706367-0 status updated to: GENERATING_AUDIO
@@ -13,9 +128,6 @@ Task task-1757943706367-0 status updated to: GENERATING_AUDIO
 🎵 Starting audio generation for task: task-1757943706367-0
 ⏰ Scheduling next processTasks in 1 second
 🎵 Starting TTS generation for task: task-1757943706367-0 in language: en-US
-[IndexTTS-Client] ✅ Client initialized with 45s timeout
-[VoiceConfigManager] Initialized with mapping: { moderator: 'tom', tom: 'guodegang', mark: 'cillian' }
-[IndexTTS-Integrated] Service initialized
 🎵 Generating 8 audio items for task: task-1757943706367-0 using IndexTTS
 [IndexTTS-Integrated] 🎪 Generating batch speech: 8 segments
 [IndexTTS-Integrated] 📋 Processing segment 1/8
@@ -23,16 +135,272 @@ Task task-1757943706367-0 status updated to: GENERATING_AUDIO
 [IndexTTS-Integrated] 🎵 Using voice: Tom (tom)
 [IndexTTS-Client] 🚀 Starting speech generation: "Welcome. Today, we discuss the landmark trial of '..."
 [IndexTTS-Client] 📋 Attempt 1/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 171620 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+[IndexTTS-Client] 📋 Attempt 2/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 178560 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+[IndexTTS-Client] ❌ Attempt 1 failed: You have exceeded your Pro GPU quota (60s requested vs. 38s left). Try again in 23:23:19
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true, tasks: 1
+📝 Found 0 pending text tasks
+⏰ Scheduling next processTasks in 1 second
+PS C:\Users\tj169\OneDrive - Flinders\work\IT\AI-NEWS> 
+                                                       npm run dev
+
+> aitv-news-commentary@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.32
+  - Local:        http://localhost:3000
+  - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 2.5s
+ ○ Compiling / ...
+
+warn - As of Tailwind CSS v3.3, the `@tailwindcss/line-clamp` plugin is now included by default.
+warn - Remove it from the `plugins` array in your configuration to eliminate this warning. 
+ ✓ Compiled / in 3.2s (572 modules)
+[IndexTTS] Service initialized with private space
+[TTSManager] Initializing TTS Service Manager
+[TTSManager] Checking service availability...
+[IndexTTS] Connecting to private space client...
+[UI] ===== MAIN PAGE COMPONENT RENDERED =====
+[UI] getSpeakerImage for moderator: animationState = static
+[UI] moderator using STATIC image (state: static) - IDLE
+[UI] getSpeakerImage for tom: animationState = static
+[UI] tom using STATIC image (state: static) - IDLE
+[UI] getSpeakerImage for mark: animationState = static
+[UI] mark using STATIC image (state: static) - IDLE
+[UI] Current speaker states: { moderator: 'static', tom: 'static', mark: 'static' }        
+[UI] Active speaker (speaking): undefined
+[UI] Thinking speakers: []
+ GET / 200 in 3906ms
+[IndexTTS] Private space client connected successfully
+[TTSManager] IndexTTS available: true
+[TTSManager] CosyVoice available: true
+[TTSManager] Service status: { indexTTS: true, cosyVoice: true }
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1284ms (561 modules)
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 768ms
+ ✓ Compiled /api/news in 233ms (318 modules)
+[NEWS SERVICE] Fetching ABC news from URL: https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.abc.net.au%2Fnews%2Ffeed%2F51120%2Frss.xml&_t=1757974953418
+[NEWS SERVICE] Fetching BBC news from URL: https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.bbci.co.uk%2Fnews%2Frss.xml&_t=1757974953420
+[NEWS SERVICE] BBC RSS API response status: ok
+[NEWS SERVICE] Processing BBC News RSS items, total count: 10
+[NEWS SERVICE] ABC RSS API response status: ok
+[NEWS SERVICE] Processing ABC News RSS items, total count: 10
+[NEWS SERVICE] ABC News Item 1: {
+  title: 'Spanish PM wants Israel out of sport after La Vuel...',
+  pubDate: '2025-09-15 22:03:54',
+  formattedDate: 'Sep 15, 2025',
+  source: 'ABC News'
+}
+ GET /api/news 200 in 783ms
+[NEWS SERVICE] Fetching ABC news from URL: https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.abc.net.au%2Fnews%2Ffeed%2F51120%2Frss.xml&_t=1757974953854
+[NEWS SERVICE] Fetching BBC news from URL: https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.bbci.co.uk%2Fnews%2Frss.xml&_t=1757974953855
+[NEWS SERVICE] ABC RSS API response status: ok
+[NEWS SERVICE] Processing ABC News RSS items, total count: 10
+[NEWS SERVICE] ABC News Item 1: {
+  title: 'Spanish PM wants Israel out of sport after La Vuel...',
+  pubDate: '2025-09-15 22:03:54',
+  formattedDate: 'Sep 15, 2025',
+  source: 'ABC News'
+}
+[NEWS SERVICE] BBC RSS API response status: ok
+[NEWS SERVICE] Processing BBC News RSS items, total count: 10
+ GET /api/news 200 in 330ms
+ ○ Compiling /api/pipeline/status ...
+ ✓ Compiled /api/pipeline/status in 1720ms (982 modules)
+ ✓ Compiled (984 modules)
+Subscribed to event: task:updated
+Subscribed to event: task:created
+Subscribed to event: task:completed
+Subscribed to event: task:failed
+[Pipeline API] Received POST request to start pipeline
+(node:7796) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[Pipeline API] Request body: {
+  "newsTopics": [
+    "Title: Spanish PM wants Israel out of sport after La Vuelta finale called off. Summary: Pro-Palestinian protests sparked by the inclusion of an Israeli team in La Vuelta a España prompt the cancellation of the last stage of the race, with Spain's prime minister calling for Israel to be treated like Russia by sporting organisations."
+  ],
+  "debateRounds": 3,
+  "voiceConfig": {
+    "tom": "cosy-en-male-energetic",
+    "mark": "cosy-en-female-calm",
+    "moderator": "cosy-en-neutral-professional"
+  },
+  "language": "en-US"
+}
+[Pipeline API] Validating individual topics...
+[Pipeline API] Validating debate rounds...
+[Pipeline API] Validating language...
+[Pipeline API] Validating voice config...
+[Pipeline API] All validations passed, getting orchestrator...
+[Pipeline API] Orchestrator obtained, checking current state...
+[Pipeline API] Current pipeline state: { isActive: false, totalTasks: 0, completedTasks: 0 }
+[Pipeline API] Starting pipeline with parameters: {
+  newsTopicsCount: 1,
+  debateRounds: 3,
+  voiceConfig: {
+    tom: 'cosy-en-male-energetic',
+    mark: 'cosy-en-female-calm',
+    moderator: 'cosy-en-neutral-professional'
+  },
+  language: 'en-US'
+}
+🚀 Pipeline started with 1 tasks
+📋 Tasks created: task-1757974970634-0:PENDING_TEXT:en-US
+Publishing event: task:created for task: task-1757974970634-0
+[WebSocket] Task task-1757974970634-0 updated
+🔄 Starting task processing...
+🔄 processTasks called, isActive: true
+📝 Found 1 pending text tasks
+🎯 Assigning task task-1757974970634-0 to worker Gemini
+Worker Gemini assigned to task: task-1757974970634-0
+Task task-1757974970634-0 updated: { status: 'GENERATING_TEXT' }
+Publishing event: task:updated for task: task-1757974970634-0
+[WebSocket] Task task-1757974970634-0 updated
+✅ processTasks() called successfully
+[Pipeline API] Pipeline started successfully
+[Pipeline API] New pipeline state: { isActive: true, totalTasks: 1 }
+🚀 Starting text generation for task: task-1757974970634-0 with worker: Gemini
+ POST /api/pipeline/start 200 in 2548ms
+🔄 Starting text generation for task-1757974970634-0 with Gemini (retry: 0)
+📞 Calling aiWorkerPool.assignTask for task-1757974970634-0
+ GET /api/pipeline/status 200 in 2562ms
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+Gemini API response: {
+  hasText: true,
+  textLength: 139,
+  textPreview: "Welcome. Spain's PM seeks Israel's sports exclusion post-La Vuelta protests. We'll debate this with our expert panel. Your thoughts, first?"
+}
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+Response too long (583 chars), applying intelligent truncation...
+Response truncated from 583 to 253 characters
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+Reka API response: {
+  hasContent: true,
+  contentLength: 226,
+  contentPreview: 'Excluding Israel risks escalating global tensions,'
+}
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+Response too long (518 chars), applying intelligent truncation...
+Response truncated from 518 to 279 characters
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+Reka API response: {
+  hasContent: true,
+  contentLength: 246,
+  contentPreview: 'Excluding Israel from sports based on protests ris'
+}
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+Response too long (378 chars), applying intelligent truncation...
+Response truncated from 378 to 154 characters
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+Reka API response: {
+  hasContent: true,
+  contentLength: 208,
+  contentPreview: "Banning Israel from sports won't resolve conflicts"
+}
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+Gemini API response: {
+  hasText: true,
+  textLength: 165,
+  textPreview: 'Panelists debated if excluding Israel from sports escalates or addresses conflict. Mark argued for unity via diplomacy; Tom stressed accountability. A complex issue.'
+}
+✅ Worker Gemini completed task task-1757974970634-0 in 26116ms
+📋 AI task result for task-1757974970634-0: { success: true, hasScript: true, error: undefined, duration: 26116 }
+✅ Text generation completed for task: task-1757974970634-0
+Task task-1757974970634-0 updated: {
+  script: {
+    moderator_intro: "Welcome. Spain's PM seeks Israel's sports exclusion post-La Vuelta protests. We'll debate this with our expert panel. Your thoughts, first?",
+    conversation: [ [Object], [Object], [Object], [Object], [Object], [Object] ],
+    moderator_outro: 'Panelists debated if excluding Israel from sports escalates or addresses conflict. Mark argued for unity via diplomacy; Tom stressed accountability. A complex issue.'
+  }
+}
+Task task-1757974970634-0 updated: { status: 'PENDING_AUDIO' }
+Publishing event: task:updated for task: task-1757974970634-0
+[WebSocket] Task task-1757974970634-0 updated
+✅ Text generation completed for task: task-1757974970634-0
+Worker Gemini released
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+Task task-1757974970634-0 updated: { status: 'GENERATING_AUDIO' }
+Publishing event: task:updated for task: task-1757974970634-0
+[WebSocket] Task task-1757974970634-0 updated
+🎵 Starting audio generation for task: task-1757974970634-0
+🎵 Starting audio generation for task: task-1757974970634-0 in language: en-US
+[IndexTTS-Client] ✅ Client initialized with 45s timeout
+[VoiceConfigManager] Initialized with mapping: { moderator: 'tom', tom: 'guodegang', mark: 'cillian' }
+[IndexTTS-Integrated] Service initialized
+🎵 Generating 8 audio items for task: task-1757974970634-0 using IndexTTS
+[IndexTTS-Integrated] 🎪 Generating batch speech: 8 segments
+[IndexTTS-Integrated] 📋 Processing segment 1/8
+[IndexTTS-Integrated] 🎯 Generating speech for moderator: "Welcome. Spain's PM seeks Isra..."
+[IndexTTS-Integrated] 🎵 Using voice: Tom (tom)
+[IndexTTS-Client] 🚀 Starting speech generation: "Welcome. Spain's PM seeks Israel's sports exclusio..."
+[IndexTTS-Client] 📋 Attempt 1/3
 [IndexTTS-Client] 🔐 Connecting to private Space: Tom1986/indextts2
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
 [IndexTTS-Client] ✅ Connected successfully
 [IndexTTS-Client] 📥 Downloading network file...
 [IndexTTS-Client] ✅ Downloaded 171620 bytes
@@ -40,143 +408,95 @@ Task task-1757943706367-0 status updated to: GENERATING_AUDIO
 [IndexTTS-Client] ✅ File processed successfully
 [IndexTTS-Client] 🔧 Built 24 parameters
 [IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
 [IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/616a211f3cdf0433ded64c431f760f746334d6802942ff2c91c0dd25be25947a/spk_1757943835.wav
-🔄 processTasks called, isActive: true, tasks: 1
+[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/96e7e9a076fa3c63255f452b7a3cab670f46a1b8db7728ef9bb112000949887f/spk_1757975011.wav
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] ✅ Processing completed in 19300ms
+[IndexTTS-Client] ✅ Processing completed in 32745ms
 [IndexTTS-Integrated] ✅ Segment 1 completed successfully
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
 [IndexTTS-Integrated] 📋 Processing segment 2/8
-[IndexTTS-Integrated] 🎯 Generating speech for tom: "This trial is a pivotal moment..."    
+[IndexTTS-Integrated] 🎯 Generating speech for tom: "Excluding nations from sports ..."    
 [IndexTTS-Integrated] 🎵 Using voice: 郭德纲 (guodegang)
-[IndexTTS-Client] 🚀 Starting speech generation: "This trial is a pivotal moment for justice and rec..."
+[IndexTTS-Client] 🚀 Starting speech generation: "Excluding nations from sports punishes athletes, n..."
 [IndexTTS-Client] 📋 Attempt 1/3
 [IndexTTS-Client] 📥 Downloading network file...
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
 [IndexTTS-Client] ✅ Downloaded 216960 bytes
 [IndexTTS-Client] 🔄 Processing with handle_file...
 [IndexTTS-Client] ✅ File processed successfully
 [IndexTTS-Client] 🔧 Built 24 parameters
 [IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
 [IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/91544eb5d892ec4ef83cd148f0099b9d4d340d1bf92072813f79e756ba8b00ce/spk_1757943853.wav
-🔄 processTasks called, isActive: true, tasks: 1
+[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/4a73cc0aee5697be978d3e7bd0f1972c33b06e14e09faf9083c765d7c8fda264/spk_1757975030.wav
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] ✅ Processing completed in 20632ms
+[IndexTTS-Client] ✅ Processing completed in 18035ms
 [IndexTTS-Integrated] ✅ Segment 2 completed successfully
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
 [IndexTTS-Integrated] 📋 Processing segment 3/8
-[IndexTTS-Integrated] 🎯 Generating speech for mark: "While justice is crucial, this..."   
+[IndexTTS-Integrated] 🎯 Generating speech for mark: "Excluding Israel risks escalat..."   
 [IndexTTS-Integrated] 🎵 Using voice: Cillian Murphy (cillian)
-[IndexTTS-Client] 🚀 Starting speech generation: "While justice is crucial, this trial risks reopeni..."
+[IndexTTS-Client] 🚀 Starting speech generation: "Excluding Israel risks escalating global tensions,..."
 [IndexTTS-Client] 📋 Attempt 1/3
 [IndexTTS-Client] 📥 Downloading network file...
 [IndexTTS-Client] ✅ Downloaded 178560 bytes
@@ -184,92 +504,29 @@ Task task-1757943706367-0 status updated to: GENERATING_AUDIO
 [IndexTTS-Client] ✅ File processed successfully
 [IndexTTS-Client] 🔧 Built 24 parameters
 [IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+💥 Audio generation failed for task task-1757974970634-0: TTS generation timeout after 60 seconds
+Task task-1757974970634-0 updated: {
+  status: 'PENDING_AUDIO',
+  error: 'TTS generation timeout after 60 seconds'
+}
+Publishing event: task:updated for task: task-1757974970634-0
+[WebSocket] Task task-1757974970634-0 updated
+❌ Audio generation failed for task: task-1757974970634-0 TTS generation timeout after 60 seconds
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/c74399d47d9998e194ff3c889ae5ab0fe6c99009aea06aa1e676ce6d8b10d4fb/spk_1757943871.wav
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] ✅ Processing completed in 14345ms
-[IndexTTS-Integrated] ✅ Segment 3 completed successfully
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Integrated] 📋 Processing segment 4/8
-[IndexTTS-Integrated] 🎯 Generating speech for tom: "Justice delayed isn’t justice ..."    
-[IndexTTS-Integrated] 🎵 Using voice: 郭德纲 (guodegang)
-[IndexTTS-Client] 🚀 Starting speech generation: "Justice delayed isn’t justice denied—it’s a promis..."
-[IndexTTS-Client] 📋 Attempt 1/3
-[IndexTTS-Client] 📥 Downloading network file...
-[IndexTTS-Client] ✅ Downloaded 216960 bytes
-[IndexTTS-Client] 🔄 Processing with handle_file...
-[IndexTTS-Client] ✅ File processed successfully
-[IndexTTS-Client] 🔧 Built 24 parameters
-[IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-💥 TTS generation failed for task task-1757943706367-0: TTS generation timeout after 60 seconds
-Task task-1757943706367-0 status updated to: PENDING_AUDIO
-[WebSocket] Task task-1757943706367-0 updated
-❌ TTS task execution failed for task: task-1757943706367-0 TTS generation timeout after 60 seconds
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-Task task-1757943706367-0 status updated to: GENERATING_AUDIO
-[WebSocket] Task task-1757943706367-0 updated
-🎵 Starting audio generation for task: task-1757943706367-0
-⏰ Scheduling next processTasks in 1 second
-🎵 Starting TTS generation for task: task-1757943706367-0 in language: en-US
-🎵 Generating 8 audio items for task: task-1757943706367-0 using IndexTTS
+Task task-1757974970634-0 updated: { status: 'GENERATING_AUDIO' }
+Publishing event: task:updated for task: task-1757974970634-0
+[WebSocket] Task task-1757974970634-0 updated
+🎵 Starting audio generation for task: task-1757974970634-0
+🎵 Starting audio generation for task: task-1757974970634-0 in language: en-US
+🎵 Generating 8 audio items for task: task-1757974970634-0 using IndexTTS
 [IndexTTS-Integrated] 🎪 Generating batch speech: 8 segments
 [IndexTTS-Integrated] 📋 Processing segment 1/8
-[IndexTTS-Integrated] 🎯 Generating speech for moderator: "Welcome. Today, we discuss the..."
+[IndexTTS-Integrated] 🎯 Generating speech for moderator: "Welcome. Spain's PM seeks Isra..."
 [IndexTTS-Integrated] 🎵 Using voice: Tom (tom)
-[IndexTTS-Client] 🚀 Starting speech generation: "Welcome. Today, we discuss the landmark trial of '..."
+[IndexTTS-Client] 🚀 Starting speech generation: "Welcome. Spain's PM seeks Israel's sports exclusio..."
 [IndexTTS-Client] 📋 Attempt 1/3
 [IndexTTS-Client] 📥 Downloading network file...
 [IndexTTS-Client] ✅ Downloaded 171620 bytes
@@ -277,69 +534,327 @@ Task task-1757943706367-0 status updated to: GENERATING_AUDIO
 [IndexTTS-Client] ✅ File processed successfully
 [IndexTTS-Client] 🔧 Built 24 parameters
 [IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+[IndexTTS-Client] ❌ Attempt 1 failed: You have exceeded your Pro GPU quota (60s requested vs. 4s left). Try again in 14:49:53
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
+[IndexTTS-Client] 📋 Attempt 2/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 171620 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
 [IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/1e90c7ead5b6eaf96b8a5908f8ba8937585cb09975dc1ea42900a7b3999d4a27/spk_1757943889.wav
-[IndexTTS-Client] ✅ Processing completed in 20642ms
-[IndexTTS-Integrated] ✅ Segment 4 completed successfully
-[IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/98b37cb69bfa102a019e3f606f1cfcf0d8f8b887e44e0f52c6b065824ef250e5/spk_1757943894.wav
-🔄 processTasks called, isActive: true, tasks: 1
+[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/41cd52d92c26ee79d4df30cb76fad4ff3668ce468b7c6f23457058f783ef00c4/spk_1757975050.wav
+[IndexTTS-Client] ✅ Processing completed in 13436ms
+[IndexTTS-Integrated] ✅ Segment 3 completed successfully
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] ✅ Processing completed in 17309ms
-[IndexTTS-Integrated] ✅ Segment 1 completed successfully
+[IndexTTS-Integrated] 📋 Processing segment 4/8
+[IndexTTS-Integrated] 🎯 Generating speech for tom: "Mark’s right—sports *should* u..."    
+[IndexTTS-Integrated] 🎵 Using voice: 郭德纲 (guodegang)
+[IndexTTS-Client] 🚀 Starting speech generation: "Mark’s right—sports *should* unite. But ignoring g..."
+[IndexTTS-Client] 📋 Attempt 1/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 216960 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ❌ Attempt 2 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:49
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] 📋 Attempt 3/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 171620 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ❌ Attempt 1 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:46
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ❌ Attempt 3 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:45
+[IndexTTS-Integrated] ⚠️ Segment 1 attempt 1 failed: All 3 attempts failed. Last error: Youu have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:45      
+[IndexTTS-Integrated] 🔄 Retry 1/2 for segment 1
+[IndexTTS-Client] 📋 Attempt 2/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 216960 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Integrated] 🎯 Generating speech for moderator: "Welcome. Spain's PM seeks Isra..."
+[IndexTTS-Integrated] 🎵 Using voice: Tom (tom)
+[IndexTTS-Client] 🚀 Starting speech generation: "Welcome. Spain's PM seeks Israel's sports exclusio..."
+[IndexTTS-Client] 📋 Attempt 1/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 171620 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ❌ Attempt 2 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:40
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ❌ Attempt 1 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:40
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] 📋 Attempt 3/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 216960 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+[IndexTTS-Client] 📋 Attempt 2/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 171620 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ❌ Attempt 3 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:36
+[IndexTTS-Integrated] ⚠️ Segment 4 attempt 1 failed: All 3 attempts failed. Last error: Youu have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:36      
+[IndexTTS-Integrated] 🔄 Retry 1/2 for segment 4
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ❌ Attempt 2 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:36
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Integrated] 🎯 Generating speech for tom: "Mark’s right—sports *should* u..."
+[IndexTTS-Integrated] 🎵 Using voice: 郭德纲 (guodegang)
+[IndexTTS-Client] 🚀 Starting speech generation: "Mark’s right—sports *should* unite. But ignoring g..."
+[IndexTTS-Client] 📋 Attempt 1/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] 📋 Attempt 3/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 216960 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ✅ Downloaded 171620 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ❌ Attempt 1 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:32
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+[IndexTTS-Client] ❌ Attempt 3 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:32
+[IndexTTS-Integrated] ⚠️ Segment 1 attempt 2 failed: All 3 attempts failed. Last error: Youu have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:32      
+[IndexTTS-Integrated] 🔄 Retry 2/2 for segment 1
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] 📋 Attempt 2/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 216960 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ❌ Attempt 2 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:28
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Integrated] 🎯 Generating speech for moderator: "Welcome. Spain's PM seeks Isra..."
+[IndexTTS-Integrated] 🎵 Using voice: Tom (tom)
+[IndexTTS-Client] 🚀 Starting speech generation: "Welcome. Spain's PM seeks Israel's sports exclusio..."
+[IndexTTS-Client] 📋 Attempt 1/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 171620 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] 📋 Attempt 3/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 216960 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ❌ Attempt 1 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:24
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] 📋 Attempt 2/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 171620 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+[IndexTTS-Client] ❌ Attempt 3 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:22
+[IndexTTS-Integrated] ⚠️ Segment 4 attempt 2 failed: All 3 attempts failed. Last error: Youu have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:22      
+[IndexTTS-Integrated] 🔄 Retry 2/2 for segment 4
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ❌ Attempt 2 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:19
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Integrated] 🎯 Generating speech for tom: "Mark’s right—sports *should* u..."
+[IndexTTS-Integrated] 🎵 Using voice: 郭德纲 (guodegang)
+[IndexTTS-Client] 🚀 Starting speech generation: "Mark’s right—sports *should* unite. But ignoring g..."
+[IndexTTS-Client] 📋 Attempt 1/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 216960 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] 📋 Attempt 3/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 171620 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ❌ Attempt 1 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:14
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+[IndexTTS-Client] ❌ Attempt 3 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:14
+[IndexTTS-Integrated] ⚠️ Segment 1 attempt 3 failed: All 3 attempts failed. Last error: Youu have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:14      
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Integrated] 📋 Processing segment 2/8
+[IndexTTS-Integrated] 🎯 Generating speech for tom: "Excluding nations from sports ..."    
+[IndexTTS-Integrated] 🎵 Using voice: 郭德纲 (guodegang)
+[IndexTTS-Client] 🚀 Starting speech generation: "Excluding nations from sports punishes athletes, n..."
+[IndexTTS-Client] 📋 Attempt 1/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 216960 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] 📋 Attempt 2/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 216960 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ❌ Attempt 1 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:10
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ❌ Attempt 2 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:09
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] 📋 Attempt 2/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 216960 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] 📋 Attempt 3/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 216960 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ❌ Attempt 2 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:06
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] 📋 Attempt 3/3
+[IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ✅ Downloaded 216960 bytes
+[IndexTTS-Client] 🔄 Processing with handle_file...
+[IndexTTS-Client] ✅ File processed successfully
+[IndexTTS-Client] 🔧 Built 24 parameters
+[IndexTTS-Client] 🔄 Calling /gen_single...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
+[IndexTTS-Client] ❌ Attempt 3 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:03
+[IndexTTS-Integrated] ⚠️ Segment 4 attempt 3 failed: All 3 attempts failed. Last error: Youu have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:03      
+[IndexTTS-Client] ❌ Attempt 3 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:03
+[IndexTTS-Integrated] ⚠️ Segment 2 attempt 1 failed: All 3 attempts failed. Last error: Youu have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:03      
+[IndexTTS-Integrated] 🔄 Retry 1/2 for segment 2
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
 [IndexTTS-Integrated] 📋 Processing segment 5/8
-[IndexTTS-Integrated] 🎯 Generating speech for mark: "Delayed trials risk underminin..."   
+[IndexTTS-Integrated] 🎯 Generating speech for mark: "Excluding Israel from sports b..."   
 [IndexTTS-Integrated] 🎵 Using voice: Cillian Murphy (cillian)
-[IndexTTS-Client] 🚀 Starting speech generation: "Delayed trials risk undermining trust; we must ens..."
+[IndexTTS-Client] 🚀 Starting speech generation: "Excluding Israel from sports based on protests ris..."
 [IndexTTS-Client] 📋 Attempt 1/3
 [IndexTTS-Client] 📥 Downloading network file...
 [IndexTTS-Client] ✅ Downloaded 178560 bytes
@@ -347,569 +862,30 @@ Task task-1757943706367-0 status updated to: GENERATING_AUDIO
 [IndexTTS-Client] ✅ File processed successfully
 [IndexTTS-Client] 🔧 Built 24 parameters
 [IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Integrated] 📋 Processing segment 2/8
-[IndexTTS-Integrated] 🎯 Generating speech for tom: "This trial is a pivotal moment..."    
+[IndexTTS-Integrated] 🎯 Generating speech for tom: "Excluding nations from sports ..."
 [IndexTTS-Integrated] 🎵 Using voice: 郭德纲 (guodegang)
-[IndexTTS-Client] 🚀 Starting speech generation: "This trial is a pivotal moment for justice and rec..."
+[IndexTTS-Client] 🚀 Starting speech generation: "Excluding nations from sports punishes athletes, n..."
 [IndexTTS-Client] 📋 Attempt 1/3
 [IndexTTS-Client] 📥 Downloading network file...
+[IndexTTS-Client] ❌ Attempt 1 failed: You have exceeded your Pro GPU quota (60s requested vs. 54s left). Try again in 14:49:01
+[IndexTTS-Client] ⏱️ Retrying in 1500ms...
+🔄 processTasks called, isActive: true
+📝 Found 0 pending text tasks
 [IndexTTS-Client] ✅ Downloaded 216960 bytes
 [IndexTTS-Client] 🔄 Processing with handle_file...
 [IndexTTS-Client] ✅ File processed successfully
 [IndexTTS-Client] 🔧 Built 24 parameters
 [IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/b6dd7d88f1876b1f58485bae09847cbf2fd702d2fcfd17dd131266237530fa3e/spk_1757943911.wav
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] ✅ Processing completed in 16740ms
-[IndexTTS-Integrated] ✅ Segment 5 completed successfully
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Integrated] 📋 Processing segment 6/8
-[IndexTTS-Integrated] 🎯 Generating speech for tom: "Truth isn’t "distant"—it’s fou..."    
-[IndexTTS-Integrated] 🎵 Using voice: 郭德纲 (guodegang)
-[IndexTTS-Client] 🚀 Starting speech generation: "Truth isn’t "distant"—it’s foundational. The 2010 ..."
-[IndexTTS-Client] 📋 Attempt 1/3
-[IndexTTS-Client] 📥 Downloading network file...
-[IndexTTS-Client] ✅ Downloaded 216960 bytes
-[IndexTTS-Client] 🔄 Processing with handle_file...
-[IndexTTS-Client] ✅ File processed successfully
-[IndexTTS-Client] 🔧 Built 24 parameters
-[IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/d0b00c7f86cf947c22be04eab43c1a5d5bd9ec394886a494fd51f6c4aeb8818f/spk_1757943911.wav
-[IndexTTS-Client] ✅ Processing completed in 20498ms
-[IndexTTS-Integrated] ✅ Segment 2 completed successfully
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Integrated] 📋 Processing segment 3/8
-[IndexTTS-Integrated] 🎯 Generating speech for mark: "While justice is crucial, this..."   
-[IndexTTS-Integrated] 🎵 Using voice: Cillian Murphy (cillian)
-[IndexTTS-Client] 🚀 Starting speech generation: "While justice is crucial, this trial risks reopeni..."
-[IndexTTS-Client] 📋 Attempt 1/3
+[IndexTTS-Client] 📋 Attempt 2/3
 [IndexTTS-Client] 📥 Downloading network file...
 [IndexTTS-Client] ✅ Downloaded 178560 bytes
 [IndexTTS-Client] 🔄 Processing with handle_file...
 [IndexTTS-Client] ✅ File processed successfully
 [IndexTTS-Client] 🔧 Built 24 parameters
 [IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
+🔄 processTasks called, isActive: true
 📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/209a08f0678be4c642a9422f2b83b0c7b18bbafc733b5cad2b9f152f6e7eae4b/spk_1757943925.wav
-[IndexTTS-Client] ✅ Processing completed in 18056ms
-[IndexTTS-Integrated] ✅ Segment 6 completed successfully
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Integrated] 📋 Processing segment 7/8
-[IndexTTS-Integrated] 🎯 Generating speech for mark: "Delayed justice risks further ..."   
-[IndexTTS-Integrated] 🎵 Using voice: Cillian Murphy (cillian)
-[IndexTTS-Client] 🚀 Starting speech generation: "Delayed justice risks further division. Solid, unt..."
-[IndexTTS-Client] 📋 Attempt 1/3
-[IndexTTS-Client] 📥 Downloading network file...
-[IndexTTS-Client] ✅ Downloaded 178560 bytes
-[IndexTTS-Client] 🔄 Processing with handle_file...
-[IndexTTS-Client] ✅ File processed successfully
-[IndexTTS-Client] 🔧 Built 24 parameters
-[IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-💥 TTS generation failed for task task-1757943706367-0: TTS generation timeout after 60 seconds
-Task task-1757943706367-0 status updated to: PENDING_AUDIO
-[WebSocket] Task task-1757943706367-0 updated
-❌ TTS task execution failed for task: task-1757943706367-0 TTS generation timeout after 60 seconds
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-Task task-1757943706367-0 status updated to: GENERATING_AUDIO
-[WebSocket] Task task-1757943706367-0 updated
-🎵 Starting audio generation for task: task-1757943706367-0
-⏰ Scheduling next processTasks in 1 second
-🎵 Starting TTS generation for task: task-1757943706367-0 in language: en-US
-🎵 Generating 8 audio items for task: task-1757943706367-0 using IndexTTS
-[IndexTTS-Integrated] 🎪 Generating batch speech: 8 segments
-[IndexTTS-Integrated] 📋 Processing segment 1/8
-[IndexTTS-Integrated] 🎯 Generating speech for moderator: "Welcome. Today, we discuss the..."
-[IndexTTS-Integrated] 🎵 Using voice: Tom (tom)
-[IndexTTS-Client] 🚀 Starting speech generation: "Welcome. Today, we discuss the landmark trial of '..."
-[IndexTTS-Client] 📋 Attempt 1/3
-[IndexTTS-Client] 📥 Downloading network file...
-[IndexTTS-Client] ✅ Downloaded 171620 bytes
-[IndexTTS-Client] 🔄 Processing with handle_file...
-[IndexTTS-Client] ✅ File processed successfully
-[IndexTTS-Client] 🔧 Built 24 parameters
-[IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/3e456d646237a663ac388f22ec42025bde4b8fc531c1a6b05d60cde5bb28b9cf/spk_1757943940.wav
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] ✅ Processing completed in 23300ms
-[IndexTTS-Integrated] ✅ Segment 3 completed successfully
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Integrated] 📋 Processing segment 4/8
-[IndexTTS-Integrated] 🎯 Generating speech for tom: "Justice delayed isn’t justice ..."    
-[IndexTTS-Integrated] 🎵 Using voice: 郭德纲 (guodegang)
-[IndexTTS-Client] 🚀 Starting speech generation: "Justice delayed isn’t justice denied—it’s a promis..."
-[IndexTTS-Client] 📋 Attempt 1/3
-[IndexTTS-Client] 📥 Downloading network file...
-[IndexTTS-Client] ✅ Downloaded 216960 bytes
-[IndexTTS-Client] 🔄 Processing with handle_file...
-[IndexTTS-Client] ✅ File processed successfully
-[IndexTTS-Client] 🔧 Built 24 parameters
-[IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/42ad70af5e26c631f5ed6202f206b6334a31a020a8b7d6ea9860ecbc000e0c7b/spk_1757943949.wav
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] ✅ Processing completed in 18606ms
-[IndexTTS-Integrated] ✅ Segment 7 completed successfully
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Integrated] 📋 Processing segment 8/8
-[IndexTTS-Integrated] 🎯 Generating speech for moderator: "Mark prioritizes stability, ro..."
-[IndexTTS-Integrated] 🎵 Using voice: Tom (tom)
-[IndexTTS-Client] 🚀 Starting speech generation: "Mark prioritizes stability, robust evidence, and a..."
-[IndexTTS-Client] 📋 Attempt 1/3
-[IndexTTS-Client] 📥 Downloading network file...
-[IndexTTS-Client] ✅ Downloaded 171620 bytes
-[IndexTTS-Client] 🔄 Processing with handle_file...
-[IndexTTS-Client] ✅ File processed successfully
-[IndexTTS-Client] 🔧 Built 24 parameters
-[IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/a3441845e7e760cbc53387bdbbe8889e2c6d977f8aa2a703d1472750003939e1/spk_1757943959.wav
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] ✅ Processing completed in 20707ms
-[IndexTTS-Integrated] ✅ Segment 1 completed successfully
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Integrated] 📋 Processing segment 2/8
-[IndexTTS-Integrated] 🎯 Generating speech for tom: "This trial is a pivotal moment..."    
-[IndexTTS-Integrated] 🎵 Using voice: 郭德纲 (guodegang)
-[IndexTTS-Client] 🚀 Starting speech generation: "This trial is a pivotal moment for justice and rec..."
-[IndexTTS-Client] 📋 Attempt 1/3
-[IndexTTS-Client] 📥 Downloading network file...
-[IndexTTS-Client] ✅ Downloaded 216960 bytes
-[IndexTTS-Client] 🔄 Processing with handle_file...
-[IndexTTS-Client] ✅ File processed successfully
-[IndexTTS-Client] 🔧 Built 24 parameters
-[IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/fda3af8b240075b4d2a559ed59639373edea26f5c67f974db89be685b1124b99/spk_1757943961.wav
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] ✅ Processing completed in 26867ms
-[IndexTTS-Integrated] ✅ Segment 4 completed successfully
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/0df0401c8ad8822fa99ffbd1059f041f2e885c82a9c0f34c32e0e927ab73cbca/spk_1757943966.wav
-[IndexTTS-Client] ✅ Processing completed in 17423ms
-[IndexTTS-Integrated] ✅ Segment 8 completed successfully
-[IndexTTS-Integrated] ✅ Batch completed: 8/8 successful
-[IndexTTS-Integrated] 📋 Processing segment 5/8
-[IndexTTS-Integrated] 🎯 Generating speech for mark: "Delayed trials risk underminin..."   
-[IndexTTS-Integrated] 🎵 Using voice: Cillian Murphy (cillian)
-[IndexTTS-Client] 🚀 Starting speech generation: "Delayed trials risk undermining trust; we must ens..."
-[IndexTTS-Client] 📋 Attempt 1/3
-[IndexTTS-Client] 📥 Downloading network file...
-[IndexTTS-Client] ✅ Downloaded 178560 bytes
-[IndexTTS-Client] 🔄 Processing with handle_file...
-[IndexTTS-Client] ✅ File processed successfully
-[IndexTTS-Client] 🔧 Built 24 parameters
-[IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/629eb9df86f45135d321efd4556c4514e368ac12e09325c5ba0f0759f6231f6a/spk_1757943977.wav
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] ✅ Processing completed in 20236ms
-[IndexTTS-Integrated] ✅ Segment 2 completed successfully
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Integrated] 📋 Processing segment 3/8
-[IndexTTS-Integrated] 🎯 Generating speech for mark: "While justice is crucial, this..."   
-[IndexTTS-Integrated] 🎵 Using voice: Cillian Murphy (cillian)
-[IndexTTS-Client] 🚀 Starting speech generation: "While justice is crucial, this trial risks reopeni..."
-[IndexTTS-Client] 📋 Attempt 1/3
-[IndexTTS-Client] 📥 Downloading network file...
-[IndexTTS-Client] ✅ Downloaded 178560 bytes
-[IndexTTS-Client] 🔄 Processing with handle_file...
-[IndexTTS-Client] ✅ File processed successfully
-[IndexTTS-Client] 🔧 Built 24 parameters
-[IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/658b3d21d2609fdd24468b29e883d5214ae791ce2aee94f169187077b04671b1/spk_1757943983.wav
-[IndexTTS-Client] ✅ Processing completed in 13950ms
-[IndexTTS-Integrated] ✅ Segment 5 completed successfully
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Integrated] 📋 Processing segment 6/8
-[IndexTTS-Integrated] 🎯 Generating speech for tom: "Truth isn’t "distant"—it’s fou..."    
-[IndexTTS-Integrated] 🎵 Using voice: 郭德纲 (guodegang)
-[IndexTTS-Client] 🚀 Starting speech generation: "Truth isn’t "distant"—it’s foundational. The 2010 ..."
-[IndexTTS-Client] 📋 Attempt 1/3
-[IndexTTS-Client] 📥 Downloading network file...
-[IndexTTS-Client] ✅ Downloaded 216960 bytes
-[IndexTTS-Client] 🔄 Processing with handle_file...
-[IndexTTS-Client] ✅ File processed successfully
-[IndexTTS-Client] 🔧 Built 24 parameters
-[IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-💥 TTS generation failed for task task-1757943706367-0: TTS generation timeout after 60 seconds
-Task task-1757943706367-0 status updated to: PENDING_AUDIO
-[WebSocket] Task task-1757943706367-0 updated
-❌ TTS task execution failed for task: task-1757943706367-0 TTS generation timeout after 60 seconds
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-Task task-1757943706367-0 status updated to: GENERATING_AUDIO
-[WebSocket] Task task-1757943706367-0 updated
-🎵 Starting audio generation for task: task-1757943706367-0
-⏰ Scheduling next processTasks in 1 second
-🎵 Starting TTS generation for task: task-1757943706367-0 in language: en-US
-🎵 Generating 8 audio items for task: task-1757943706367-0 using IndexTTS
-[IndexTTS-Integrated] 🎪 Generating batch speech: 8 segments
-[IndexTTS-Integrated] 📋 Processing segment 1/8
-[IndexTTS-Integrated] 🎯 Generating speech for moderator: "Welcome. Today, we discuss the..."
-[IndexTTS-Integrated] 🎵 Using voice: Tom (tom)
-[IndexTTS-Client] 🚀 Starting speech generation: "Welcome. Today, we discuss the landmark trial of '..."
-[IndexTTS-Client] 📋 Attempt 1/3
-[IndexTTS-Client] 📥 Downloading network file...
-[IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/f87936a817513fe9bf4d76817238497fcf6d90b74b9ea31a6068b88215f3c50c/spk_1757943997.wav
-[IndexTTS-Client] ✅ Downloaded 171620 bytes
-[IndexTTS-Client] 🔄 Processing with handle_file...
-[IndexTTS-Client] ✅ File processed successfully
-[IndexTTS-Client] 🔧 Built 24 parameters
-[IndexTTS-Client] 🔄 Calling /gen_single...
-[IndexTTS-Client] ✅ Processing completed in 18659ms
-[IndexTTS-Integrated] ✅ Segment 3 completed successfully
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Integrated] 📋 Processing segment 4/8
-[IndexTTS-Integrated] 🎯 Generating speech for tom: "Justice delayed isn’t justice ..."    
-[IndexTTS-Integrated] 🎵 Using voice: 郭德纲 (guodegang)
-[IndexTTS-Client] 🚀 Starting speech generation: "Justice delayed isn’t justice denied—it’s a promis..."
-[IndexTTS-Client] 📋 Attempt 1/3
-[IndexTTS-Client] 📥 Downloading network file...
-[IndexTTS-Client] ✅ Downloaded 216960 bytes
-[IndexTTS-Client] 🔄 Processing with handle_file...
-[IndexTTS-Client] ✅ File processed successfully
-[IndexTTS-Client] 🔧 Built 24 parameters
-[IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Client] 📊 Parsing API response...
-[IndexTTS-Client] ✅ Found nested audio URL: https://tom1986-indextts2.hf.space/gradio_api/file=/tmp/gradio/7a3fec0e611ceba69565989fba546af22c6b23996e61831eb035cad68bca78bb/spk_1757943997.wav
-[IndexTTS-Client] ✅ Processing completed in 19744ms
-[IndexTTS-Integrated] ✅ Segment 6 completed successfully
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-[IndexTTS-Integrated] 📋 Processing segment 7/8
-[IndexTTS-Integrated] 🎯 Generating speech for mark: "Delayed justice risks further ..."   
-[IndexTTS-Integrated] 🎵 Using voice: Cillian Murphy (cillian)
-[IndexTTS-Client] 🚀 Starting speech generation: "Delayed justice risks further division. Solid, unt..."
-[IndexTTS-Client] 📋 Attempt 1/3
-[IndexTTS-Client] 📥 Downloading network file...
-[IndexTTS-Client] ✅ Downloaded 178560 bytes
-[IndexTTS-Client] 🔄 Processing with handle_file...
-[IndexTTS-Client] ✅ File processed successfully
-[IndexTTS-Client] 🔧 Built 24 parameters
-[IndexTTS-Client] 🔄 Calling /gen_single...
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1
-📝 Found 0 pending text tasks
-⏰ Scheduling next processTasks in 1 second
-🔄 processTasks called, isActive: true, tasks: 1

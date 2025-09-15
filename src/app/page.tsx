@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { ConversationEntry, NewsItem, Speaker, AppState, SpeakersState, AudioPlaybackInfo } from '@/types'
-import { SpeakerStateManager } from '@/lib/managers/speaker-state-manager'
-import { AudioManager } from '@/lib/managers/audio-manager'
-import { GenerationManager } from '@/lib/managers/generation-manager'
+// TODO: These managers need to be recreated or removed after architecture refactoring
+// import { SpeakerStateManager } from '@/lib/managers/speaker-state-manager'
+// import { AudioManager } from '@/lib/managers/audio-manager'
+// import { GenerationManager } from '@/lib/managers/generation-manager'
 import { SettingsPanel } from '@/components/settings'
 import { PipelineMonitor } from '@/components/PipelineMonitor'
 import { usePipelineStore } from '@/stores/pipeline-store'
@@ -86,27 +87,14 @@ export default function HomePage() {
     }
   }, [state.isDebating, pollPipelineStatus])
 
-  // Initialize managers
-  const speakerStateManager = new SpeakerStateManager()
-  speakerStateManager.setStateChangeCallback(
-    (newState: SpeakersState) => setState(prev => ({ ...prev, speakersState: newState }))
-  )
+  // TODO: Managers are disabled after architecture refactoring to one-shot generation
+  // The new architecture uses PipelineScheduler for all generation logic
+  // Frontend now only needs to interact with the pipeline API
   
-  const audioManager = new AudioManager(speakerStateManager)
-  audioManager.setStateChangeCallback(
-    (audioInfo: AudioPlaybackInfo) => setState(prev => ({ 
-      ...prev, 
-      currentPlayingAudio: audioInfo.currentSequence > 0 ? audioInfo.currentSequence.toString() : undefined
-    }))
-  )
-  
-  const generationManager = new GenerationManager(audioManager, speakerStateManager)
-  generationManager.setConversationUpdateCallback(
-    (conversation: ConversationEntry[]) => setState(prev => ({ 
-      ...prev, 
-      conversation 
-    }))
-  )
+  // Initialize managers (DISABLED)
+  // const speakerStateManager = new SpeakerStateManager()
+  // const audioManager = new AudioManager(speakerStateManager)  
+  // const generationManager = new GenerationManager(audioManager, speakerStateManager)
 
   const updateStatus = (msg: string) => {
     setState((prev: AppState) => ({ ...prev, status: msg }))
@@ -212,7 +200,7 @@ export default function HomePage() {
     
     const requestBody = {
       newsTopics: [newsTopic], // 单条新闻作为数组
-      debateRounds: 3,
+      debateRounds: 1,
       voiceConfig: {
         tom: 'cosy-en-male-energetic',
         mark: 'cosy-en-female-calm', 
@@ -289,10 +277,10 @@ export default function HomePage() {
         ...prev, 
         isDebating: false
       }))
-      // Reset all speakers to static state
-      speakerStateManager.setStatic('moderator')
-      speakerStateManager.setStatic('tom')
-      speakerStateManager.setStatic('mark')
+      // TODO: Reset speakers state (disabled after refactoring)
+      // speakerStateManager.setStatic('moderator')
+      // speakerStateManager.setStatic('tom')  
+      // speakerStateManager.setStatic('mark')
       updateStatus('Discussion finished. Click Start to begin again.')
     }
   }
@@ -329,11 +317,13 @@ export default function HomePage() {
       updateStatus(`${turn.speaker.charAt(0).toUpperCase() + turn.speaker.slice(1)} is preparing...`)
       
       try {
-        await generationManager.executeSpeakerTurn(
-          turn.speaker,
-          turn.prompt,
-          state.conversation
-        )
+        // TODO: Replace with new pipeline-based generation
+        // await generationManager.executeSpeakerTurn(
+        //   turn.speaker,
+        //   turn.prompt,
+        //   state.conversation
+        // )
+        console.log('TODO: Implement new generation logic')
         
         // Small delay between speakers
         await new Promise(resolve => setTimeout(resolve, 1000))

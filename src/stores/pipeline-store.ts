@@ -184,7 +184,7 @@ export const usePipelineStore = create<PipelineState>()(
       showMonitorPanel: false,
       
       // 启动流水线
-      startPipeline: async (newsTopics, debateRounds = 3, voiceConfig, language = 'zh-CN') => {
+      startPipeline: async (newsTopics, debateRounds = 1, voiceConfig, language = 'zh-CN') => {
         try {
           const response = await fetch('/api/pipeline/start', {
             method: 'POST',
