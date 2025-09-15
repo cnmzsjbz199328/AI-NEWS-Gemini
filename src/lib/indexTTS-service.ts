@@ -5,6 +5,7 @@
 
 import { client, type Client } from '@gradio/client'
 import { Speaker } from '@/types'
+import { getVoiceConfigManager } from './voice-config-manager'
 
 export interface IndexTTSConfig {
   text: string
@@ -21,21 +22,25 @@ export interface IndexTTSResult {
   error?: string
 }
 
-// 角色音色配置 - 默认音色参考文件
-const DEFAULT_VOICE_REFERENCES = {
-  moderator: '/voices/moderator_reference.wav',
-  tom: '/voices/tom_reference.wav',
-  mark: '/voices/mark_reference.wav'
-} as const
+// 获取角色对应的音色URL（动态从voice-config-manager获取）
+function getVoiceUrlForSpeaker(speaker: Speaker): string {
+  const voiceManager = getVoiceConfigManager()
+  const voiceConfig = voiceManager.getVoiceForRole(speaker)
+  return voiceConfig.url
+}
 
 export class IndexTTSService {
   private client: Client | null = null
-  private readonly baseUrl = 'IndexTeam/IndexTTS-2-Demo'
+  private readonly baseUrl = 'Tom1986/indextts2' // 使用私有Space
   private readonly maxRetries = 3
   private readonly retryDelay = 2000 // 2秒
+  private readonly hfToken = process.env.HF_TOKEN // Hugging Face token
 
   constructor() {
-    console.log('[IndexTTS] Service initialized')
+    console.log('[IndexTTS] Service initialized with private space')
+    if (!this.hfToken) {
+      console.warn('[IndexTTS] No HF_TOKEN found in environment variables')
+    }
   }
 
   /**
@@ -43,13 +48,22 @@ export class IndexTTSService {
    */
   private async getClient(): Promise<Client> {
     if (!this.client) {
-      console.log('[IndexTTS] Connecting to IndexTTS-2-Demo client...')
+      console.log('[IndexTTS] Connecting to private space client...')
       try {
-        this.client = await client(this.baseUrl)
-        console.log('[IndexTTS] Client connected successfully')
+        // 使用token连接私有Space
+        const connectOptions: any = {
+          timeout: 60000
+        }
+        
+        if (this.hfToken) {
+          connectOptions.hf_token = this.hfToken
+        }
+        
+        this.client = await client(this.baseUrl, connectOptions)
+        console.log('[IndexTTS] Private space client connected successfully')
       } catch (error) {
-        console.error('[IndexTTS] Failed to connect to client:', error)
-        throw new Error(`Failed to connect to IndexTTS: ${error}`)
+        console.error('[IndexTTS] Failed to connect to private space:', error)
+        throw new Error(`Failed to connect to IndexTTS private space: ${error}`)
       }
     }
     return this.client
@@ -147,36 +161,34 @@ export class IndexTTSService {
             console.warn(`[IndexTTS] Could not get API info:`, apiInfoError)
           }
           
-          console.log(`[IndexTTS] 🚀 Calling /gen_single endpoint with CORRECT format...`)
+          console.log(`[IndexTTS] 🚀 Using corrected 24-parameter array format from development plan...`)
           
-          // 🔧 根据技术文档使用正确的对象格式参数
-          console.log(`[IndexTTS] Using documented object format parameters`)
-          result = await app.predict('/gen_single', {
-            // --- Required Parameters ---
-            prompt: voiceBlobWithType,                    // The voice to clone
-            text: text,                                   // The text to speak
-            
-            // --- Critical Dropdown-style Parameter ---
-            emo_control_method: "Same as the voice reference", 
-            
-            // --- Emotion Reference (reuse the prompt audio) ---
-            emo_ref_path: voiceBlobWithType, 
-            emo_weight: 0.8,
-            
-            // --- Other technical parameters (default values from docs) ---
-            vec1: 0, vec2: 0, vec3: 0, vec4: 0, vec5: 0, vec6: 0, vec7: 0, vec8: 0,
-            emo_text: "",
-            emo_random: false,
-            max_text_tokens_per_sentence: 120,
-            param_16: true, // do_sample
-            param_17: 0.8,  // top_p
-            param_18: 30,   // top_k
-            param_19: 0.8,  // temperature
-            param_20: 0,    // length_penalty
-            param_21: 3,    // num_beams
-            param_22: 10,   // repetition_penalty
-            param_23: 1500, // max_mel_tokens
+          // 使用handle_file处理音频Blob
+          const { handle_file } = await import('@gradio/client')
+          const handledVoiceFile = handle_file(voiceBlobWithType)
+          
+          console.log(`[IndexTTS] Processed voice file with handle_file:`, {
+            originalSize: voiceBlobWithType.size,
+            originalType: voiceBlobWithType.type,
+            handledFile: typeof handledVoiceFile
           })
+          
+          // 按照开发计划中的成功模板，使用24个参数的数组格式
+          const params = [
+            "Same as the voice reference",  // 0: emotion_control_method
+            handledVoiceFile,              // 1: voice_reference (关键!)
+            text,                          // 2: text
+            null,                          // 3: emotion_reference
+            0.8,                          // 4: emotion_weight
+            0, 0, 0, 0, 0, 0, 0, 0,      // 5-12: emotion_vectors (8个)
+            "",                           // 13: emotion_text
+            false,                        // 14: random_emotion
+            120,                          // 15: max_tokens
+            true, 0.8, 30, 0.8, 0, 3, 10, 1500  // 16-23: 高级参数
+          ]
+          
+          console.log(`[IndexTTS] Calling /gen_single with 24-parameter array format`)
+          result = await app.predict("/gen_single", params)
           
           console.log(`[IndexTTS] ✅ API call succeeded with object format!`)
           console.log(`[IndexTTS] 🎉 API CALL SUCCEEDED! Received response.`)
@@ -311,36 +323,28 @@ export class IndexTTSService {
         const app = await this.getClient()
 
         // 获取音色参考文件
-        const voiceReferenceUrl = customVoiceUrl || DEFAULT_VOICE_REFERENCES[speaker]
+        const voiceReferenceUrl = customVoiceUrl || getVoiceUrlForSpeaker(speaker)
         const voiceBlob = await this.fetchVoiceReference(voiceReferenceUrl)
 
-        // 调用 IndexTTS API - 使用文档中的正确对象格式
-        const result: any = await app.predict('/gen_single', {
-          // --- Required Parameters ---
-          prompt: voiceBlob,                           // The voice to clone
-          text: text,                                  // The text to speak
-          
-          // --- Critical Dropdown-style Parameter ---
-          emo_control_method: "Same as the voice reference", 
-          
-          // --- Emotion Reference (reuse the prompt audio) ---
-          emo_ref_path: voiceBlob, 
-          emo_weight: 0.8,
-          
-          // --- Other technical parameters (default values from docs) ---
-          vec1: 0, vec2: 0, vec3: 0, vec4: 0, vec5: 0, vec6: 0, vec7: 0, vec8: 0,
-          emo_text: "",
-          emo_random: false,
-          max_text_tokens_per_sentence: 120,
-          param_16: true, // do_sample
-          param_17: 0.8,  // top_p
-          param_18: 30,   // top_k
-          param_19: 0.8,  // temperature
-          param_20: 0,    // length_penalty
-          param_21: 3,    // num_beams
-          param_22: 10,   // repetition_penalty
-          param_23: 1500, // max_mel_tokens
-        })
+        // 使用handle_file处理音频Blob
+        const { handle_file } = await import('@gradio/client')
+        const handledVoiceFile = handle_file(voiceBlob)
+        
+        // 使用正确的24参数数组格式
+        const params = [
+          "Same as the voice reference",  // 0: emotion_control_method
+          handledVoiceFile,              // 1: voice_reference (关键!)
+          text,                          // 2: text
+          null,                          // 3: emotion_reference
+          0.8,                          // 4: emotion_weight
+          0, 0, 0, 0, 0, 0, 0, 0,      // 5-12: emotion_vectors (8个)
+          "",                           // 13: emotion_text
+          false,                        // 14: random_emotion
+          120,                          // 15: max_tokens
+          true, 0.8, 30, 0.8, 0, 3, 10, 1500  // 16-23: 高级参数
+        ]
+        
+        const result: any = await app.predict('/gen_single', params)
 
         // 🔍 关键调试：记录完整的原始响应结构 - generateSpeech方法
         console.log(`[IndexTTS] COMPLETE RAW API RESPONSE (generateSpeech):`, JSON.stringify(result, null, 2))
@@ -489,7 +493,12 @@ export class IndexTTSService {
    * 获取默认音色配置
    */
   getDefaultVoiceConfig() {
-    return DEFAULT_VOICE_REFERENCES
+    const voiceManager = getVoiceConfigManager()
+    return {
+      moderator: voiceManager.getVoiceForRole('moderator').url,
+      tom: voiceManager.getVoiceForRole('tom').url,
+      mark: voiceManager.getVoiceForRole('mark').url
+    }
   }
 
   /**

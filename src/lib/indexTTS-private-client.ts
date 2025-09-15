@@ -51,7 +51,8 @@ export class IndexTTSPrivateClient {
   private readonly spaceId = 'Tom1986/indextts2'
   private readonly hfToken: string
   private readonly maxRetries = 3
-  private readonly retryDelay = 2000
+  private readonly retryDelay = 1500  // 减少重试延迟
+  private readonly requestTimeout = 45000  // 45秒超时（之前可能太长）
 
   constructor() {
     // 从环境变量获取HF token
@@ -60,7 +61,7 @@ export class IndexTTSPrivateClient {
       console.error('[IndexTTS-Client] ❌ HF_TOKEN not found')
       throw new Error('HF_TOKEN is required for private Space access')
     }
-    console.log('[IndexTTS-Client] ✅ Client initialized')
+    console.log('[IndexTTS-Client] ✅ Client initialized with 45s timeout')
   }
 
   /**
@@ -255,9 +256,19 @@ export class IndexTTSPrivateClient {
         // 3. 构建API参数
         const apiParameters = this.buildAPIParameters(text, processedVoiceFile, config)
 
-        // 4. 调用API
+        // 4. 调用API with timeout control
         console.log('[IndexTTS-Client] 🔄 Calling /gen_single...')
-        const result = await client.predict('/gen_single', apiParameters)
+        
+        // 创建超时Promise
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error(`Request timeout after ${this.requestTimeout}ms`)), this.requestTimeout)
+        })
+
+        // API调用Promise
+        const apiPromise = client.predict('/gen_single', apiParameters)
+
+        // 使用Promise.race来实现超时控制
+        const result = await Promise.race([apiPromise, timeoutPromise])
 
         // 5. 解析响应
         return await this.parseAPIResponse(result, startTime)

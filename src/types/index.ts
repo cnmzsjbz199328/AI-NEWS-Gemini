@@ -83,7 +83,8 @@ export type PipelineTaskStatus =
   | 'PENDING_AUDIO'     // 待语音生成
   | 'GENERATING_AUDIO'  // 语音生成中
   | 'READY_TO_PLAY'     // 准备播放
-  | 'DONE';             // 已完成
+  | 'DONE'              // 已完成
+  | 'FAILED';           // 失败（超过最大重试次数）
 
 // AI工作者类型
 export type AIWorkerType = 'Gemini' | 'Mistral' | 'Reka';
@@ -145,6 +146,7 @@ export interface PipelineTask {
   createdAt: number;
   updatedAt: number;
   error?: string;
+  retryCount?: number; // 重试次数计数
 }
 
 // 流水线状态

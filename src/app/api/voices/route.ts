@@ -3,126 +3,123 @@
  * GET /api/voices
  */
 
-import { NextResponse } from 'next/server'
-import { AvailableVoice, SupportedLanguage } from '@/types'
-import { cosyVoiceTTSService, LANGUAGE_CONFIGS } from '@/lib/cosyvoice-tts-service'
+import { NextRequest, NextResponse } from 'next/server'
+import { cosyVoiceTTSService } from '@/lib/cosyvoice-tts-service'
 
-// 动态生成可用音色列表
-function generateAvailableVoices(): AvailableVoice[] {
-  const voices: AvailableVoice[] = []
-  
-  Object.values(LANGUAGE_CONFIGS).forEach(langConfig => {
-    const voicesForLang = cosyVoiceTTSService.getAvailableVoicesForLanguage(langConfig.code)
-    
-    voicesForLang.forEach(voice => {
-      voices.push({
-        id: voice.voiceId,
-        name: voice.name,
-        language: voice.language,
-        gender: voice.voiceId.includes('女') || voice.voiceId.includes('Female') ? 'female' : 'male',
-        description: `${langConfig.nativeName} voice for ${voice.speaker}`
-      })
-    })
-  })
-  
-  return voices
-}
-
-// 根据角色和语言推荐的默认音色
-function getRoleRecommendations(language?: string, role?: string) {
-  if (!language || !role || !cosyVoiceTTSService.isLanguageSupported(language)) return null
-  
-  const voicesForLang = cosyVoiceTTSService.getAvailableVoicesForLanguage(language as SupportedLanguage)
-  return voicesForLang
-    .filter(v => v.speaker === role)
-    .map(v => v.voiceId)
-}
-
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const url = new URL(request.url)
-    const language = url.searchParams.get('language')
-    const gender = url.searchParams.get('gender')
-    const role = url.searchParams.get('role')
-
-    let filteredVoices = generateAvailableVoices()
-
-    // 按语言过滤
+    // 获取查询参数
+    const { searchParams } = new URL(request.url)
+    const language = searchParams.get('language')
+    
+    // 获取支持的语言列表
+    const supportedLanguages = cosyVoiceTTSService.getSupportedLanguages()
+    
+    // 如果指定了语言，返回该语言的音色
     if (language) {
-      filteredVoices = filteredVoices.filter(voice => 
-        voice.language.toLowerCase() === language.toLowerCase()
-      )
-    }
-
-    // 按性别过滤
-    if (gender && (gender === 'male' || gender === 'female')) {
-      filteredVoices = filteredVoices.filter(voice => voice.gender === gender)
-    }
-
-    // 按角色推荐排序
-    const roleRecommendations = getRoleRecommendations(language || undefined, role || undefined)
-    if (roleRecommendations && roleRecommendations.length > 0) {
-      filteredVoices.sort((a, b) => {
-        const aIndex = roleRecommendations.indexOf(a.id as any)
-        const bIndex = roleRecommendations.indexOf(b.id as any)
-        
-        // 推荐的音色排在前面
-        if (aIndex !== -1 && bIndex === -1) return -1
-        if (aIndex === -1 && bIndex !== -1) return 1
-        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex
-        
-        return 0
+      const languageInfo = supportedLanguages.find(lang => lang.code === language)
+      if (!languageInfo) {
+        return NextResponse.json(
+          { error: `Unsupported language: ${language}` },
+          { status: 400 }
+        )
+      }
+      
+      return NextResponse.json({
+        language: languageInfo,
+        voices: [] // 暂时返回空数组，后续可以扩展具体音色列表
       })
     }
-
-    const response = {
-      success: true,
-      voices: filteredVoices,
-      total: filteredVoices.length,
-      supportedLanguages: cosyVoiceTTSService.getSupportedLanguages(),
-      filters: {
-        language: language || null,
-        gender: gender || null,
-        role: role || null
-      },
-      roleRecommendations: roleRecommendations || null
-    }
-
-    return NextResponse.json(response)
+    
+    // 返回所有支持的语言和音色
+    return NextResponse.json({
+      supportedLanguages,
+      defaultVoiceConfig: {
+        moderator: {
+          voiceId: 'cosy-zh-female-1',
+          style: 'professional',
+          speed: 1.0,
+          pitch: 0.0
+        },
+        tom: {
+          voiceId: 'cosy-en-male-1',
+          style: 'energetic',
+          speed: 1.1,
+          pitch: 2.0
+        },
+        mark: {
+          voiceId: 'cosy-en-male-2',
+          style: 'calm',
+          speed: 0.9,
+          pitch: -1.0
+        }
+      }
+    })
 
   } catch (error) {
     console.error('Voices API error:', error)
-    
     return NextResponse.json(
-      { 
-        success: false,
-        error: 'Internal server error while fetching voices',
-        voices: [],
-        total: 0
-      },
+      { error: 'Internal server error while fetching voices' },
       { status: 500 }
     )
   }
 }
 
-// 处理不支持的HTTP方法
-export async function POST() {
-  return NextResponse.json(
-    { error: 'Method not allowed. Use GET to fetch voices.' },
-    { status: 405 }
-  )
+// POST方法用于验证音色配置
+export async function POST(request: NextRequest) {
+  try {
+    const voiceConfig = await request.json()
+    
+    // 基础验证
+    const requiredRoles = ['moderator', 'tom', 'mark']
+    const missingRoles = requiredRoles.filter(role => !voiceConfig[role])
+    
+    if (missingRoles.length > 0) {
+      return NextResponse.json(
+        { 
+          error: 'Missing voice configuration for roles',
+          missingRoles 
+        },
+        { status: 400 }
+      )
+    }
+    
+    // 验证每个角色的配置
+    for (const role of requiredRoles) {
+      const config = voiceConfig[role]
+      if (!config.voiceId) {
+        return NextResponse.json(
+          { error: `Missing voiceId for role: ${role}` },
+          { status: 400 }
+        )
+      }
+    }
+    
+    return NextResponse.json({
+      valid: true,
+      message: 'Voice configuration is valid'
+    })
+
+  } catch (error) {
+    console.error('Voice config validation error:', error)
+    return NextResponse.json(
+      { error: 'Invalid voice configuration format' },
+      { status: 400 }
+    )
+  }
 }
 
+// 处理不支持的HTTP方法
 export async function PUT() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use GET to fetch voices.' },
+    { error: 'Method not allowed. Use GET to fetch voices or POST to validate config.' },
     { status: 405 }
   )
 }
 
 export async function DELETE() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use GET to fetch voices.' },
+    { error: 'Method not allowed. Use GET to fetch voices or POST to validate config.' },
     { status: 405 }
   )
 }

@@ -74,7 +74,7 @@ export class IndexTTSIntegratedService {
   }
 
   /**
-   * 批量生成语音（用于新闻辩论）
+   * 批量生成语音（用于新闻辩论）- 增强错误处理
    */
   async generateBatchSpeech(
     segments: Array<{ text: string; speaker: Speaker }>,
@@ -83,31 +83,64 @@ export class IndexTTSIntegratedService {
     console.log(`[IndexTTS-Integrated] 🎪 Generating batch speech: ${segments.length} segments`)
 
     const results: SpeechGenerationResult[] = []
+    const maxRetries = 2  // 每个片段最多重试2次
     
     for (let i = 0; i < segments.length; i++) {
       const segment = segments[i]
       console.log(`[IndexTTS-Integrated] 📋 Processing segment ${i + 1}/${segments.length}`)
+      
+      let segmentResult: SpeechGenerationResult | null = null
+      
+      // 为每个片段提供重试机制
+      for (let retry = 0; retry <= maxRetries; retry++) {
+        try {
+          if (retry > 0) {
+            console.log(`[IndexTTS-Integrated] 🔄 Retry ${retry}/${maxRetries} for segment ${i + 1}`)
+            // 重试间增加延迟
+            await new Promise(resolve => setTimeout(resolve, 2000 * retry))
+          }
 
-      try {
-        const result = await this.generateSpeechForRole(segment.text, segment.speaker, options)
-        results.push(result)
+          segmentResult = await this.generateSpeechForRole(segment.text, segment.speaker, options)
+          
+          if (segmentResult.success) {
+            console.log(`[IndexTTS-Integrated] ✅ Segment ${i + 1} completed successfully`)
+            break  // 成功就退出重试循环
+          } else {
+            console.warn(`[IndexTTS-Integrated] ⚠️ Segment ${i + 1} attempt ${retry + 1} failed:`, segmentResult.error)
+          }
 
-        // 避免请求过于频繁
-        if (i < segments.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 1000))
+        } catch (error) {
+          console.error(`[IndexTTS-Integrated] ❌ Segment ${i + 1} attempt ${retry + 1} error:`, error)
+          segmentResult = {
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error'
+          }
         }
+      }
 
-      } catch (error) {
-        console.error(`[IndexTTS-Integrated] ❌ Segment ${i + 1} failed:`, error)
-        results.push({
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        })
+      // 添加结果（成功或最终失败）
+      results.push(segmentResult || {
+        success: false,
+        error: 'Failed after all retries'
+      })
+
+      // 片段间延迟，减少服务器负载
+      if (i < segments.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 800))  // 减少延迟
       }
     }
 
     const successCount = results.filter(r => r.success).length
     console.log(`[IndexTTS-Integrated] ✅ Batch completed: ${successCount}/${segments.length} successful`)
+
+    // 如果成功率太低，记录详细错误信息
+    if (successCount < segments.length * 0.5) {
+      const failureReasons = results
+        .filter(r => !r.success)
+        .map(r => r.error)
+        .join('; ')
+      console.error(`[IndexTTS-Integrated] ⚠️ Low success rate! Failure reasons: ${failureReasons}`)
+    }
 
     return results
   }

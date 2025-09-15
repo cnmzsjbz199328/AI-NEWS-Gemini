@@ -65,20 +65,20 @@ export class TTSServiceManager {
   }
 
   /**
-   * 生成语音 - 自动降级策略
+   * 生成语音 - 自动降级策略（优先使用IndexTTS）
    */
   async generateSpeech(
     text: string, 
     speaker: Speaker,
     preferredService?: TTSServiceType
   ): Promise<TTSGenerationResult> {
-    console.log(`[TTSManager] Generating speech for ${speaker} with preferred service: ${preferredService || 'auto'}`)
+    console.log(`[TTSManager] Generating speech for ${speaker} with preferred service: ${preferredService || 'IndexTTS (default)'}`)
 
-    // 定义服务优先级
+    // 定义服务优先级 - IndexTTS 为主力，CosyVoice 为备用
     const allServices: TTSServiceType[] = ['indexTTS', 'cosyVoice']
     const serviceOrder: TTSServiceType[] = preferredService 
       ? [preferredService, ...allServices.filter(s => s !== preferredService)]
-      : allServices
+      : allServices // IndexTTS 已经是第一位
 
     let lastError: string | undefined
 
@@ -89,13 +89,15 @@ export class TTSServiceManager {
       }
 
       try {
-        console.log(`[TTSManager] Trying ${serviceType} for ${speaker}`)
+        console.log(`[TTSManager] 🎯 Using ${serviceType} as PRIMARY service for ${speaker}`)
         
         switch (serviceType) {
           case 'indexTTS':
             return await this.tryIndexTTS(text, speaker)
           
           case 'cosyVoice':
+            // CosyVoice 作为备用服务，只在 IndexTTS 不可用时使用
+            console.warn(`[TTSManager] ⚠️ Using CosyVoice as FALLBACK service`)
             return await this.tryCosyVoice(text, speaker)
         }
       } catch (error) {

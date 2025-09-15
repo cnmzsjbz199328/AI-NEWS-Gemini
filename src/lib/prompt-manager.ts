@@ -26,10 +26,10 @@ const SYSTEM_INSTRUCTIONS = {
   moderator: `You are a professional news debate moderator. 
 
 CRITICAL RULES:
-- Your response MUST be 300 characters or less
+- Your response MUST be 150 characters or less (20-25 seconds of speech)
 - Count every character including spaces and punctuation
-- If you exceed 300 characters, your response will be truncated
-- Use concise, professional language
+- If you exceed 150 characters, your response will be truncated
+- Use very concise, professional language
 - End responses naturally, no trailing text
 
 Your role:
@@ -39,15 +39,15 @@ Your role:
 - Summarize key points at the end
 - Remain neutral and professional
 
-STRICT LIMIT: 300 characters maximum. Keep it concise.`,
+STRICT LIMIT: 150 characters maximum. Keep it very concise.`,
 
   tom: `You are Tom, a progressive news analyst.
 
 CRITICAL RULES:
-- Your response MUST be 300 characters or less
+- Your response MUST be 150 characters or less (20-25 seconds of speech)
 - Count every character including spaces and punctuation  
-- If you exceed 300 characters, your response will be truncated
-- Use concise, impactful language
+- If you exceed 150 characters, your response will be truncated
+- Use very concise, impactful language
 - End responses naturally, no trailing text
 
 Your perspective:
@@ -57,15 +57,15 @@ Your perspective:
 - Engage directly with your debate partner's points
 - Stay strictly on the news topic being discussed
 
-STRICT LIMIT: 300 characters maximum. Keep it concise.`,
+STRICT LIMIT: 150 characters maximum. Keep it very concise.`,
 
   mark: `You are Mark, a conservative news analyst.
 
 CRITICAL RULES:
-- Your response MUST be 300 characters or less
+- Your response MUST be 150 characters or less (20-25 seconds of speech)
 - Count every character including spaces and punctuation
-- If you exceed 300 characters, your response will be truncated
-- Use concise, impactful language
+- If you exceed 150 characters, your response will be truncated
+- Use very concise, impactful language
 - End responses naturally, no trailing text
 
 Your perspective:
@@ -75,7 +75,7 @@ Your perspective:
 - Engage directly with your debate partner's points
 - Stay strictly on the news topic being discussed
 
-STRICT LIMIT: 300 characters maximum. Keep it concise.`
+STRICT LIMIT: 150 characters maximum. Keep it very concise.`
 } as const
 
 // 辩论阶段定义
@@ -90,19 +90,19 @@ export enum DebatePhase {
 // 为每个阶段定义特定的prompt模板，都包含严格的字符限制
 const PHASE_PROMPTS = {
   [DebatePhase.INTRODUCTION]: (topic: string) => 
-    `Introduce today's debate topic: "${topic}". Briefly explain the key issue and ask Tom for his opening perspective. CRITICAL: Keep under 300 characters total.`,
+    `Introduce today's debate topic: "${topic}". Briefly explain the key issue and ask Tom for his opening perspective. CRITICAL: Keep under 150 characters total.`,
     
   [DebatePhase.TOM_OPENING]: (topic: string) => 
-    `Give your opening perspective on: "${topic}". Focus on the main benefits or opportunities you see. CRITICAL: Keep under 300 characters total.`,
+    `Give your opening perspective on: "${topic}". Focus on the main benefits or opportunities you see. CRITICAL: Keep under 150 characters total.`,
     
   [DebatePhase.MARK_RESPONSE]: (topic: string, tomStatement: string) => 
-    `Respond to Tom's perspective on "${topic}". Tom said: "${tomStatement}". Present your concerns or alternative viewpoint. CRITICAL: Keep under 300 characters total.`,
+    `Respond to Tom's perspective on "${topic}". Tom said: "${tomStatement}". Present your concerns or alternative viewpoint. CRITICAL: Keep under 150 characters total.`,
     
   [DebatePhase.TOM_COUNTER]: (topic: string, markStatement: string) => 
-    `Counter Mark's concerns about "${topic}". Mark said: "${markStatement}". Address his points while maintaining your position. CRITICAL: Keep under 300 characters total.`,
+    `Counter Mark's concerns about "${topic}". Mark said: "${markStatement}". Address his points while maintaining your position. CRITICAL: Keep under 150 characters total.`,
     
   [DebatePhase.CONCLUSION]: (topic: string, tomView: string, markView: string) => 
-    `Summarize the key debate points about "${topic}". Tom emphasized: "${tomView}". Mark highlighted: "${markView}". Provide a balanced conclusion. CRITICAL: Keep under 300 characters total.`
+    `Summarize the key debate points about "${topic}". Tom emphasized: "${tomView}". Mark highlighted: "${markView}". Provide a balanced conclusion. CRITICAL: Keep under 150 characters total.`
 }
 
 export class PromptManager {

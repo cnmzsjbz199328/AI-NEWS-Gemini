@@ -22,8 +22,7 @@ export async function GET() {
       GENERATING_AUDIO: 0,
       READY_TO_PLAY: 0,
       PLAYING: 0,
-      DONE: 0,
-      FAILED: 0
+      DONE: 0
     }
 
     pipelineState.tasks.forEach(task => {

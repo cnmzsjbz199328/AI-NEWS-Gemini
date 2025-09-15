@@ -164,8 +164,13 @@ export class AIWorkerPool {
     const promptManager = PromptManager.getInstance()
     const conversation: Array<{speaker: Speaker, text: string}> = []
     
-    // 1. 生成主持人开场白
+    // 检查语言配置是否存在
     const languageConfig = LANGUAGE_CONFIGS[language]
+    if (!languageConfig) {
+      throw new Error(`Language config not found for language: ${language}. Available languages: ${Object.keys(LANGUAGE_CONFIGS).join(', ')}`)
+    }
+    
+    // 1. 生成主持人开场白
     const moderatorIntro = await this.generateSpeakerResponse(
       'moderator',
       this.buildLanguageSpecificPrompt(
@@ -276,6 +281,11 @@ export class AIWorkerPool {
     promptType: 'moderator_intro' | 'moderator_outro' | 'debate_point' | 'debate_response'
   ): string {
     const languageConfig = LANGUAGE_CONFIGS[language]
+    
+    // 如果找不到语言配置，抛出更明确的错误
+    if (!languageConfig) {
+      throw new Error(`Language config not found for language: ${language}. Available languages: ${Object.keys(LANGUAGE_CONFIGS).join(', ')}`)
+    }
     
     // 语言特定的指令
     const languageInstructions = {

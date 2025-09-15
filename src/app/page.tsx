@@ -1,11 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { ConversationEntry, NewsItem, Speaker, AppState, SpeakersState, AudioPlaybackInfo } from '@/types'
 import { SpeakerStateManager } from '@/lib/managers/speaker-state-manager'
 import { AudioManager } from '@/lib/managers/audio-manager'
 import { GenerationManager } from '@/lib/managers/generation-manager'
 import { SettingsPanel } from '@/components/settings'
+import { PipelineMonitor } from '@/components/PipelineMonitor'
+import { usePipelineStore } from '@/stores/pipeline-store'
 
 export default function HomePage() {
   console.log('[UI] ===== MAIN PAGE COMPONENT RENDERED =====')
@@ -45,6 +47,44 @@ export default function HomePage() {
 
   // 设置面板状态
   const [isSettingsPanelVisible, setIsSettingsPanelVisible] = useState(false)
+  
+  // 流水线监控面板状态
+  const showMonitorPanel = usePipelineStore(state => state.showMonitorPanel)
+  const toggleMonitorPanel = usePipelineStore(state => state.toggleMonitorPanel)
+
+  // 流水线状态轮询
+  const [pipelineStatus, setPipelineStatus] = useState<any>(null)
+  
+  // 定期获取流水线状态
+  const pollPipelineStatus = useCallback(async () => {
+    try {
+      const response = await fetch('/api/pipeline/status')
+      if (response.ok) {
+        const status = await response.json()
+        setPipelineStatus(status)
+      }
+    } catch (error) {
+      console.warn('[UI] Failed to poll pipeline status:', error)
+    }
+  }, [])
+
+  // 启动状态轮询
+  useEffect(() => {
+    let pollInterval: NodeJS.Timeout | null = null
+    
+    if (state.isDebating) {
+      // 立即获取一次状态
+      pollPipelineStatus()
+      // 然后每2秒轮询一次
+      pollInterval = setInterval(pollPipelineStatus, 2000)
+    }
+    
+    return () => {
+      if (pollInterval) {
+        clearInterval(pollInterval)
+      }
+    }
+  }, [state.isDebating, pollPipelineStatus])
 
   // Initialize managers
   const speakerStateManager = new SpeakerStateManager()
@@ -164,6 +204,51 @@ export default function HomePage() {
     }
   }
 
+  const startPipelineAPI = async (title: string, description: string) => {
+    console.log('[UI] Starting unified script pipeline for:', title)
+    
+    // 构造完整的新闻主题
+    const newsTopic = `Title: ${title}. Summary: ${description}`
+    
+    const requestBody = {
+      newsTopics: [newsTopic], // 单条新闻作为数组
+      debateRounds: 3,
+      voiceConfig: {
+        tom: 'cosy-en-male-energetic',
+        mark: 'cosy-en-female-calm', 
+        moderator: 'cosy-en-neutral-professional' // 修改为moderator
+      },
+      language: 'en-US' // 修复语言代码以匹配LANGUAGE_CONFIGS
+    }
+    
+    console.log('[UI] Sending request to pipeline API:', requestBody)
+    
+    // 调用流水线API
+    const response = await fetch('/api/pipeline/start', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody)
+    })
+
+    console.log('[UI] Pipeline API response status:', response.status)
+    
+    if (!response.ok) {
+      const error = await response.json()
+      console.error('[UI] Pipeline API error:', error)
+      throw new Error(`Pipeline API error: ${error.error}`)
+    }
+
+    const result = await response.json()
+    console.log('[UI] Pipeline started successfully:', result)
+    
+    // 等待流水线完成（通过轮询监控）
+    updateStatus('Pipeline started - generating unified script...')
+    
+    // 轮询会在useEffect中自动开始，因为isDebating已经为true
+  }
+
   const startDiscussion = async () => {
     console.log('[UI] startDiscussion called!')
     if (state.isDebating || state.news.length === 0) {
@@ -195,7 +280,8 @@ export default function HomePage() {
     updateStatus('The discussion is starting...')
 
     try {
-      await runDebateWithNewSystem(topic)
+      // 使用新的并发流水线API
+      await startPipelineAPI(currentNews.title, currentNews.description)
     } catch (e: any) {
       updateError(`An error occurred: ${e.message}`)
     } finally {
@@ -359,7 +445,47 @@ export default function HomePage() {
       </div>
 
       <div id="transcript">
-        {/* 只显示当前正在播放语音的字幕 */}
+        {/* 流水线状态显示 */}
+        {state.isDebating && pipelineStatus && (
+          <div className="pipeline-status-widget" style={{
+            position: 'fixed',
+            top: '10px',
+            right: '10px',
+            background: 'rgba(0,0,0,0.8)',
+            color: 'white',
+            padding: '10px',
+            borderRadius: '8px',
+            fontSize: '12px',
+            zIndex: 1000,
+            minWidth: '200px'
+          }}>
+            <div><strong>流水线状态</strong></div>
+            <div>总任务: {pipelineStatus.totalTasks}</div>
+            <div>已完成: {pipelineStatus.completedTasks}</div>
+            <div>进度: {pipelineStatus.progressPercentage}%</div>
+            <div>活跃状态: {pipelineStatus.isActive ? '运行中' : '已停止'}</div>
+            {pipelineStatus.tasks && pipelineStatus.tasks.length > 0 && (
+              <div style={{ marginTop: '5px', fontSize: '10px' }}>
+                <strong>当前任务:</strong>
+                {pipelineStatus.tasks.map((task: any) => (
+                  <div key={task.id} style={{ 
+                    padding: '2px', 
+                    background: task.status.includes('GENERATING') ? '#333' : 
+                               task.status === 'READY_TO_PLAY' ? '#006600' : 
+                               task.status === 'DONE' ? '#666' : 
+                               task.status === 'FAILED' ? '#660000' : '#444',
+                    margin: '1px 0',
+                    borderRadius: '2px'
+                  }}>
+                    {task.status}: {task.newsTopic}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 原有的字幕区域 */}
         {(() => {
           // 记录当前所有角色的状态
           console.log(`[UI] Current speaker states:`, {
@@ -411,8 +537,18 @@ export default function HomePage() {
           <button onClick={startDiscussion} disabled={state.isDebating}>
             Start Discussion
           </button>
+          
+          <button 
+            onClick={toggleMonitorPanel}
+            className="ml-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            {showMonitorPanel ? '关闭监控' : '打开流水线监控'}
+          </button>
         </div>
       </div>
+      
+      {/* 流水线监控面板 */}
+      {showMonitorPanel && <PipelineMonitor />}
     </div>
   )
 }
