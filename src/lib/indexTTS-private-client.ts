@@ -50,7 +50,7 @@ export class IndexTTSPrivateClient {
   private client: Client | null = null
   private readonly spaceId = 'Tom1986/indextts2'
   private readonly hfToken: string
-  private readonly maxRetries = 3
+  private readonly maxRetries = 1  // 移除Client层重试，由上层Integrated处理
   private readonly retryDelay = 1500  // 减少重试延迟
   private readonly requestTimeout = 45000  // 45秒超时（之前可能太长）
 

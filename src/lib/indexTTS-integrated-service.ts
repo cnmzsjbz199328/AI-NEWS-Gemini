@@ -107,6 +107,12 @@ export class IndexTTSIntegratedService {
             break  // 成功就退出重试循环
           } else {
             console.warn(`[IndexTTS-Integrated] ⚠️ Segment ${i + 1} attempt ${retry + 1} failed:`, segmentResult.error)
+            
+            // 检测GPU配额耗尽，立即停止重试
+            if (segmentResult.error?.includes('exceeded your Pro GPU quota')) {
+              console.error(`[IndexTTS-Integrated] 🚫 GPU quota exceeded, stopping retries for segment ${i + 1}`)
+              break
+            }
           }
 
         } catch (error) {

@@ -158,3 +158,17 @@ export const getAIProviderForSpeaker = (speaker: string): AIProvider => {
       throw new Error(`Unknown speaker: ${speaker}`)
   }
 }
+
+// 获取对应AI工作者的提供商
+export const getAIProviderForWorker = (workerType: string): AIProvider => {
+  switch (workerType) {
+    case 'Gemini':
+      return createGeminiProvider()
+    case 'Mistral':
+      return createMistralProvider()
+    case 'Reka':
+      return createRekaProvider()
+    default:
+      throw new Error(`Unknown worker type: ${workerType}`)
+  }
+}

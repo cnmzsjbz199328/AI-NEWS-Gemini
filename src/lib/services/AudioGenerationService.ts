@@ -41,9 +41,14 @@ export class AudioGenerationService {
 
       console.log(`🎵 Generating ${ttsItems.length} audio items for task: ${task.id} using IndexTTS`)
 
-      // 使用 IndexTTS 批量生成语音（添加超时保护）
+      // 使用 IndexTTS 批量生成语音（添加超时保护和取消机制）
+      const controller = new AbortController()
+      
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error(`TTS generation timeout after ${this.timeoutMs / 1000} seconds`)), this.timeoutMs)
+        setTimeout(() => {
+          controller.abort() // 尝试取消正在进行的请求
+          reject(new Error(`TTS generation timeout after ${this.timeoutMs / 1000} seconds`))
+        }, this.timeoutMs)
       })
       
       const batchResults = await Promise.race([
