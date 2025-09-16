@@ -16,6 +16,7 @@ export class AudioManager {
   private currentPlayingSequence: number = -1
   private currentAudio: HTMLAudioElement | null = null
   private onStateChange?: (state: AudioPlaybackInfo) => void
+  private onSpeakerChange?: (speaker: Speaker | null, text: string, action: 'start' | 'end') => void
   private fallbackTTS: FallbackTTS | null = null
   private useFallbackTTS: boolean = false
 
@@ -36,6 +37,13 @@ export class AudioManager {
    */
   setStateChangeCallback(callback: (state: AudioPlaybackInfo) => void): void {
     this.onStateChange = callback
+  }
+
+  /**
+   * 设置说话人变化回调（用于字幕和动画同步）
+   */
+  setSpeakerChangeCallback(callback: (speaker: Speaker | null, text: string, action: 'start' | 'end') => void): void {
+    this.onSpeakerChange = callback
   }
 
   /**
@@ -129,8 +137,11 @@ export class AudioManager {
         audioItem.onPlaybackStart()
       }
 
-      // 设置角色为发言状态
-      // this.speakerStateManager.setSpeaking(audioItem.speaker, audioItem.id)
+      // 设置角色为发言状态 - 通过回调通知外部系统
+      console.log(`[AudioManager] Setting ${audioItem.speaker} to speaking state`)
+      if (this.onSpeakerChange) {
+        this.onSpeakerChange(audioItem.speaker, audioItem.text || '', 'start')
+      }
 
       this.notifyStateChange()
 
@@ -228,8 +239,10 @@ export class AudioManager {
     const audioItem = this.audioQueue.get(sequenceNumber)
     if (audioItem) {
       console.log(`[AudioManager] Setting ${audioItem.speaker} back to static after audio completion`)
-      // 设置角色为静态状态
-      // this.speakerStateManager.setStatic(audioItem.speaker)
+      // 设置角色为静态状态 - 通过回调通知外部系统
+      if (this.onSpeakerChange) {
+        this.onSpeakerChange(audioItem.speaker, audioItem.text || '', 'end')
+      }
       
       // 标记为已完成
       this.markAsCompleted(sequenceNumber)
@@ -280,8 +293,11 @@ export class AudioManager {
       this.currentAudio = null
     }
 
-    // 重置所有角色状态
-    // this.speakerStateManager.resetAllStates()
+    // 重置所有角色状态 - 通过回调通知外部系统
+    console.log('[AudioManager] Resetting all speaker states')
+    if (this.onSpeakerChange) {
+      this.onSpeakerChange(null, '', 'end')
+    }
     this.notifyStateChange()
   }
 

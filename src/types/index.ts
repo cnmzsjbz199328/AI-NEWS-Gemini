@@ -6,8 +6,10 @@
 export type Speaker = 'moderator' | 'tom' | 'mark';
 
 export interface ConversationEntry {
+  id: string;
   speaker: Speaker;
   text: string;
+  timestamp: Date;
 }
 
 export interface NewsItem {

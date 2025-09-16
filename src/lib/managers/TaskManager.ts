@@ -154,6 +154,18 @@ export class TaskManager {
   }
 
   /**
+   * 标记指定任务为已完成
+   */
+  public markTaskAsCompleted(taskId: string): boolean {
+    const task = this.tasks.find(t => t.id === taskId)
+    if (task && task.status === 'READY_TO_PLAY') {
+      this.updateTaskStatus(taskId, 'DONE')
+      return true
+    }
+    return false
+  }
+
+  /**
    * 获取当前播放索引
    */
   public getCurrentPlayIndex(): number {

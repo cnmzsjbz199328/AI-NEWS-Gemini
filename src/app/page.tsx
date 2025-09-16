@@ -12,6 +12,7 @@ import { useNewsManager } from '@/hooks/useNewsManager'
 import { usePipelineStatus } from '@/hooks/usePipelineStatus'
 import { useDiscussionManager } from '@/hooks/useDiscussionManager'
 import { useNewsAutoRotation } from '@/hooks/useNewsAutoRotation'
+import { usePlaybackController } from '@/hooks/usePlaybackController'
 
 
 export default function HomePage() {
@@ -74,6 +75,45 @@ export default function HomePage() {
     newsLength: news.length,
     isDebating: state.isDebating,
     onRotateNews: handleNewsRotation
+  })
+
+  // 音频播放控制
+  const updateSpeakerAnimationState = useCallback((speaker: Speaker, animationState: 'speaking' | 'static') => {
+    setState(prevState => ({
+      ...prevState,
+      speakersState: {
+        ...prevState.speakersState,
+        [speaker]: {
+          ...prevState.speakersState[speaker],
+          animationState
+        }
+      }
+    }))
+  }, [])
+
+  // 更新对话记录的回调
+  const updateConversation = useCallback((speaker: Speaker, text: string, action: 'add' | 'remove') => {
+    if (action === 'add') {
+      const newEntry = {
+        id: `${speaker}-${Date.now()}`,
+        speaker,
+        text,
+        timestamp: new Date()
+      }
+      setState(prevState => ({
+        ...prevState,
+        conversation: [...prevState.conversation, newEntry]
+      }))
+      console.log(`[UI] Added conversation entry for ${speaker}: ${text.substring(0, 50)}`)
+    }
+  }, [])
+
+  const { isPlaying, currentSpeaker } = usePlaybackController({
+    pipelineStatus,
+    onSpeakerStateChange: (speaker, speakingState) => {
+      updateSpeakerAnimationState(speaker, speakingState === 'speaking' ? 'speaking' : 'static')
+    },
+    onConversationUpdate: updateConversation
   })
 
   // TODO: Managers are disabled after architecture refactoring to one-shot generation

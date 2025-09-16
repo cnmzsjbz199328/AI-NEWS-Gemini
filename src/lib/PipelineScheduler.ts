@@ -174,6 +174,13 @@ export class PipelineScheduler {
   }
 
   /**
+   * 标记指定任务为已完成
+   */
+  public markTaskAsCompleted(taskId: string): boolean {
+    return this.taskManager.markTaskAsCompleted(taskId)
+  }
+
+  /**
    * 获取工作者状态
    */
   public getWorkerStates() {

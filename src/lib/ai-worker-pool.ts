@@ -6,7 +6,7 @@
  */
 
 import { AIWorkerType, PipelineTask, DebateScript, SupportedLanguage } from '@/types'
-import { getAIProviderForSpeaker, AIProvider } from './ai-providers'
+import { getAIProviderForWorker, AIProvider } from './ai-providers'
 import { PromptManager } from './prompt-manager'
 
 export interface WorkerTask {
@@ -83,7 +83,7 @@ export class AIWorkerPool {
       console.log(`🤖 Starting one-shot generation for task ${task.id} with ${workerType}`)
       
       // 获取AI提供者
-      const provider = getAIProviderForSpeaker(workerType)
+      const provider = getAIProviderForWorker(workerType)
       
       // 构建一次性生成的完整提示词
       const promptManager = PromptManager.getInstance()
