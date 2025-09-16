@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { ConversationEntry, NewsItem, Speaker, AppState, SpeakersState, AudioPlaybackInfo } from '@/types'
 import { SettingsPanel } from '@/components/settings'
-import { PipelineMonitor } from '@/components/PipelineMonitor'
+
 import { NewsDisplay } from '@/components/news/NewsDisplay'
 import { SpeakerAvatar } from '@/components/ui/SpeakerAvatar'
 import { TranscriptArea } from '@/components/ui/TranscriptArea'
@@ -12,7 +12,7 @@ import { useNewsManager } from '@/hooks/useNewsManager'
 import { usePipelineStatus } from '@/hooks/usePipelineStatus'
 import { useDiscussionManager } from '@/hooks/useDiscussionManager'
 import { useNewsAutoRotation } from '@/hooks/useNewsAutoRotation'
-import { usePipelineStore } from '@/stores/pipeline-store'
+
 
 export default function HomePage() {
   console.log('[UI] ===== MAIN PAGE COMPONENT RENDERED =====')
@@ -53,9 +53,7 @@ export default function HomePage() {
   // 设置面板状态
   const [isSettingsPanelVisible, setIsSettingsPanelVisible] = useState(false)
   
-  // 流水线监控面板状态
-  const showMonitorPanel = usePipelineStore(state => state.showMonitorPanel)
-  const toggleMonitorPanel = usePipelineStore(state => state.toggleMonitorPanel)
+
 
   // 使用自定义hooks
   const { news, newsError, activeNewsIndex, fetchNews, setActiveNewsIndex } = useNewsManager()
@@ -160,17 +158,10 @@ export default function HomePage() {
             Start Discussion
           </button>
           
-          <button 
-            onClick={toggleMonitorPanel}
-            className="ml-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            {showMonitorPanel ? '关闭监控' : '打开流水线监控'}
-          </button>
+
         </div>
       </div>
-      
-      {/* 流水线监控面板 */}
-      {showMonitorPanel && <PipelineMonitor />}
+
     </div>
   )
 }
