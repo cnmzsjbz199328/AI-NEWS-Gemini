@@ -52,7 +52,7 @@ export class IndexTTSPrivateClient {
   private readonly hfToken: string
   private readonly maxRetries = 1  // 移除Client层重试，由上层Integrated处理
   private readonly retryDelay = 1500  // 减少重试延迟
-  private readonly requestTimeout = 45000  // 45秒超时（之前可能太长）
+  private readonly requestTimeout = 90000  // 90秒超时 - 增加以适应多个音频片段的生成时间
 
   constructor() {
     // 从环境变量获取HF token
@@ -61,7 +61,7 @@ export class IndexTTSPrivateClient {
       console.error('[IndexTTS-Client] ❌ HF_TOKEN not found')
       throw new Error('HF_TOKEN is required for private Space access')
     }
-    console.log('[IndexTTS-Client] ✅ Client initialized with 45s timeout')
+    console.log('[IndexTTS-Client] ✅ Client initialized with 90s timeout')
   }
 
   /**

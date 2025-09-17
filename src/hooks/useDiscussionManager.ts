@@ -70,6 +70,64 @@ export function useDiscussionManager({
     updateStatus('Pipeline started - generating unified script...')
   }, [updateStatus])
 
+  const waitForPipelineCompletion = useCallback(async (): Promise<void> => {
+    console.log('[UI] Waiting for pipeline completion...')
+    
+    const pollInterval = 2000 // 2 seconds
+    const maxWaitTime = 300000 // 5 minutes max wait
+    const startTime = Date.now()
+    
+    return new Promise((resolve, reject) => {
+      const checkStatus = async () => {
+        try {
+          const response = await fetch('/api/pipeline/status')
+          if (!response.ok) {
+            console.warn('[UI] Failed to fetch pipeline status:', response.status)
+            return
+          }
+          
+          const status = await response.json()
+          console.log('[UI] Pipeline status check:', {
+            isActive: status.isActive,
+            completedTasks: status.completedTasks,
+            totalTasks: status.totalTasks,
+            progressPercentage: status.progressPercentage
+          })
+          
+          // Update status with progress
+          if (status.totalTasks > 0) {
+            updateStatus(`Processing discussion... ${status.progressPercentage}% complete (${status.completedTasks}/${status.totalTasks} tasks)`)
+          }
+          
+          // Pipeline is complete when it's no longer active and all tasks are done
+          if (!status.isActive && status.totalTasks > 0 && status.completedTasks === status.totalTasks) {
+            console.log('[UI] Pipeline completed successfully!')
+            clearInterval(pollIntervalId)
+            resolve()
+            return
+          }
+          
+          // Check for timeout
+          if (Date.now() - startTime > maxWaitTime) {
+            console.warn('[UI] Pipeline wait timeout after 5 minutes')
+            clearInterval(pollIntervalId)
+            reject(new Error('Pipeline completion timeout'))
+            return
+          }
+          
+        } catch (error) {
+          console.error('[UI] Error checking pipeline status:', error)
+        }
+      }
+      
+      // Start polling
+      const pollIntervalId = setInterval(checkStatus, pollInterval)
+      
+      // Initial check
+      checkStatus()
+    })
+  }, [updateStatus])
+
   const startDiscussion = useCallback(async () => {
     console.log('[UI] startDiscussion called!')
     if (state.isDebating || news.length === 0) {
@@ -99,17 +157,26 @@ export function useDiscussionManager({
     updateStatus('The discussion is starting...')
 
     try {
+      // Start the pipeline
       await startPipelineAPI(currentNews.title, currentNews.description)
+      
+      // Wait for pipeline to complete
+      await waitForPipelineCompletion()
+      
+      // Pipeline completed successfully
+      updateStatus('Discussion finished. Click Start to begin again.')
+      
     } catch (e: any) {
+      console.error('[UI] Discussion error:', e)
       updateError(`An error occurred: ${e.message}`)
     } finally {
+      // Always set isDebating to false when done
       setState((prev: AppState) => ({ 
         ...prev, 
         isDebating: false
       }))
-      updateStatus('Discussion finished. Click Start to begin again.')
     }
-  }, [state.isDebating, news, activeNewsIndex, setState, updateStatus, updateError, startPipelineAPI])
+  }, [state.isDebating, news, activeNewsIndex, setState, updateStatus, updateError, startPipelineAPI, waitForPipelineCompletion])
 
   return {
     startDiscussion,

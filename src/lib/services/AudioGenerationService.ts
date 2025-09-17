@@ -12,7 +12,7 @@ export interface AudioGenerationResult {
 }
 
 export class AudioGenerationService {
-  private readonly timeoutMs: number = 60000 // 60秒超时
+  private readonly timeoutMs: number = 120000 // 120秒超时 - 增加以适应多个音频片段的生成时间
 
   /**
    * 执行音频生成任务
@@ -41,23 +41,13 @@ export class AudioGenerationService {
 
       console.log(`🎵 Generating ${ttsItems.length} audio items for task: ${task.id} using IndexTTS`)
 
-      // 使用 IndexTTS 批量生成语音（添加超时保护和取消机制）
-      const controller = new AbortController()
+      // 使用 IndexTTS 批量生成语音（直接调用，依赖底层超时机制）
+      console.log(`🕐 Starting batch speech generation (timeout handled by IndexTTS service)`)
       
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => {
-          controller.abort() // 尝试取消正在进行的请求
-          reject(new Error(`TTS generation timeout after ${this.timeoutMs / 1000} seconds`))
-        }, this.timeoutMs)
+      const batchResults = await indexTTSService.generateBatchSpeech(ttsItems, { 
+        emotion: 'neutral',
+        speed: 1.0 
       })
-      
-      const batchResults = await Promise.race([
-        indexTTSService.generateBatchSpeech(ttsItems, { 
-          emotion: 'neutral',
-          speed: 1.0 
-        }),
-        timeoutPromise
-      ]) as any[]
 
       // 检查生成结果
       const successfulResults = batchResults.filter(r => r.success)

@@ -52,7 +52,7 @@ export class IndexTTSService {
       try {
         // 使用token连接私有Space
         const connectOptions: any = {
-          timeout: 60000
+          timeout: 120000 // 增加连接超时到120秒
         }
         
         if (this.hfToken) {
