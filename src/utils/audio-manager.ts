@@ -93,6 +93,23 @@ export class AudioManager {
   }
 
   /**
+   * 设置新队列并开始播放
+   * @param items - 要播放的完整音频项目列表
+   */
+  setQueueAndPlay(items: AudioItem[]): void {
+    console.log(`[AudioManager] Setting new queue with ${items.length} items and starting playback.`)
+    this.clearQueue()
+
+    items.forEach(item => {
+      const updatedItem = { ...item, state: 'ready' as AudioPlaybackState }
+      this.audioQueue.set(item.sequenceNumber, updatedItem)
+    })
+
+    this.notifyStateChange()
+    this.tryPlayNext()
+  }
+
+  /**
    * 检查并播放下一个语音
    */
   async tryPlayNext(): Promise<void> {

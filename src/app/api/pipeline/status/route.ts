@@ -32,23 +32,38 @@ export async function GET() {
       }
     })
 
-    // 计算进度百分比
-    const progressPercentage = pipelineState.totalTasks > 0 
-      ? Math.round((pipelineState.completedTasks / pipelineState.totalTasks) * 100)
-      : 0
+    // 定义各状态的进度权重
+    const progressWeights = {
+      PENDING_TEXT: 0,
+      GENERATING_TEXT: 0.25,
+      PENDING_AUDIO: 0.5,
+      GENERATING_AUDIO: 0.75,
+      READY_TO_PLAY: 1,
+      PLAYING: 1, // PLAYING 状态也视为100%
+      DONE: 1,      // DONE 状态也视为100%
+      FAILED: 1     // FAILED 状态也视为100%，因为它已结束
+    }
 
-    // 获取任务详情（不包含大量数据，只包含关键信息）
-    const taskSummaries = pipelineState.tasks.map(task => ({
-      id: task.id,
-      newsTopic: task.newsTopic.substring(0, 50) + (task.newsTopic.length > 50 ? '...' : ''),
-      status: task.status,
-      assignedWorker: task.assignedWorker,
-      hasScript: !!task.script,
-      hasAudio: !!task.audioPlaylist,
-      error: task.error,
-      createdAt: task.createdAt,
-      updatedAt: task.updatedAt
-    }))
+    // --- 详细日志开始 ---
+    console.log(`[Status API] Polling at ${new Date().toISOString()}`)
+    console.log(`[Status API] Is pipeline active? ${pipelineState.isActive}`)
+    console.log(`[Status API] Total tasks: ${pipelineState.tasks.length}`)
+    pipelineState.tasks.forEach((task, index) => {
+      console.log(`[Status API] Task ${index}: ID=${task.id}, Status=${task.status}`)
+    })
+    // --- 详细日志结束 ---
+
+    // 计算总进度
+    let totalProgress = 0
+    pipelineState.tasks.forEach(task => {
+      totalProgress += progressWeights[task.status as keyof typeof progressWeights] || 0
+    })
+
+    const progressPercentage = pipelineState.totalTasks > 0
+      ? Math.round((totalProgress / pipelineState.totalTasks) * 100)
+      : 0
+    
+    console.log(`[Status API] Calculated totalProgress=${totalProgress}, progressPercentage=${progressPercentage}%`)
 
     // 获取下一个可播放的任务
     const nextPlayableTask = orchestrator.getNextPlayableTask()
@@ -60,7 +75,7 @@ export async function GET() {
       currentPlayIndex: pipelineState.currentPlayIndex,
       progressPercentage,
       statusCounts,
-      tasks: taskSummaries,
+      tasks: pipelineState.tasks, // 返回完整的任务对象
       nextPlayableTask: nextPlayableTask ? {
         id: nextPlayableTask.id,
         newsTopic: nextPlayableTask.newsTopic.substring(0, 50) + '...'

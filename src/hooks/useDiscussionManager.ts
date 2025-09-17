@@ -99,9 +99,9 @@ export function useDiscussionManager({
             updateStatus(`Processing discussion... ${status.progressPercentage}% complete (${status.completedTasks}/${status.totalTasks} tasks)`)
           }
           
-          // Pipeline is complete when it's no longer active and all tasks are done
-          if (!status.isActive && status.totalTasks > 0 && status.completedTasks === status.totalTasks) {
-            console.log('[UI] Pipeline completed successfully!')
+          // Pipeline is complete when all tasks are processed (progress is 100%)
+          if (status.progressPercentage === 100) {
+            console.log('[UI] Pipeline processing completed (100%)!')
             clearInterval(pollIntervalId)
             resolve()
             return
@@ -164,13 +164,15 @@ export function useDiscussionManager({
       await waitForPipelineCompletion()
       
       // Pipeline completed successfully
-      updateStatus('Discussion finished. Click Start to begin again.')
+      updateStatus('Discussion ready. Playback will start automatically.')
+      
+      // The playback is handled by usePlaybackController, so we just need to wait.
+      // We can consider setting isDebating to false after a certain period of inactivity.
       
     } catch (e: any) {
       console.error('[UI] Discussion error:', e)
       updateError(`An error occurred: ${e.message}`)
-    } finally {
-      // Always set isDebating to false when done
+      // Set isDebating to false on error to allow retry
       setState((prev: AppState) => ({ 
         ...prev, 
         isDebating: false

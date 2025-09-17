@@ -18,16 +18,17 @@ import { TextGenerationService } from './services/TextGenerationService'
 import { AudioGenerationService } from './services/AudioGenerationService'
 import { NotificationService, createWebSocketListener } from './services/NotificationService'
 
+
+// 在开发模式下，为了防止热更新重置单例状态，我们将实例挂载到全局对象上
+declare const global: typeof globalThis & {
+  pipelineSchedulerInstance?: PipelineScheduler
+}
+
 export class PipelineScheduler {
   private static instance: PipelineScheduler | null = null
   private isActive: boolean = false
 
-  // 各个管理器和服务
-  private taskManager: TaskManager
-  private workerManager: WorkerManager
-  private textGenerationService: TextGenerationService
-  private audioGenerationService: AudioGenerationService
-  private notificationService: NotificationService
+  // ... (rest of the class is the same)
 
   private constructor() {
     this.taskManager = new TaskManager()
@@ -41,13 +42,23 @@ export class PipelineScheduler {
   }
 
   /**
-   * 获取单例实例
+   * 获取单例实例（兼容开发模式的热更新）
    */
   public static getInstance(): PipelineScheduler {
-    if (!PipelineScheduler.instance) {
-      PipelineScheduler.instance = new PipelineScheduler()
+    if (process.env.NODE_ENV === 'production') {
+      // 生产环境下使用标准单例
+      if (!PipelineScheduler.instance) {
+        PipelineScheduler.instance = new PipelineScheduler()
+      }
+      return PipelineScheduler.instance
+    } else {
+      // 开发环境下使用全局对象，防止热更新丢失状态
+      if (!global.pipelineSchedulerInstance) {
+        console.log('Initializing global PipelineScheduler instance for development.')
+        global.pipelineSchedulerInstance = new PipelineScheduler()
+      }
+      return global.pipelineSchedulerInstance
     }
-    return PipelineScheduler.instance
   }
 
   /**

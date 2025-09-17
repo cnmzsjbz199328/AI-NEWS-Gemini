@@ -158,11 +158,13 @@ export class TaskManager {
    */
   public markTaskAsCompleted(taskId: string): boolean {
     const task = this.tasks.find(t => t.id === taskId)
-    if (task && task.status === 'READY_TO_PLAY') {
-      this.updateTaskStatus(taskId, 'DONE')
-      return true
+    if (task) {
+      if (task.status !== 'DONE') {
+        this.updateTaskStatus(taskId, 'DONE')
+      }
+      return true // 只要找到任务就返回成功
     }
-    return false
+    return false // 仅当任务不存在时返回失败
   }
 
   /**
