@@ -62,16 +62,19 @@ export class AudioPlayer {
         }
         audio.addEventListener('timeupdate', timeUpdateListener)
         
-        // 当音频结束时清除监听器
-        const originalOnEnded = audio.onended
-        audio.onended = (event) => {
-          audio.removeEventListener('timeupdate', timeUpdateListener)
-          if (originalOnEnded) originalOnEnded.call(audio, event)
-        }
+        // 保存监听器引用以便在结束时清理
+        ;(audio as any)._timeUpdateListener = timeUpdateListener
       }
 
       audio.onended = () => {
         console.log(`[AudioPlayer] 🏁 Audio playback completed`)
+        
+        // 清理时间更新监听器
+        const timeUpdateListener = (audio as any)._timeUpdateListener
+        if (timeUpdateListener) {
+          audio.removeEventListener('timeupdate', timeUpdateListener)
+        }
+        
         this.cleanup()
         events.onEnded?.()
         resolve()

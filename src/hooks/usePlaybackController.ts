@@ -188,13 +188,22 @@ export function usePlaybackController({
       console.log(`[PlaybackController] Task ${index}: ID=${task.id}, Status=${task.status}, Processed=${processedTasksRef.current.has(task.id)}`)
     })
 
-    // 查找READY_TO_PLAY状态的任务
+    // 优先查找READY_TO_PLAY状态的任务
     const readyTasks = pipelineStatus.tasks.filter((task: any) => 
       task.status === 'READY_TO_PLAY' && 
       !processedTasksRef.current.has(task.id)
     )
 
-    // 如果没有READY_TO_PLAY任务，检查是否有已完成的任务可以重播
+    if (readyTasks.length > 0) {
+      console.log(`[PlaybackController] 🎵 Found ${readyTasks.length} ready tasks`)
+      for (const task of readyTasks) {
+        console.log(`[PlaybackController] 🚀 Starting ready task: ${task.id}`)
+        playTask(task) // 不需要await，playTask内部会处理异步
+      }
+      return // 处理完READY_TO_PLAY任务后直接返回，不处理重播
+    }
+
+    // 只有在没有READY_TO_PLAY任务时，才考虑重播已完成的任务
     const completedTasks = pipelineStatus.tasks.filter((task: any) => 
       task.status === 'DONE' && 
       task.audioPlaylist && 
@@ -202,30 +211,27 @@ export function usePlaybackController({
       !processedTasksRef.current.has(`replay-${task.id}`)
     )
 
-    console.log(`[PlaybackController] 📋 Found ${readyTasks.length} ready tasks, ${completedTasks.length} completed tasks for replay`)
+    console.log(`[PlaybackController] 📋 Found 0 ready tasks (already processed), ${completedTasks.length} completed tasks for replay`)
 
     const currentPlaybackState = audioManager.current.getPlaybackState()
     console.log(`[PlaybackController] 🎵 Current playback state: isPlaying=${currentPlaybackState.isPlaying}, speaker=${currentPlaybackState.currentSpeaker}`)
 
-    // 优先播放READY_TO_PLAY任务，如果没有则重播已完成任务
-    const taskToPlay = readyTasks[0] || completedTasks[0]
+    // 只处理已完成任务的重播
+    const taskToReplay = completedTasks[0]
 
-    if (taskToPlay && !currentPlaybackState.isPlaying) {
-      const isReplay = taskToPlay.status === 'DONE'
-      const taskKey = isReplay ? `replay-${taskToPlay.id}` : taskToPlay.id
+    if (taskToReplay && !currentPlaybackState.isPlaying) {
+      const replayKey = `replay-${taskToReplay.id}`
       
-      console.log(`[PlaybackController] 🎯 Found ${isReplay ? 'completed' : 'ready'} task: ${taskToPlay.id}`)
-      console.log(`[PlaybackController] 📝 Task script available: ${!!taskToPlay.script}`)
-      console.log(`[PlaybackController] 🎧 Task audioPlaylist available: ${!!taskToPlay.audioPlaylist}`)
+      console.log(`[PlaybackController] 🔄 Found completed task for replay: ${taskToReplay.id}`)
+      console.log(`[PlaybackController] 📝 Task script available: ${!!taskToReplay.script}`)
+      console.log(`[PlaybackController] 🎧 Task audioPlaylist available: ${!!taskToReplay.audioPlaylist}`)
       
-      if (isReplay) {
-        console.log(`[PlaybackController] 🔄 Replaying completed task: ${taskToPlay.id}`)
-      }
+      console.log(`[PlaybackController] 🔄 Auto-replaying completed task: ${taskToReplay.id}`)
       
-      processedTasksRef.current.add(taskKey)
-      playTask(taskToPlay)
+      processedTasksRef.current.add(replayKey)
+      playTask(taskToReplay)
       
-    } else if (!taskToPlay) {
+    } else if (!taskToReplay) {
       console.log(`[PlaybackController] ⏳ No tasks available for playback`)
       
       // 如果没有准备好的任务，并且AudioManager认为还在播放，重置其状态

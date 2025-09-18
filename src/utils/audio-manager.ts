@@ -48,11 +48,18 @@ export class AudioManager {
 
   // 播放控制
   async tryPlayNext(): Promise<void> {
-    if (this.audioPlayer.isPlaying()) return
+    if (this.audioPlayer.isPlaying()) {
+      console.log(`[AudioManager] ⏸️ Player already playing, skipping`)
+      return
+    }
 
     const nextItem = this.queueManager.getNextItem()
-    if (!nextItem) return
+    if (!nextItem) {
+      console.log(`[AudioManager] 📭 No next item in queue`)
+      return
+    }
 
+    console.log(`[AudioManager] ▶️ Found next item: ${nextItem.speaker} seq:${nextItem.sequenceNumber}`)
     await this.playItem(nextItem)
   }
 
