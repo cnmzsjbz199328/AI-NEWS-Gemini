@@ -27,21 +27,22 @@ export function usePlaybackController({
 
     // 设置说话人变化回调（用于字幕和动画同步）
     audioManager.current.setSpeakerChangeCallback((speaker, text, action) => {
-      console.log(`[PlaybackController] Speaker change: ${speaker} - ${action} - ${text.substring(0, 50)}`)
+      console.log(`[LOG-CHAIN] 1. AudioManager fired onSpeakerChange. Speaker: ${speaker}, Action: ${action}`)
       
       if (action === 'start' && speaker) {
-        // 开始说话：设置动画状态为speaking，添加字幕
+        console.log(`[LOG-CHAIN] 2. PlaybackController is calling onSpeakerStateChange with 'speaking'.`);
         onSpeakerStateChange(speaker, 'speaking')
         if (onConversationUpdate) {
+          console.log(`[LOG-CHAIN] 2b. PlaybackController is calling onConversationUpdate.`);
           onConversationUpdate(speaker, text, 'add')
         }
       } else if (action === 'end') {
         if (speaker) {
-          // 结束说话：设置动画状态为idle
+          console.log(`[LOG-CHAIN] 2. PlaybackController is calling onSpeakerStateChange with 'idle'.`);
           onSpeakerStateChange(speaker, 'idle')
         } else {
-          // 重置所有说话人状态
           const speakers: Speaker[] = ['moderator', 'tom', 'mark']
+          console.log(`[LOG-CHAIN] 2. PlaybackController is resetting all speakers to 'idle'.`);
           speakers.forEach(s => onSpeakerStateChange(s, 'idle'))
         }
       }
@@ -50,15 +51,40 @@ export function usePlaybackController({
 
   const playTask = useCallback(async (task: any) => {
     try {
+      console.log(`[PlaybackController] 🚀 Starting to play task: ${task.id}`)
+      console.log(`[PlaybackController] 📋 Task details:`, {
+        id: task.id,
+        status: task.status,
+        hasScript: !!task.script,
+        hasAudioPlaylist: !!task.audioPlaylist,
+        newsTopic: task.newsTopic?.substring(0, 50) + '...'
+      })
+
       if (task.audioPlaylist && task.script) {
         console.log(`[PlaybackController] ✅ Preparing audio queue for task: ${task.id}`)
         const audioItems = await createAudioQueue(task.audioPlaylist, task.script)
         
+        console.log(`[PlaybackController] 🎵 Created ${audioItems.length} audio items`)
+        
         if (audioItems.length > 0) {
+          console.log(`[PlaybackController] 🎬 Setting queue and starting playback...`)
           audioManager.current.setQueueAndPlay(audioItems)
+          
           // 标记任务为已播放
-          await fetch(`/api/pipeline/task/${task.id}/mark-played`, { method: 'POST' })
+          try {
+            await fetch(`/api/pipeline/task/${task.id}/mark-played`, { method: 'POST' })
+            console.log(`[PlaybackController] ✅ Task ${task.id} marked as played`)
+          } catch (markError) {
+            console.warn(`[PlaybackController] ⚠️ Failed to mark task as played:`, markError)
+          }
+        } else {
+          console.warn(`[PlaybackController] ⚠️ No audio items created for task ${task.id}`)
         }
+      } else {
+        console.error(`[PlaybackController] ❌ Task ${task.id} missing required data:`, {
+          hasAudioPlaylist: !!task.audioPlaylist,
+          hasScript: !!task.script
+        })
       }
     } catch (error) {
       console.error(`[PlaybackController] ❌ Failed to play task ${task.id}:`, error)
@@ -121,19 +147,46 @@ export function usePlaybackController({
   }, [])
 
   const fetchAudioBlob = useCallback(async (audioUrl: string): Promise<Blob> => {
-    // 将Hugging Face URL重写为使用我们的API代理
-    const proxyUrl = `/api/audio/${audioUrl}`;
-    console.log(`[PlaybackController] Fetching audio via proxy: ${proxyUrl}`)
+    try {
+      // 将Hugging Face URL重写为使用我们的API代理
+      const proxyUrl = `/api/audio/${audioUrl}`;
+      console.log(`[PlaybackController] 🎵 Fetching audio via proxy: ${proxyUrl}`)
 
-    const response = await fetch(proxyUrl)
-    if (!response.ok) {
-      throw new Error(`Failed to fetch audio blob: ${response.status}`)
+      const response = await fetch(proxyUrl)
+      console.log(`[PlaybackController] 📡 Audio fetch response: status=${response.status}, ok=${response.ok}`)
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error(`[PlaybackController] ❌ Audio fetch failed: ${response.status} - ${errorText}`)
+        throw new Error(`Failed to fetch audio blob: ${response.status} - ${errorText}`)
+      }
+      
+      const blob = await response.blob()
+      console.log(`[PlaybackController] 🎵 Audio blob received: size=${blob.size} bytes, type=${blob.type}`)
+      
+      if (blob.size === 0) {
+        throw new Error('Received empty audio blob')
+      }
+      
+      return blob
+    } catch (error) {
+      console.error(`[PlaybackController] ❌ fetchAudioBlob error:`, error)
+      throw error
     }
-    return await response.blob()
   }, [])
 
   useEffect(() => {
-    if (!pipelineStatus || !pipelineStatus.tasks) return
+    if (!pipelineStatus || !pipelineStatus.tasks) {
+      console.log('[PlaybackController] No pipeline status or tasks available')
+      return
+    }
+
+    console.log(`[PlaybackController] 🔍 Pipeline check - Active: ${pipelineStatus.isActive}, Tasks: ${pipelineStatus.tasks.length}`)
+    
+    // 打印所有任务状态用于调试
+    pipelineStatus.tasks.forEach((task: any, index: number) => {
+      console.log(`[PlaybackController] Task ${index}: ID=${task.id}, Status=${task.status}, Processed=${processedTasksRef.current.has(task.id)}`)
+    })
 
     // 查找READY_TO_PLAY状态的任务
     const readyTasks = pipelineStatus.tasks.filter((task: any) => 
@@ -141,15 +194,47 @@ export function usePlaybackController({
       !processedTasksRef.current.has(task.id)
     )
 
+    // 如果没有READY_TO_PLAY任务，检查是否有已完成的任务可以重播
+    const completedTasks = pipelineStatus.tasks.filter((task: any) => 
+      task.status === 'DONE' && 
+      task.audioPlaylist && 
+      task.script &&
+      !processedTasksRef.current.has(`replay-${task.id}`)
+    )
+
+    console.log(`[PlaybackController] 📋 Found ${readyTasks.length} ready tasks, ${completedTasks.length} completed tasks for replay`)
+
     const currentPlaybackState = audioManager.current.getPlaybackState()
-    if (readyTasks.length > 0 && !currentPlaybackState.isPlaying) {
-      // 按创建时间排序，播放最早的任务
-      const nextTask = readyTasks.sort((a: any, b: any) => a.createdAt - b.createdAt)[0]
+    console.log(`[PlaybackController] 🎵 Current playback state: isPlaying=${currentPlaybackState.isPlaying}, speaker=${currentPlaybackState.currentSpeaker}`)
+
+    // 优先播放READY_TO_PLAY任务，如果没有则重播已完成任务
+    const taskToPlay = readyTasks[0] || completedTasks[0]
+
+    if (taskToPlay && !currentPlaybackState.isPlaying) {
+      const isReplay = taskToPlay.status === 'DONE'
+      const taskKey = isReplay ? `replay-${taskToPlay.id}` : taskToPlay.id
       
-      console.log(`[PlaybackController] 🎯 Found ready task: ${nextTask.id}`)
-      processedTasksRef.current.add(nextTask.id)
+      console.log(`[PlaybackController] 🎯 Found ${isReplay ? 'completed' : 'ready'} task: ${taskToPlay.id}`)
+      console.log(`[PlaybackController] 📝 Task script available: ${!!taskToPlay.script}`)
+      console.log(`[PlaybackController] 🎧 Task audioPlaylist available: ${!!taskToPlay.audioPlaylist}`)
       
-      playTask(nextTask)
+      if (isReplay) {
+        console.log(`[PlaybackController] 🔄 Replaying completed task: ${taskToPlay.id}`)
+      }
+      
+      processedTasksRef.current.add(taskKey)
+      playTask(taskToPlay)
+      
+    } else if (!taskToPlay) {
+      console.log(`[PlaybackController] ⏳ No tasks available for playback`)
+      
+      // 如果没有准备好的任务，并且AudioManager认为还在播放，重置其状态
+      if (currentPlaybackState.isPlaying) {
+        console.log(`[PlaybackController] 🔄 No tasks but AudioManager thinks it's playing. Stopping all.`)
+        audioManager.current.stopAll()
+      }
+    } else {
+      console.log(`[PlaybackController] 🎵 Audio already playing, skipping new tasks`)
     }
   }, [pipelineStatus, playTask])
 
@@ -169,12 +254,49 @@ export function usePlaybackController({
     audioManager.current.stopAll()
   }, [])
 
+  const replayLastTask = useCallback(() => {
+    console.log('[PlaybackController] 🔄 Replay button clicked!')
+    
+    if (!pipelineStatus || !pipelineStatus.tasks) {
+      console.log('[PlaybackController] No tasks available for replay')
+      return
+    }
+
+    console.log(`[PlaybackController] Found ${pipelineStatus.tasks.length} total tasks`)
+
+    // 找到最后一个已完成的任务
+    const completedTasks = pipelineStatus.tasks
+      .filter((task: any) => task.status === 'DONE' && task.audioPlaylist && task.script)
+      .sort((a: any, b: any) => b.createdAt - a.createdAt) // 按时间倒序
+
+    console.log(`[PlaybackController] Found ${completedTasks.length} completed tasks`)
+
+    if (completedTasks.length === 0) {
+      console.log('[PlaybackController] No completed tasks found for replay')
+      return
+    }
+
+    const taskToReplay = completedTasks[0]
+    console.log(`[PlaybackController] 🔄 Manually replaying task: ${taskToReplay.id}`)
+
+    // 停止当前播放
+    audioManager.current.stopAll()
+    
+    // 清除重播标记以允许重新播放
+    const replayKey = `replay-${taskToReplay.id}`
+    processedTasksRef.current.delete(replayKey)
+    
+    // 播放任务
+    setTimeout(() => playTask(taskToReplay), 100)
+  }, [pipelineStatus, playTask])
+
   // 获取AudioManager的播放状态
   const playbackState = audioManager.current.getPlaybackState()
 
   return {
     isPlaying: playbackState.isPlaying,
     currentSpeaker: playbackState.currentSpeaker,
-    stopPlayback: stopPlaybackController
+    stopPlayback: stopPlaybackController,
+    replayLastTask
   }
 }

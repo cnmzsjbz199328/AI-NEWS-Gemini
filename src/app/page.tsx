@@ -79,21 +79,27 @@ export default function HomePage() {
 
   // 音频播放控制
   const updateSpeakerAnimationState = useCallback((speaker: Speaker, animationState: 'speaking' | 'static') => {
-    setState(prevState => ({
-      ...prevState,
-      speakersState: {
-        ...prevState.speakersState,
-        [speaker]: {
-          ...prevState.speakersState[speaker],
-          animationState
+    console.log(`[LOG-CHAIN] 3. page.tsx received state update. Speaker: ${speaker}, State: ${animationState}`);
+    setState(prevState => {
+      const newState = {
+        ...prevState,
+        speakersState: {
+          ...prevState.speakersState,
+          [speaker]: {
+            ...prevState.speakersState[speaker],
+            animationState
+          }
         }
       }
-    }))
+      console.log(`[LOG-CHAIN] 4. page.tsx is setting new state.`, newState.speakersState);
+      return newState;
+    })
   }, [])
 
   // 更新对话记录的回调
   const updateConversation = useCallback((speaker: Speaker, text: string, action: 'add' | 'remove') => {
     if (action === 'add') {
+      console.log(`[LOG-CHAIN] 3b. page.tsx received conversation update for ${speaker}.`);
       const newEntry = {
         id: `${speaker}-${Date.now()}`,
         speaker,
@@ -104,11 +110,10 @@ export default function HomePage() {
         ...prevState,
         conversation: [...prevState.conversation, newEntry]
       }))
-      console.log(`[UI] Added conversation entry for ${speaker}: ${text.substring(0, 50)}`)
     }
   }, [])
 
-  const { isPlaying, currentSpeaker } = usePlaybackController({
+  const { isPlaying, currentSpeaker, replayLastTask } = usePlaybackController({
     pipelineStatus,
     onSpeakerStateChange: (speaker, speakingState) => {
       updateSpeakerAnimationState(speaker, speakingState === 'speaking' ? 'speaking' : 'static')
@@ -198,7 +203,13 @@ export default function HomePage() {
             Start Discussion
           </button>
           
-
+          <button 
+            onClick={replayLastTask} 
+            disabled={state.isDebating}
+            style={{ marginLeft: '10px' }}
+          >
+            🔄 Replay Last
+          </button>
         </div>
       </div>
 

@@ -4,13 +4,11 @@ import { formatStorageUsage } from '../ui/formatters'
 
 interface AdvancedSettingsProps {
   showDebugInfo: boolean
-  useFallbackTTS: boolean
-  onUpdateSetting: (key: 'showDebugInfo' | 'useFallbackTTS', value: boolean) => void
+  onUpdateSetting: (key: 'showDebugInfo', value: boolean) => void
 }
 
 export default function AdvancedSettings({
   showDebugInfo,
-  useFallbackTTS,
   onUpdateSetting
 }: AdvancedSettingsProps) {
   const storageUsage = VoiceStorageManager.getStorageUsage()
@@ -24,12 +22,6 @@ export default function AdvancedSettings({
           checked={showDebugInfo}
           onChange={(checked) => onUpdateSetting('showDebugInfo', checked)}
           label="显示调试信息"
-        />
-
-        <Switch
-          checked={useFallbackTTS}
-          onChange={(checked) => onUpdateSetting('useFallbackTTS', checked)}
-          label="使用备用语音合成"
         />
       </div>
 

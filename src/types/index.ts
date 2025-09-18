@@ -49,7 +49,6 @@ export interface AudioItem {
   state: AudioPlaybackState;
   timestamp?: number;
   onPlaybackStart?: () => void;
-  useFallbackTTS?: boolean; // 是否使用备用 TTS
 }
 
 // 角色状态

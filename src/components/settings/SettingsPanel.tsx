@@ -25,7 +25,6 @@ interface AppSettings {
   theme: 'light' | 'dark' | 'auto'
   language: 'en' | 'zh' | 'auto'
   debateSpeed: 'slow' | 'normal' | 'fast'
-  useFallbackTTS: boolean
   showDebugInfo: boolean
   ttsService: 'indexTTS' | 'cosyVoice'
 }
@@ -37,7 +36,6 @@ const DEFAULT_SETTINGS: AppSettings = {
   theme: 'auto',
   language: 'auto',
   debateSpeed: 'normal',
-  useFallbackTTS: false,
   showDebugInfo: false,
   ttsService: 'indexTTS'
 }
@@ -198,7 +196,6 @@ export default function SettingsPanel({
             {activeTab === 'advanced' && (
               <AdvancedSettings
                 showDebugInfo={settings.showDebugInfo}
-                useFallbackTTS={settings.useFallbackTTS}
                 onUpdateSetting={updateSetting}
               />
             )}

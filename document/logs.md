@@ -1,21 +1,29 @@
-GET http://localhost:3001/favicon.ico 404 (Not Found)Understand this error
-usePlaybackController.ts:60  POST http://localhost:3001/api/pipeline/task/task-1758113464395-0/mark-played 404 (Not Found)
-Processing discussion... 75% complete (0/1 tasks)
-tatus API] Calculated totalProgress=0, progressPercentage=0% 
- GET /api/pipeline/status 200 in 7ms
-Subscribed to event: task:updated
-Subscribed to event: task:created
-Subscribed to event: task:completed
-Subscribed to event: task:failed
-[Mark Played API] 🎵 Marking task as played: task-1758113464395-0
- POST /api/pipeline/task/task-1758113464395-0/mark-played 404 in 909ms
-(node:23864) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.    
-(Use `node --trace-deprecation ...` to show where the warning was created)
-[Status API] Polling at 2025-09-17T12:52:36.113Z
-[Status API] Is pipeline active? false
-[Status API] Total tasks: 0
-[Status API] Calculated totalProgress=0, progressPercentage=0% 
- GET /api/pipeline/status 200 in 8ms
-[Status API] Polling at 2025-09-17T12:52:36.413Z
-[Status API] Is pipeline active? false
-[Status API] Total tasks: 0
+[LOG-CHAIN] 1. AudioManager fired onSpeakerChange. Speaker: null, Action: end
+usePlaybackController.ts:45 [LOG-CHAIN] 2. PlaybackController is resetting all speakers to 'idle'.
+page.tsx:82 [LOG-CHAIN] 3. page.tsx received state update. Speaker: moderator, State: static
+page.tsx:82 [LOG-CHAIN] 3. page.tsx received state update. Speaker: tom, State: static
+page.tsx:82 [LOG-CHAIN] 3. page.tsx received state update. Speaker: mark, State: static
+usePlaybackController.ts:30 [LOG-CHAIN] 1. AudioManager fired onSpeakerChange. Speaker: moderator, Action: start
+usePlaybackController.ts:33 [LOG-CHAIN] 2. PlaybackController is calling onSpeakerStateChange with 'speaking'.
+page.tsx:82 [LOG-CHAIN] 3. page.tsx received state update. Speaker: moderator, State: speaking
+usePlaybackController.ts:36 [LOG-CHAIN] 2b. PlaybackController is calling onConversationUpdate.
+page.tsx:102 [LOG-CHAIN] 3b. page.tsx received conversation update for moderator.
+page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
+page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
+page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
+page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
+page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
+page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
+page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
+page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
+usePlaybackController.ts:30 [LOG-CHAIN] 1. AudioManager fired onSpeakerChange. Speaker: null, Action: end
+usePlaybackController.ts:45 [LOG-CHAIN] 2. PlaybackController is resetting all speakers to 'idle'.
+page.tsx:82 [LOG-CHAIN] 3. page.tsx received state update. Speaker: moderator, State: static
+page.tsx:82 [LOG-CHAIN] 3. page.tsx received state update. Speaker: tom, State: static
+page.tsx:82 [LOG-CHAIN] 3. page.tsx received state update. Speaker: mark, State: static
+page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
+page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
+page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
+page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
+page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
+page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
