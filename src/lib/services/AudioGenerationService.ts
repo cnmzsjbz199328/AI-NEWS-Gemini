@@ -13,7 +13,7 @@ export class AudioGenerationService {
       // This service now handles a single audio generation, not a whole task.
       const indexTTSService = getIndexTTSIntegratedService();
 
-      const result = await indexTTSService.generateSpeech(text, speaker, { 
+      const result = await indexTTSService.generateSpeechForRole(text, speaker as any, { 
         emotion: 'neutral',
         speed: 1.0 
       });
