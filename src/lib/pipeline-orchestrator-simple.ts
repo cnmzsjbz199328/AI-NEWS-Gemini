@@ -1,139 +1,89 @@
+import { TaskManager } from './managers/TaskManager';
+import { TextGenerationService } from './services/TextGenerationService';
+import { AudioGenerationService } from './services/AudioGenerationService';
+import { VoiceConfig, SupportedLanguage, PipelineTask } from '@/types';
+
 /**
- * 简化版流水线调度器 - 解决导入问题
+ * Pipeline Orchestrator - Refactored for Statelessness
+ *
+ * This class is now a stateless service responsible for orchestrating the entire
+ * news generation pipeline, from text generation to audio synthesis.
+ * It uses the KV-backed TaskManager to persist and retrieve state at each step.
  */
+export class PipelineOrchestrator {
 
-// 简化的类型定义
-interface SimpleTask {
-  id: string
-  newsTopic: string
-  status: 'PENDING_TEXT' | 'GENERATING_TEXT' | 'PENDING_AUDIO' | 'GENERATING_AUDIO' | 'READY_TO_PLAY' | 'PLAYING' | 'DONE'
-  assignedWorker?: 'Gemini' | 'Mistral' | 'Reka' | null
-  error?: string
-  createdAt: number
-  updatedAt: number
-}
+  /**
+   * Starts the entire pipeline for a given news topic.
+   * This method is designed to be called from an API endpoint and run asynchronously.
+   * It does not return data, but orchestrates the background process.
+   *
+   * @param newsTopic The topic for the news debate.
+   * @param debateRounds The number of debate rounds.
+   * @param voiceConfig The voice configuration for TTS.
+   * @param language The language of the debate.
+   */
+  public static async run(newsTopic: string, debateRounds: number, voiceConfig: VoiceConfig, language: SupportedLanguage): Promise<void> {
+    let taskId: string | null = null;
+    try {
+      // 1. Create and persist the initial task
+      console.log(`[Orchestrator] Creating task for topic: "${newsTopic}"`);
+      const task = await TaskManager.createTask(newsTopic, debateRounds, voiceConfig, language);
+      taskId = task.id;
+      console.log(`[Orchestrator] Task ${taskId} created.`);
 
-interface SimpleWorkerState {
-  type: 'Gemini' | 'Mistral' | 'Reka'
-  isIdle: boolean
-  currentTaskId: string | null
-  lastCompletedAt: number | null
-  errorCount: number
-}
+      // 2. Generate the debate script
+      await TaskManager.updateTaskStatus(taskId, 'GENERATING_TEXT');
+      console.log(`[Orchestrator] Task ${taskId}: Generating script...`);
+      const script = await TextGenerationService.generateDebateScript(newsTopic, debateRounds, language);
+      await TaskManager.saveTaskScript(taskId, script);
+      console.log(`[Orchestrator] Task ${taskId}: Script generated and saved.`);
 
-interface SimplePipelineState {
-  tasks: SimpleTask[]
-  currentPlayIndex: number
-  isActive: boolean
-  totalTasks: number
-  completedTasks: number
-}
+      // 3. Generate audio for each part of the script
+      await TaskManager.updateTaskStatus(taskId, 'GENERATING_AUDIO');
+      console.log(`[Orchestrator] Task ${taskId}: Starting audio generation...`);
 
-export class SimplePipelineOrchestrator {
-  private static instance: SimplePipelineOrchestrator | null = null
-  private tasks: SimpleTask[] = []
-  private currentPlayIndex: number = 0
-  private isActive: boolean = false
-  private workers: Map<string, SimpleWorkerState> = new Map()
+      // Generate moderator intro audio
+      await this.generateAndSaveAudio(taskId, 'moderator_intro', script.moderator_intro, voiceConfig.speaker_id);
 
-  private constructor() {
-    this.initializeWorkers()
-  }
+      // Generate conversation audio in parallel
+      const conversationPromises = script.conversation.map((turn, index) => 
+        this.generateAndSaveAudio(taskId, 'conversation', turn.text, turn.speaker, index)
+      );
+      await Promise.all(conversationPromises);
 
-  public static getInstance(): SimplePipelineOrchestrator {
-    if (!SimplePipelineOrchestrator.instance) {
-      SimplePipelineOrchestrator.instance = new SimplePipelineOrchestrator()
-    }
-    return SimplePipelineOrchestrator.instance
-  }
+      // Generate moderator outro audio
+      await this.generateAndSaveAudio(taskId, 'moderator_outro', script.moderator_outro, voiceConfig.speaker_id);
 
-  private initializeWorkers(): void {
-    const workerTypes = ['Gemini', 'Mistral', 'Reka']
-    
-    workerTypes.forEach(type => {
-      this.workers.set(type, {
-        type: type as any,
-        isIdle: true,
-        currentTaskId: null,
-        lastCompletedAt: null,
-        errorCount: 0
-      })
-    })
-  }
+      console.log(`[Orchestrator] Task ${taskId}: All audio generation requests are complete.`);
+      // The final status update to READY_TO_PLAY is handled within TaskManager.addAudioSegment
 
-  public getState(): SimplePipelineState {
-    const completedTasks = this.tasks.filter(task => task.status === 'DONE').length
-    
-    return {
-      tasks: [...this.tasks],
-      currentPlayIndex: this.currentPlayIndex,
-      isActive: this.isActive,
-      totalTasks: this.tasks.length,
-      completedTasks
-    }
-  }
-
-  public getWorkerStates(): Record<string, SimpleWorkerState> {
-    const result: Record<string, SimpleWorkerState> = {}
-    this.workers.forEach((value, key) => {
-      result[key] = { ...value }
-    })
-    return result
-  }
-
-  public async startPipeline(newsTopics: string[]): Promise<void> {
-    if (this.isActive) {
-      throw new Error('Pipeline is already active')
-    }
-
-    this.tasks = []
-    this.currentPlayIndex = 0
-    this.isActive = true
-
-    newsTopics.forEach((topic, index) => {
-      const task: SimpleTask = {
-        id: `task-${Date.now()}-${index}`,
-        newsTopic: topic,
-        status: 'PENDING_TEXT',
-        assignedWorker: null,
-        createdAt: Date.now(),
-        updatedAt: Date.now()
+    } catch (error) {
+      console.error(`[Orchestrator] Pipeline failed for task ${taskId}:`, error);
+      if (taskId) {
+        await TaskManager.updateTaskStatus(taskId, 'FAILED', error instanceof Error ? error.message : String(error));
       }
-      this.tasks.push(task)
-    })
-
-    console.log(`Simple pipeline started with ${this.tasks.length} tasks`)
+    }
   }
 
-  public stopPipeline(): void {
-    this.isActive = false
-    this.tasks = []
-    this.currentPlayIndex = 0
-    
-    this.workers.forEach(worker => {
-      worker.isIdle = true
-      worker.currentTaskId = null
-    })
-
-    console.log('Simple pipeline stopped')
-  }
-
-  public markCurrentTaskAsCompleted(): boolean {
-    if (this.currentPlayIndex >= this.tasks.length) {
-      return false
+  /**
+   * A helper method to generate a single audio segment and save it via the TaskManager.
+   */
+  private static async generateAndSaveAudio(
+    taskId: string, 
+    type: 'moderator_intro' | 'conversation' | 'moderator_outro',
+    text: string, 
+    speaker: string, 
+    index?: number
+  ): Promise<void> {
+    try {
+      const audioUrl = await AudioGenerationService.generateAudio(text, speaker);
+      await TaskManager.addAudioSegment(taskId, type, audioUrl, text, speaker, index);
+    } catch (error) {
+      // Log the error for the specific segment but don't fail the entire pipeline.
+      // A more robust solution might involve retrying or marking the segment as failed.
+      console.error(`[Orchestrator] Failed to generate audio for task ${taskId}, segment ${index ?? type}:`, error);
+      // We still add a "segment" with an error state to ensure the task completes.
+      await TaskManager.addAudioSegment(taskId, type, 'error:generation_failed', text, speaker, index);
     }
-
-    const task = this.tasks[this.currentPlayIndex]
-    if (task.status === 'READY_TO_PLAY') {
-      task.status = 'DONE'
-      task.updatedAt = Date.now()
-      this.currentPlayIndex++
-      return true
-    }
-
-    return false
   }
 }
-
-// 导出单例实例
-export const simplePipelineOrchestrator = SimplePipelineOrchestrator.getInstance()

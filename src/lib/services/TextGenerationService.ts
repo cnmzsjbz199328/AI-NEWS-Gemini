@@ -4,18 +4,54 @@
  */
 
 import { PipelineTask, AIWorkerType, DebateScript } from '@/types'
-import { aiWorkerPool, WorkerResult } from '../ai-worker-pool'
+import { aiWorkerPool, WorkerResult } from '../ai-worker-pool';
 
 export interface TextGenerationResult {
-  success: boolean
-  script?: DebateScript
-  error?: string
-  shouldRetry: boolean
-  duration?: number
+  success: boolean;
+  script?: DebateScript;
+  error?: string;
+  shouldRetry: boolean;
+  duration?: number;
 }
 
 export class TextGenerationService {
-  private readonly maxRetries: number = 3
+  private readonly maxRetries: number = 3;
+
+  /**
+   * Static entry point to generate a debate script.
+   * This simplifies calls from other services like the orchestrator.
+   */
+  public static async generateDebateScript(topic: string, rounds: number, language: SupportedLanguage): Promise<DebateScript> {
+    // For now, we'll use a default worker type or decide based on some logic.
+    // This part can be expanded later.
+    const workerType: AIWorkerType = 'Gemini'; 
+    const service = new TextGenerationService();
+    
+    // We need a mock PipelineTask object to pass to the execute method.
+    const mockTask: PipelineTask = {
+      id: `text-gen-task-${Date.now()}`,
+      newsTopic: topic,
+      debateRounds: rounds,
+      language: language,
+      status: 'GENERATING_TEXT',
+      // Fill in other required fields with default/mock values
+      script: null,
+      audioPlaylist: null,
+      voiceConfig: { provider: 'XTTS', speaker_id: 'larry', speed: 1.1, language: 'en', cleanup_voice: false },
+      assignedWorker: null,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      retryCount: 0,
+    };
+
+    const result = await service.execute(mockTask, workerType);
+
+    if (result.success && result.script) {
+      return result.script;
+    } else {
+      throw new Error(result.error || 'Text generation failed for an unknown reason.');
+    }
+  }
 
   /**
    * 执行文本生成任务
