@@ -1,8 +1,3 @@
-/**
- * 任务管理器 - 负责任务状态的管理和操作
- * 作为任务状态的唯一真实来源
- */
-
 import { 
   PipelineTask, 
   PipelineTaskStatus, 
@@ -10,187 +5,208 @@ import {
   DebateScript,
   AudioPlaylist,
   SupportedLanguage
-} from '@/types'
+} from '@/types';
+import { TaskStorageService } from '@/lib/services/TaskStorageService';
+import { StoredTask, StoredAudioCollection, StoredAudioItem, AudioItemType } from '@/lib/kv/kv-schemas';
 
+/**
+ * Task Manager - Refactored for Vercel KV
+ * 
+ * This class is now a stateless service that orchestrates business logic.
+ * It uses TaskStorageService for all data persistence.
+ * All methods are static as it no longer holds any internal state.
+ */
 export class TaskManager {
-  private tasks: PipelineTask[] = []
-  private currentPlayIndex: number = 0
 
   /**
-   * 创建新任务
+   * Creates a new task, calculates expected audio, and persists it to KV.
    */
-  public createTasks(
-    newsTopics: string[], 
+  public static async createTask(
+    newsTopic: string, 
     debateRounds: number = 1,
     voiceConfig: VoiceConfig,
     language: SupportedLanguage = 'zh-CN'
-  ): void {
-    this.tasks = []
-    this.currentPlayIndex = 0
+  ): Promise<PipelineTask> {
+    const taskId = `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Business Logic: Calculate the expected number of audio segments.
+    const expectedAudioCount = 1 + (debateRounds * 2) + 1; // intro + (2 speakers * rounds) + outro
+    
+    const storedTask: StoredTask = {
+      id: taskId,
+      newsTopic,
+      status: 'PENDING_TEXT',
+      debateRounds,
+      language,
+      voiceConfig,
+      assignedWorker: null,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      retryCount: 0,
+      expectedAudioCount,
+    };
 
-    newsTopics.forEach((topic, index) => {
-      const task: PipelineTask = {
-        id: `task-${Date.now()}-${index}`,
-        newsTopic: topic,
-        status: 'PENDING_TEXT',
-        script: null,
-        audioPlaylist: null,
-        voiceConfig,
-        assignedWorker: null,
-        debateRounds,
-        language,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        retryCount: 0
-      }
-      this.tasks.push(task)
-    })
+    await TaskStorageService.createTaskRecord(storedTask);
+    
+    console.log(`[TaskManager] Task created: ${taskId} (expecting ${expectedAudioCount} audio items)`);
+    return this.mapStoredTaskToPipelineTask(storedTask);
   }
 
   /**
-   * 根据状态获取任务列表
+   * Retrieves a full task object, including script and playlist if available.
    */
-  public getTasksByStatus(status: PipelineTaskStatus): PipelineTask[] {
-    return this.tasks.filter(task => task.status === status)
-  }
-
-  /**
-   * 根据ID获取任务
-   */
-  public getTaskById(taskId: string): PipelineTask | undefined {
-    return this.tasks.find(t => t.id === taskId)
-  }
-
-  /**
-   * 获取所有任务
-   */
-  public getAllTasks(): PipelineTask[] {
-    return [...this.tasks] // 返回副本避免外部修改
-  }
-
-  /**
-   * 更新任务状态
-   */
-  public updateTask(taskId: string, updates: Partial<PipelineTask>): boolean {
-    const task = this.tasks.find(t => t.id === taskId)
-    if (!task) {
-      console.error(`Task not found: ${taskId}`)
-      return false
+  public static async getTaskById(taskId: string): Promise<PipelineTask | null> {
+    const storedTask = await TaskStorageService.getTaskRecord(taskId);
+    if (!storedTask) {
+      return null;
     }
 
-    Object.assign(task, updates)
-    task.updatedAt = Date.now()
+    const [script, audioCollection] = await Promise.all([
+      TaskStorageService.getScript(taskId),
+      TaskStorageService.getAudioCollection(taskId)
+    ]);
+
+    const pipelineTask = this.mapStoredTaskToPipelineTask(storedTask);
+    pipelineTask.script = script ?? null;
     
-    console.log(`Task ${taskId} updated:`, updates)
-    return true
+    if (audioCollection?.isComplete) {
+      pipelineTask.audioPlaylist = this.buildAudioPlaylist(audioCollection);
+    } else {
+      pipelineTask.audioPlaylist = null;
+    }
+
+    return pipelineTask;
   }
 
   /**
-   * 更新任务状态（简化接口）
+   * Updates specific fields of a task.
    */
-  public updateTaskStatus(taskId: string, status: PipelineTaskStatus, error?: string): boolean {
-    const updates: Partial<PipelineTask> = { status }
+  public static async updateTask(taskId: string, updates: Partial<Omit<StoredTask, 'id'>>): Promise<boolean> {
+    try {
+      await TaskStorageService.updateTaskRecord(taskId, updates);
+      console.log(`[TaskManager] Task ${taskId} updated:`, updates);
+      return true;
+    } catch (error) {
+      console.error(`[TaskManager] Failed to update task ${taskId}:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * A simplified interface to update only the task's status.
+   */
+  public static async updateTaskStatus(taskId: string, status: PipelineTaskStatus, error?: string): Promise<boolean> {
+    const updates: Partial<StoredTask> = { status };
     if (error) {
-      updates.error = error
+      updates.error = error;
     }
-    return this.updateTask(taskId, updates)
+    return this.updateTask(taskId, updates);
   }
 
   /**
-   * 更新任务重试次数
+   * Saves the debate script for a task.
    */
-  public updateTaskRetryCount(taskId: string, retryCount: number): boolean {
-    return this.updateTask(taskId, { retryCount })
-  }
-
-  /**
-   * 设置任务脚本
-   */
-  public setTaskScript(taskId: string, script: DebateScript): boolean {
-    return this.updateTask(taskId, { script })
-  }
-
-  /**
-   * 设置任务音频播放列表
-   */
-  public setTaskAudioPlaylist(taskId: string, audioPlaylist: AudioPlaylist): boolean {
-    return this.updateTask(taskId, { audioPlaylist })
-  }
-
-  /**
-   * 获取下一个待播放的任务
-   */
-  public getNextPlayableTask(): PipelineTask | null {
-    if (this.currentPlayIndex >= this.tasks.length) {
-      return null
+  public static async saveTaskScript(taskId: string, script: DebateScript): Promise<boolean> {
+    try {
+      await TaskStorageService.saveScript(taskId, script);
+      return true;
+    } catch (error) {
+      console.error(`[TaskManager] Failed to save script for ${taskId}:`, error);
+      return false;
     }
-
-    const task = this.tasks[this.currentPlayIndex]
-    
-    // 只有状态为 READY_TO_PLAY 的任务才能播放
-    if (task.status === 'READY_TO_PLAY') {
-      return task
-    }
-
-    return null
   }
 
   /**
-   * 标记当前任务为已完成并移动到下一个
+   * Adds a generated audio segment to a task and checks if the task is complete.
    */
-  public markCurrentTaskAsCompleted(): boolean {
-    if (this.currentPlayIndex >= this.tasks.length) {
-      return false
+  public static async addAudioSegment(
+    taskId: string,
+    type: AudioItemType,
+    audioUrl: string,
+    text: string,
+    speaker?: string,
+    index?: number
+  ): Promise<{ isComplete: boolean }> {
+    const audioItem: StoredAudioItem = { type, audioUrl, text, speaker, index };
+    await TaskStorageService.addAudioItem(taskId, audioItem);
+
+    // Business Logic: Check for completion after adding the audio.
+    const completedCount = await TaskStorageService.incrementCompletedAudio(taskId);
+    const taskRecord = await TaskStorageService.getTaskRecord(taskId);
+
+    if (!taskRecord) {
+      throw new Error(`[TaskManager] Task ${taskId} vanished after adding audio.`);
     }
 
-    const task = this.tasks[this.currentPlayIndex]
-    if (task.status === 'READY_TO_PLAY') {
-      this.updateTaskStatus(task.id, 'DONE')
-      this.currentPlayIndex++
-      return true
+    console.log(`[TaskManager] 🎵 Audio added to ${taskId}: (${completedCount}/${taskRecord.expectedAudioCount})`);
+
+    const isComplete = completedCount >= taskRecord.expectedAudioCount;
+
+    if (isComplete) {
+      console.log(`[TaskManager] 🎉 All audio collected for task ${taskId}, marking as complete.`);
+      await Promise.all([
+        this.updateTaskStatus(taskId, 'READY_TO_PLAY'),
+        TaskStorageService.markAudioCollectionComplete(taskId)
+      ]);
     }
 
-    return false
+    return { isComplete };
   }
 
-  /**
-   * 标记指定任务为已完成
-   */
-  public markTaskAsCompleted(taskId: string): boolean {
-    const task = this.tasks.find(t => t.id === taskId)
-    if (task) {
-      if (task.status !== 'DONE') {
-        this.updateTaskStatus(taskId, 'DONE')
-      }
-      return true // 只要找到任务就返回成功
-    }
-    return false // 仅当任务不存在时返回失败
-  }
+  // --- Data Mapping Utilities ---
 
   /**
-   * 获取当前播放索引
+   * Maps the raw stored task object to the application-level PipelineTask.
    */
-  public getCurrentPlayIndex(): number {
-    return this.currentPlayIndex
-  }
-
-  /**
-   * 获取任务统计信息
-   */
-  public getTaskStats() {
-    const completedTasks = this.tasks.filter(task => task.status === 'DONE').length
+  private static mapStoredTaskToPipelineTask(storedTask: StoredTask): PipelineTask {
     return {
-      totalTasks: this.tasks.length,
-      completedTasks,
-      currentPlayIndex: this.currentPlayIndex
-    }
+      id: storedTask.id,
+      newsTopic: storedTask.newsTopic,
+      status: storedTask.status,
+      script: null, // Should be populated by the caller
+      audioPlaylist: null, // Should be populated by the caller
+      voiceConfig: storedTask.voiceConfig,
+      assignedWorker: storedTask.assignedWorker as any,
+      debateRounds: storedTask.debateRounds,
+      language: storedTask.language,
+      createdAt: storedTask.createdAt,
+      updatedAt: storedTask.updatedAt,
+      error: storedTask.error,
+      retryCount: storedTask.retryCount,
+    };
   }
 
   /**
-   * 清空所有任务
+   * Builds the structured AudioPlaylist from the flat array in StoredAudioCollection.
    */
-  public clearTasks(): void {
-    this.tasks = []
-    this.currentPlayIndex = 0
+  private static buildAudioPlaylist(audioCollection: StoredAudioCollection): AudioPlaylist {
+    const playlist: AudioPlaylist = {
+      moderator_intro: '',
+      conversation: [],
+      moderator_outro: ''
+    };
+
+    for (const item of audioCollection.audioItems) {
+      switch (item.type) {
+        case 'moderator_intro':
+          playlist.moderator_intro = item.audioUrl;
+          break;
+        case 'moderator_outro':
+          playlist.moderator_outro = item.audioUrl;
+          break;
+        case 'conversation':
+          if (item.speaker && typeof item.index === 'number') {
+            playlist.conversation[item.index] = {
+              speaker: item.speaker as any,
+              audioUrl: item.audioUrl,
+              text: item.text
+            };
+          }
+          break;
+      }
+    }
+    // Ensure conversation array has no empty slots from out-of-order insertion
+    playlist.conversation = playlist.conversation.filter(Boolean);
+    return playlist;
   }
 }

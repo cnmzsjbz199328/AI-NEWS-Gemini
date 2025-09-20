@@ -30,3 +30,6 @@ yarn-error.log*
 
 # Backup files
 *-backup.*
+
+.vercel
+.env*.local

@@ -1,29 +1,9 @@
-[LOG-CHAIN] 1. AudioManager fired onSpeakerChange. Speaker: null, Action: end
-usePlaybackController.ts:45 [LOG-CHAIN] 2. PlaybackController is resetting all speakers to 'idle'.
-page.tsx:82 [LOG-CHAIN] 3. page.tsx received state update. Speaker: moderator, State: static
-page.tsx:82 [LOG-CHAIN] 3. page.tsx received state update. Speaker: tom, State: static
-page.tsx:82 [LOG-CHAIN] 3. page.tsx received state update. Speaker: mark, State: static
-usePlaybackController.ts:30 [LOG-CHAIN] 1. AudioManager fired onSpeakerChange. Speaker: moderator, Action: start
-usePlaybackController.ts:33 [LOG-CHAIN] 2. PlaybackController is calling onSpeakerStateChange with 'speaking'.
-page.tsx:82 [LOG-CHAIN] 3. page.tsx received state update. Speaker: moderator, State: speaking
-usePlaybackController.ts:36 [LOG-CHAIN] 2b. PlaybackController is calling onConversationUpdate.
-page.tsx:102 [LOG-CHAIN] 3b. page.tsx received conversation update for moderator.
-page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
-page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
-page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
-page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
-page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
-page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
-page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
-page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
-usePlaybackController.ts:30 [LOG-CHAIN] 1. AudioManager fired onSpeakerChange. Speaker: null, Action: end
-usePlaybackController.ts:45 [LOG-CHAIN] 2. PlaybackController is resetting all speakers to 'idle'.
-page.tsx:82 [LOG-CHAIN] 3. page.tsx received state update. Speaker: moderator, State: static
-page.tsx:82 [LOG-CHAIN] 3. page.tsx received state update. Speaker: tom, State: static
-page.tsx:82 [LOG-CHAIN] 3. page.tsx received state update. Speaker: mark, State: static
-page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
-page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
-page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
-page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
-page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
-page.tsx:94 [LOG-CHAIN] 4. page.tsx is setting new state. {moderator: {…}, tom: {…}, mark: {…}}
+import { Redis } from '@upstash/redis'
+
+const redis = new Redis({
+  url: 'https://epic-heron-6492.upstash.io',
+  token: 'ARjrASQ-ODZlZTQ5NWEtNDFlOC00YTgxLTlhZjQtMTA1MzViN2E5MWU2QVJsY0FBSW1jREpoT0RBME1XSTJOVEF5WVdRMFkySXpPV0ZoTWpWaE1qY3hZV1V5TldZMU5IQXlOalE1TWc=',
+})
+
+await redis.set('foo', 'bar');
+const data = await redis.get('foo');
