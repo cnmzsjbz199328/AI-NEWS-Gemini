@@ -1,27 +1,63 @@
 import { NextResponse } from 'next/server';
+import { TaskManager } from '@/lib/managers/TaskManager';
 
 /**
- * TEMPORARY Pipeline Status API
+ * Pipeline Status API
  * GET /api/pipeline/status
  *
- * This is a temporary mock endpoint to prevent the application from crashing
- * after the refactoring of TaskManager. It returns a static, empty-like state.
- * It will be replaced by a new endpoint that fetches status for a specific task ID.
+ * Returns real-time status of all tasks from Vercel KV storage.
+ * This endpoint is used by the frontend to track pipeline progress.
  */
 export async function GET() {
-  // This endpoint is temporarily providing a mock response 
-  // to allow the rest of the application to run without errors.
-  const mockResponse = {
-    isActive: false,
-    totalTasks: 0,
-    completedTasks: 0,
-    currentPlayIndex: 0,
-    progressPercentage: 0,
-    statusCounts: {},
-    tasks: [],
-    nextPlayableTask: null,
-    timestamp: Date.now(),
-  };
+  try {
+    console.log('[API /status] Fetching pipeline status from KV...');
+    
+    const status = await TaskManager.getPipelineStatus();
+    
+    console.log(`[API /status] Status summary: ${status.totalTasks} total, ${status.completedTasks} completed, ${status.progressPercentage}% progress, active: ${status.isActive}`);
+    
+    // Format response for compatibility with existing frontend
+    const response = {
+      isActive: status.isActive,
+      totalTasks: status.totalTasks,
+      completedTasks: status.completedTasks,
+      currentPlayIndex: 0, // Legacy field
+      progressPercentage: status.progressPercentage,
+      statusCounts: status.tasks.reduce((counts, task) => {
+        counts[task.status] = (counts[task.status] || 0) + 1;
+        return counts;
+      }, {} as Record<string, number>),
+      tasks: status.tasks.map(task => ({
+        id: task.id,
+        status: task.status,
+        newsTopic: task.newsTopic ? (task.newsTopic.substring(0, 50) + (task.newsTopic.length > 50 ? '...' : '')) : 'No topic',
+        createdAt: task.createdAt,
+        hasScript: !!task.script,
+        audioPlaylist: task.audioPlaylist, // Include for playback
+        script: task.script // Include for playback
+      })),
+      nextPlayableTask: null, // Legacy field
+      timestamp: Date.now(),
+    };
 
-  return NextResponse.json(mockResponse);
+    return NextResponse.json(response);
+  } catch (error) {
+    console.error('[API /status] Error fetching pipeline status:', error);
+    
+    // Return empty state on error to prevent frontend crashes
+    const errorResponse = {
+      isActive: false,
+      totalTasks: 0,
+      completedTasks: 0,
+      currentPlayIndex: 0,
+      progressPercentage: 0,
+      statusCounts: {},
+      tasks: [],
+      nextPlayableTask: null,
+      timestamp: Date.now(),
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+
+    return NextResponse.json(errorResponse, { status: 500 });
+  }
 }

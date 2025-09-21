@@ -19,8 +19,11 @@ export class AudioGenerationService {
       });
 
       if (result.success && result.audioUrl) {
+        // 将 HF 私有链接转换为本地代理链接
+        const proxyUrl = this.convertToProxyUrl(result.audioUrl);
         console.log(`[AudioService] ✅ Audio generated successfully for speaker "${speaker}".`);
-        return result.audioUrl;
+        console.log(`[AudioService] 🔄 Converted HF URL to proxy: ${proxyUrl}`);
+        return proxyUrl;
       } else {
         throw new Error(result.error || 'Audio generation failed for an unknown reason.');
       }
@@ -29,5 +32,20 @@ export class AudioGenerationService {
       console.error(`[AudioService] 💥 Audio generation failed for speaker "${speaker}":`, errorMessage);
       throw error; // Re-throw the error to be caught by the orchestrator
     }
+  }
+
+  /**
+   * 将 Hugging Face 私有链接转换为本地代理链接
+   * 例：https://xxx.hf.space/file=xxx -> /api/audio/https://xxx.hf.space/file=xxx
+   */
+  private static convertToProxyUrl(hfUrl: string): string {
+    // 如果已经是代理URL，直接返回，避免重复转换
+    if (hfUrl.startsWith('/api/audio/') || hfUrl.startsWith('api/audio/')) {
+      return hfUrl.startsWith('/') ? hfUrl : '/' + hfUrl; // 确保开头有斜杠
+    }
+    
+    // 移除可能的协议前缀，然后重新添加以确保格式正确
+    const cleanUrl = hfUrl.replace(/^https?:\/\//, '');
+    return `/api/audio/https://${cleanUrl}`;
   }
 }

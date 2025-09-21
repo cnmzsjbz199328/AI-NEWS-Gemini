@@ -12,6 +12,15 @@ export async function GET(request: NextRequest, { params }: { params: { path: st
   if (hfUrl.startsWith('https:/') && !hfUrl.startsWith('https://')) {
     hfUrl = hfUrl.replace('https:/', 'https://');
   }
+  
+  // 处理可能的嵌套api/audio路径问题
+  if (hfUrl.startsWith('api/audio/')) {
+    hfUrl = hfUrl.replace('api/audio/', '');
+    // 再次检查协议修正
+    if (hfUrl.startsWith('https:/') && !hfUrl.startsWith('https://')) {
+      hfUrl = hfUrl.replace('https:/', 'https://');
+    }
+  }
 
   if (!hfUrl) {
     return new NextResponse('Missing Hugging Face URL', { status: 400 });

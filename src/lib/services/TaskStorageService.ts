@@ -1,5 +1,5 @@
 import { Redis } from '@upstash/redis';
-import { KV_KEYS } from '@/lib/kv/kv-keys';
+import { KV_KEYS, generateTopicHash } from '@/lib/kv/kv-keys';
 import { StoredTask, StoredAudioCollection, StoredAudioItem } from '@/lib/kv/kv-schemas';
 import { DebateScript } from '@/types';
 
@@ -39,7 +39,7 @@ export class TaskStorageService {
   static async createTaskRecord(taskData: StoredTask): Promise<void> {
     return this.withRetry(async () => {
       const pipeline = redis.pipeline();
-      pipeline.hset(KV_KEYS.TASK(taskData.id), taskData);
+      pipeline.hset(KV_KEYS.TASK(taskData.id), taskData as unknown as Record<string, unknown>);
       pipeline.expire(KV_KEYS.TASK(taskData.id), TASK_EXPIRATION_SECONDS);
       
       // Also initialize the audio collection
@@ -57,7 +57,7 @@ export class TaskStorageService {
   }
 
   static async getTaskRecord(taskId: string): Promise<StoredTask | null> {
-    return this.withRetry(() => redis.hgetall<StoredTask>(KV_KEYS.TASK(taskId)));
+    return this.withRetry(() => redis.hgetall(KV_KEYS.TASK(taskId)) as Promise<StoredTask | null>);
   }
 
   static async updateTaskRecord(taskId: string, updates: Partial<StoredTask>): Promise<void> {
@@ -77,7 +77,7 @@ export class TaskStorageService {
   // --- Script Operations ---
 
   static async saveScript(taskId: string, script: DebateScript): Promise<void> {
-    return this.withRetry(() => redis.set(KV_KEYS.SCRIPT(taskId), script, { ex: TASK_EXPIRATION_SECONDS }));
+    await this.withRetry(() => redis.set(KV_KEYS.SCRIPT(taskId), script, { ex: TASK_EXPIRATION_SECONDS }));
   }
 
   static async getScript(taskId: string): Promise<DebateScript | null> {
@@ -113,6 +113,58 @@ export class TaskStorageService {
       collection.isComplete = true;
       collection.updatedAt = Date.now();
       await redis.set(KV_KEYS.AUDIO_COLLECTION(taskId), collection, { ex: TASK_EXPIRATION_SECONDS });
+    });
+  }
+
+  // --- News Topic Reuse Operations ---
+
+  /**
+   * Check if a task exists for the same news topic (including in-progress tasks)
+   */
+  static async findExistingTask(newsTopic: string, debateRounds: number, language: string): Promise<string | null> {
+    return this.withRetry(async () => {
+      const topicHash = generateTopicHash(newsTopic, debateRounds, language);
+      const latestTaskId = await redis.get<string>(KV_KEYS.LATEST_TASK(topicHash));
+      
+      if (latestTaskId) {
+        // Verify the task still exists and is either complete or in progress (not failed)
+        const task = await this.getTaskRecord(latestTaskId);
+        if (task && ['PENDING_TEXT', 'GENERATING_TEXT', 'GENERATING_AUDIO', 'READY_TO_PLAY', 'DONE'].includes(task.status)) {
+          console.log(`[TaskStorageService] 🔄 Found existing task for topic (${task.status}): ${latestTaskId}`);
+          return latestTaskId;
+        }
+      }
+      
+      return null;
+    });
+  }
+
+  /**
+   * Index a completed task by its topic hash
+   */
+  static async indexTaskByTopic(taskId: string, newsTopic: string, debateRounds: number, language: string): Promise<void> {
+    return this.withRetry(async () => {
+      const topicHash = generateTopicHash(newsTopic, debateRounds, language);
+      await redis.set(KV_KEYS.LATEST_TASK(topicHash), taskId, { ex: TASK_EXPIRATION_SECONDS });
+      console.log(`[TaskStorageService] 📇 Indexed task ${taskId} for topic hash: ${topicHash}`);
+    });
+  }
+
+  // --- Status and Monitoring Operations ---
+
+  /**
+   * Get all task IDs from KV storage
+   */
+  static async getAllTaskKeys(): Promise<string[]> {
+    return this.withRetry(async () => {
+      // Use Redis SCAN to find all task keys with the correct pattern
+      const pattern = 'ainews:v2:task:*';
+      const keys = await redis.keys(pattern);
+      
+      console.log(`[TaskStorageService] Found ${keys.length} task keys matching pattern: ${pattern}`);
+      
+      // Extract task IDs from the keys (remove the prefix)
+      return keys.map(key => key.replace('ainews:v2:task:', '')).filter(Boolean);
     });
   }
 }

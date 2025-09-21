@@ -9,8 +9,8 @@ interface UseDiscussionManagerProps {
 }
 
 interface UseDiscussionManagerReturn {
-  startDiscussion: () => Promise<void>
-  startPipelineAPI: (title: string, description: string) => Promise<void>
+  startDiscussion: (forceNew?: boolean) => Promise<void>
+  startPipelineAPI: (title: string, description: string, forceNew?: boolean) => Promise<void>
   updateStatus: (msg: string) => void
   updateError: (msg: string) => void
 }
@@ -30,20 +30,21 @@ export function useDiscussionManager({
     setState((prev: AppState) => ({ ...prev, error: msg }))
   }, [setState])
 
-  const startPipelineAPI = useCallback(async (title: string, description: string) => {
-    console.log('[UI] Starting unified script pipeline for:', title)
+  const startPipelineAPI = useCallback(async (title: string, description: string, forceNew: boolean = false) => {
+    console.log('[UI] Starting unified script pipeline for:', title, { forceNew })
     
     const newsTopic = `Title: ${title}. Summary: ${description}`
     
     const requestBody = {
-      newsTopics: [newsTopic],
+      newsTopic, // Changed from newsTopics array to single topic
       debateRounds: 1,
       voiceConfig: {
-        tom: 'cosy-en-male-energetic',
-        mark: 'cosy-en-female-calm', 
-        moderator: 'cosy-en-neutral-professional'
+        tom: { voiceId: 'cosy-en-male-energetic' },
+        mark: { voiceId: 'cosy-en-female-calm' },
+        moderator: { voiceId: 'cosy-en-neutral-professional' }
       },
-      language: 'en-US'
+      language: 'en-US',
+      forceNew // Add forceNew parameter
     }
     
     console.log('[UI] Sending request to pipeline API:', requestBody)
@@ -67,7 +68,14 @@ export function useDiscussionManager({
     const result = await response.json()
     console.log('[UI] Pipeline started successfully:', result)
     
-    updateStatus('Pipeline started - generating unified script...')
+    // Handle reused vs new tasks
+    if (result.reused) {
+      updateStatus('Found existing discussion - replaying content...')
+    } else {
+      updateStatus('Pipeline started - generating unified script...')
+    }
+    
+    return result // Return result to access reused flag
   }, [updateStatus])
 
   const waitForPipelineCompletion = useCallback(async (): Promise<void> => {
@@ -91,7 +99,8 @@ export function useDiscussionManager({
             isActive: status.isActive,
             completedTasks: status.completedTasks,
             totalTasks: status.totalTasks,
-            progressPercentage: status.progressPercentage
+            progressPercentage: status.progressPercentage,
+            tasksCount: status.tasks?.length || 0
           })
           
           // Update status with progress
@@ -99,7 +108,17 @@ export function useDiscussionManager({
             updateStatus(`Processing discussion... ${status.progressPercentage}% complete (${status.completedTasks}/${status.totalTasks} tasks)`)
           }
           
-          // Pipeline is complete when all tasks are processed (progress is 100%)
+          // Check if we have any READY_TO_PLAY tasks (this means generation is complete)
+          const readyTasks = status.tasks?.filter((task: any) => task.status === 'READY_TO_PLAY') || [];
+          
+          if (readyTasks.length > 0) {
+            console.log('[UI] Found READY_TO_PLAY tasks, pipeline processing completed!', readyTasks.map((t: any) => t.id));
+            clearInterval(pollIntervalId)
+            resolve()
+            return
+          }
+          
+          // Also check traditional progress percentage for backwards compatibility
           if (status.progressPercentage === 100) {
             console.log('[UI] Pipeline processing completed (100%)!')
             clearInterval(pollIntervalId)
@@ -128,14 +147,14 @@ export function useDiscussionManager({
     })
   }, [updateStatus])
 
-  const startDiscussion = useCallback(async () => {
-    console.log('[UI] startDiscussion called!')
+  const startDiscussion = useCallback(async (forceNew: boolean = false) => {
+    console.log('[UI] startDiscussion called!', { forceNew })
     if (state.isDebating || news.length === 0) {
       console.log('[UI] Early return - isDebating:', state.isDebating, 'news.length:', news.length)
       return
     }
 
-    console.log('[UI] Starting discussion...')
+    console.log('[UI] Starting discussion...', { forceNew })
 
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
@@ -154,20 +173,26 @@ export function useDiscussionManager({
       error: '',
       conversation: []
     }))
-    updateStatus('The discussion is starting...')
+    
+    if (forceNew) {
+      updateStatus('Generating new discussion...')
+    } else {
+      updateStatus('The discussion is starting...')
+    }
 
     try {
-      // Start the pipeline
-      await startPipelineAPI(currentNews.title, currentNews.description)
+      // Start the pipeline with forceNew parameter
+      const result = await startPipelineAPI(currentNews.title, currentNews.description, forceNew)
       
-      // Wait for pipeline to complete
-      await waitForPipelineCompletion()
-      
-      // Pipeline completed successfully
-      updateStatus('Discussion ready. Playback will start automatically.')
-      
-      // The playback is handled by usePlaybackController, so we just need to wait.
-      // We can consider setting isDebating to false after a certain period of inactivity.
+      // If content was reused, skip waiting for pipeline completion
+      if (result && result.reused) {
+        console.log('[UI] Content was reused, playback should start immediately')
+        updateStatus('Discussion ready. Playback starting...')
+      } else {
+        // Wait for pipeline to complete for new content
+        await waitForPipelineCompletion()
+        updateStatus('Discussion ready. Playback will start automatically.')
+      }
       
     } catch (e: any) {
       console.error('[UI] Discussion error:', e)

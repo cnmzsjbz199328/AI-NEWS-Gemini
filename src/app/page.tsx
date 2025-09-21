@@ -113,7 +113,7 @@ export default function HomePage() {
     }
   }, [])
 
-  const { isPlaying, currentSpeaker, replayLastTask } = usePlaybackController({
+  const { isPlaying, currentSpeaker, replayLastTask, stopAllPlayback } = usePlaybackController({
     pipelineStatus,
     onSpeakerStateChange: (speaker, speakingState) => {
       updateSpeakerAnimationState(speaker, speakingState === 'speaking' ? 'speaking' : 'static')
@@ -199,16 +199,52 @@ export default function HomePage() {
       </div>
 
         <div className="controls">
-          <button onClick={startDiscussion} disabled={state.isDebating}>
-            Start Discussion
+          <button 
+            onClick={() => startDiscussion(true)} 
+            disabled={state.isDebating}
+            style={{ 
+              marginRight: '10px',
+              backgroundColor: '#4CAF50',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: state.isDebating ? 'not-allowed' : 'pointer'
+            }}
+          >
+            🆕 Begin New Discussion
           </button>
           
           <button 
-            onClick={replayLastTask} 
+            onClick={() => startDiscussion(false)} 
             disabled={state.isDebating}
-            style={{ marginLeft: '10px' }}
+            style={{ 
+              marginRight: '10px',
+              backgroundColor: '#2196F3',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: state.isDebating ? 'not-allowed' : 'pointer'
+            }}
           >
-            🔄 Replay Last
+            🔄 Start (Reuse if Available)
+          </button>
+          
+          <button 
+            onClick={stopAllPlayback} 
+            disabled={state.isDebating && !isPlaying}
+            style={{ 
+              backgroundColor: '#f44336',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: (!isPlaying && !state.isDebating) ? 'not-allowed' : 'pointer',
+              opacity: (!isPlaying && !state.isDebating) ? 0.5 : 1
+            }}
+          >
+            🛑 Stop All Playback
           </button>
         </div>
       </div>

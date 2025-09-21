@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { PipelineScheduler } from '@/lib/PipelineScheduler'
+import { TaskManager } from '@/lib/managers/TaskManager'
 
 interface RouteParams {
   params: {
@@ -23,54 +23,38 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    console.log(`[Mark Played API] 🎵 Marking task as played: ${taskId}`)
-
-    // 获取流水线调度器实例
-    const orchestrator = PipelineScheduler.getInstance()
+    console.log(`[API /mark-played] Marking task ${taskId} as played`)
     
-    // 标记任务为已完成
-    const success = orchestrator.markTaskAsCompleted(taskId)
+    // 获取任务
+    const task = await TaskManager.getTaskById(taskId)
     
-    if (success) {
-      console.log(`[Mark Played API] ✅ Task marked as completed: ${taskId}`)
-      return NextResponse.json({
-        success: true,
-        message: 'Task marked as played'
-      })
-    } else {
+    if (!task) {
       return NextResponse.json(
-        { error: 'Task not found or already completed' },
+        { error: 'Task not found' },
         { status: 404 }
       )
     }
 
+    // 更新任务状态为已完成
+    await TaskManager.updateTaskStatus(taskId, 'DONE')
+    
+    console.log(`[API /mark-played] Task ${taskId} successfully marked as played`)
+
+    return NextResponse.json({
+      success: true,
+      message: 'Task marked as played',
+      taskId
+    })
+
   } catch (error) {
-    console.error('[Mark Played API] Error:', error)
+    console.error(`[API /mark-played] Error marking task as played:`, error)
+    
     return NextResponse.json(
-      { error: 'Internal server error while marking task as played' },
+      { 
+        error: 'Failed to mark task as played',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
-}
-
-// 处理不支持的HTTP方法
-export async function GET() {
-  return NextResponse.json(
-    { error: 'Method not allowed. Use POST to mark task as played.' },
-    { status: 405 }
-  )
-}
-
-export async function PUT() {
-  return NextResponse.json(
-    { error: 'Method not allowed. Use POST to mark task as played.' },
-    { status: 405 }
-  )
-}
-
-export async function DELETE() {
-  return NextResponse.json(
-    { error: 'Method not allowed. Use POST to mark task as played.' },
-    { status: 405 }
-  )
 }

@@ -20,13 +20,28 @@ export class TaskManager {
 
   /**
    * Creates a new task, calculates expected audio, and persists it to KV.
+   * If forceNew is false, will try to reuse existing completed task for same topic.
    */
   public static async createTask(
     newsTopic: string, 
     debateRounds: number = 1,
     voiceConfig: VoiceConfig,
-    language: SupportedLanguage = 'zh-CN'
+    language: SupportedLanguage = 'zh-CN',
+    forceNew: boolean = false
   ): Promise<PipelineTask> {
+    
+    // Check for existing task if not forcing new generation
+    if (!forceNew) {
+      const existingTaskId = await TaskStorageService.findExistingTask(newsTopic, debateRounds, language);
+      if (existingTaskId) {
+        console.log(`[TaskManager] 🔄 Reusing existing task: ${existingTaskId}`);
+        const existingTask = await this.getTaskById(existingTaskId);
+        if (existingTask) {
+          return existingTask;
+        }
+      }
+    }
+
     const taskId = `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     // Business Logic: Calculate the expected number of audio segments.
@@ -47,6 +62,9 @@ export class TaskManager {
     };
 
     await TaskStorageService.createTaskRecord(storedTask);
+    
+    // Immediately index the task by topic to prevent duplicate creation
+    await TaskStorageService.indexTaskByTopic(taskId, newsTopic, debateRounds, language);
     
     console.log(`[TaskManager] Task created: ${taskId} (expecting ${expectedAudioCount} audio items)`);
     return this.mapStoredTaskToPipelineTask(storedTask);
@@ -146,7 +164,9 @@ export class TaskManager {
       console.log(`[TaskManager] 🎉 All audio collected for task ${taskId}, marking as complete.`);
       await Promise.all([
         this.updateTaskStatus(taskId, 'READY_TO_PLAY'),
-        TaskStorageService.markAudioCollectionComplete(taskId)
+        TaskStorageService.markAudioCollectionComplete(taskId),
+        // Index the completed task by topic for future reuse
+        TaskStorageService.indexTaskByTopic(taskId, taskRecord.newsTopic, taskRecord.debateRounds, taskRecord.language)
       ]);
     }
 
@@ -208,5 +228,54 @@ export class TaskManager {
     // Ensure conversation array has no empty slots from out-of-order insertion
     playlist.conversation = playlist.conversation.filter(Boolean);
     return playlist;
+  }
+
+  /**
+   * Get all tasks from KV storage for status monitoring
+   */
+  public static async getAllTasks(): Promise<PipelineTask[]> {
+    const allTaskKeys = await TaskStorageService.getAllTaskKeys();
+    const tasks: PipelineTask[] = [];
+    
+    for (const taskId of allTaskKeys) {
+      const task = await this.getTaskById(taskId);
+      if (task) {
+        tasks.push(task);
+      }
+    }
+    
+    // Sort by creation time (most recent first)
+    return tasks.sort((a, b) => b.createdAt - a.createdAt);
+  }
+
+  /**
+   * Get pipeline status summary
+   */
+  public static async getPipelineStatus(): Promise<{
+    tasks: PipelineTask[];
+    totalTasks: number;
+    completedTasks: number;
+    progressPercentage: number;
+    isActive: boolean;
+  }> {
+    const tasks = await this.getAllTasks();
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(task => 
+      task.status === 'READY_TO_PLAY' || task.status === 'DONE'
+    ).length;
+    const activeTasks = tasks.filter(task => 
+      task.status === 'GENERATING_TEXT' || task.status === 'GENERATING_AUDIO'
+    ).length;
+    
+    const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    const isActive = activeTasks > 0;
+    
+    return {
+      tasks,
+      totalTasks,
+      completedTasks,
+      progressPercentage,
+      isActive
+    };
   }
 }
