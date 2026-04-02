@@ -1,12 +1,11 @@
-import { Redis } from '@upstash/redis';
+import { getStorageClient } from '@/lib/kv/redis-client';
 import { KV_KEYS, generateTopicHash } from '@/lib/kv/kv-keys';
 import { StoredTask, StoredAudioCollection, StoredAudioItem } from '@/lib/kv/kv-schemas';
 import { DebateScript } from '@/types';
 
 const TASK_EXPIRATION_SECONDS = 86400 * 7; // 7 days
 
-// Initialize the Redis client from environment variables
-const redis = Redis.fromEnv();
+const redis = getStorageClient();
 
 /**
  * Task Storage Service

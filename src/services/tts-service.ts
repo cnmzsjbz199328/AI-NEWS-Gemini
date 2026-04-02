@@ -77,7 +77,8 @@ export class TTSService {
       throw new Error('No audioContent in Google TTS response')
     }
 
-    return Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))
+    const binary = atob(data.audioContent)
+    return Uint8Array.from(Array.from(binary), c => c.charCodeAt(0))
   }
 
   /**
@@ -85,7 +86,7 @@ export class TTSService {
    */
   async synthesizeToDataUrl(speaker: Speaker, text: string): Promise<string> {
     const audioBytes = await this.synthesizeSpeech(speaker, text)
-    const base64 = btoa(String.fromCharCode(...audioBytes))
+    const base64 = btoa(Array.from(audioBytes, b => String.fromCharCode(b)).join(''))
     return `data:audio/mp3;base64,${base64}`
   }
 }
