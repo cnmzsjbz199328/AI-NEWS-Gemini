@@ -8,8 +8,8 @@ interface UseNewsAutoRotationProps {
 
 export function useNewsAutoRotation({ newsLength, isDebating, onRotateNews }: UseNewsAutoRotationProps) {
   useEffect(() => {
-    if (newsLength > 0 && !isDebating) {
-      const interval = setInterval(onRotateNews, 5000) // 每5秒切换一个新闻
+    if (newsLength > 0) {
+      const interval = setInterval(onRotateNews, isDebating ? 30000 : 5000)
       return () => clearInterval(interval)
     }
   }, [newsLength, isDebating, onRotateNews])

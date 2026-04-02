@@ -204,11 +204,12 @@ export function usePlaybackController({
       const taskToPlay = readyTasks[0]
       console.log(`[PlaybackController] 🚀 Starting ready task: ${taskToPlay.id}`)
       
-      // 立即标记为已处理，防止重复播放（双重保护）
+      // Mark both the task and its replay key to prevent any double-triggering
       processedTasksRef.current.add(taskToPlay.id)
-      
+      processedTasksRef.current.add(`replay-${taskToPlay.id}`)
+
       await playTask(taskToPlay)
-      return // 处理完任务后直接返回
+      return
     }
 
     // 只有在没有READY_TO_PLAY任务时，才考虑重播已完成的任务
