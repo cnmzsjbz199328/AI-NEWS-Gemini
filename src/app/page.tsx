@@ -118,7 +118,10 @@ export default function HomePage() {
     onSpeakerStateChange: (speaker, speakingState) => {
       updateSpeakerAnimationState(speaker, speakingState === 'speaking' ? 'speaking' : 'static')
     },
-    onConversationUpdate: updateConversation
+    onConversationUpdate: updateConversation,
+    onPlaybackComplete: useCallback(() => {
+      setState(prev => ({ ...prev, isDebating: false, status: 'Discussion complete. Ready to start again.' }))
+    }, [])
   })
 
   // TODO: Managers are disabled after architecture refactoring to one-shot generation

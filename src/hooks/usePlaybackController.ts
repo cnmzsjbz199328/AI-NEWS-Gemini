@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
 import { getAudioManager } from '@/utils/audio-manager'
 import { Speaker, AudioItem } from '@/types'
 
@@ -6,48 +6,43 @@ interface UsePlaybackControllerProps {
   pipelineStatus: any
   onSpeakerStateChange: (speaker: Speaker, state: 'speaking' | 'idle') => void
   onConversationUpdate?: (speaker: Speaker, text: string, action: 'add' | 'remove') => void
+  onPlaybackComplete?: () => void
 }
 
-export function usePlaybackController({ 
-  pipelineStatus, 
+export function usePlaybackController({
+  pipelineStatus,
   onSpeakerStateChange,
-  onConversationUpdate
+  onConversationUpdate,
+  onPlaybackComplete
 }: UsePlaybackControllerProps) {
   const processedTasksRef = useRef(new Set<string>())
   const audioManager = useRef(getAudioManager())
+  const [isPlayingState, setIsPlayingState] = useState(false)
 
-  // 设置AudioManager的状态变化回调
+  // Wire AudioManager callbacks
   useEffect(() => {
     audioManager.current.setStateChangeCallback((state) => {
-      console.log('[PlaybackController] AudioManager state change:', state)
-      if (state.currentSpeaker) {
-        onSpeakerStateChange(state.currentSpeaker, state.isPlaying ? 'speaking' : 'idle')
-      }
+      setIsPlayingState(state.isPlaying)
     })
 
-    // 设置说话人变化回调（用于字幕和动画同步）
     audioManager.current.setSpeakerChangeCallback((speaker, text, action) => {
-      console.log(`[LOG-CHAIN] 1. AudioManager fired onSpeakerChange. Speaker: ${speaker}, Action: ${action}`)
-      
       if (action === 'start' && speaker) {
-        console.log(`[LOG-CHAIN] 2. PlaybackController is calling onSpeakerStateChange with 'speaking'.`);
         onSpeakerStateChange(speaker, 'speaking')
-        if (onConversationUpdate) {
-          console.log(`[LOG-CHAIN] 2b. PlaybackController is calling onConversationUpdate.`);
-          onConversationUpdate(speaker, text, 'add')
-        }
+        onConversationUpdate?.(speaker, text, 'add')
       } else if (action === 'end') {
         if (speaker) {
-          console.log(`[LOG-CHAIN] 2. PlaybackController is calling onSpeakerStateChange with 'idle'.`);
           onSpeakerStateChange(speaker, 'idle')
         } else {
           const speakers: Speaker[] = ['moderator', 'tom', 'mark']
-          console.log(`[LOG-CHAIN] 2. PlaybackController is resetting all speakers to 'idle'.`);
           speakers.forEach(s => onSpeakerStateChange(s, 'idle'))
         }
       }
     })
-  }, [onSpeakerStateChange, onConversationUpdate])
+
+    audioManager.current.setQueueCompleteCallback(() => {
+      onPlaybackComplete?.()
+    })
+  }, [onSpeakerStateChange, onConversationUpdate, onPlaybackComplete])
 
   const playTask = useCallback(async (task: any) => {
     try {
@@ -264,16 +259,6 @@ export function usePlaybackController({
     }
   }, [pipelineStatus, checkTasksAndPlay])
 
-  // 当pipeline停止时，停止播放
-  useEffect(() => {
-    if (pipelineStatus && !pipelineStatus.isActive) {
-      const playbackState = audioManager.current.getPlaybackState()
-      if (playbackState.isPlaying) {
-        console.log('[PlaybackController] ⏹️ Pipeline stopped, stopping AudioManager playback')
-        audioManager.current.stopAll()
-      }
-    }
-  }, [pipelineStatus])
 
   const stopPlaybackController = useCallback(() => {
     console.log('[PlaybackController] ⏹️ Stopping AudioManager playback')
@@ -325,13 +310,10 @@ export function usePlaybackController({
     processedTasksRef.current.clear()
   }, [])
 
-  // 获取AudioManager的播放状态
-  const playbackState = audioManager.current.getPlaybackState()
-
   return {
-    isPlaying: playbackState.isPlaying,
-    currentSpeaker: playbackState.currentSpeaker,
-    queueLength: playbackState.queueLength,
+    isPlaying: isPlayingState,
+    currentSpeaker: audioManager.current.getPlaybackState().currentSpeaker,
+    queueLength: audioManager.current.getPlaybackState().queueLength,
     stopPlaybackController,
     replayLastTask,
     stopAllPlayback

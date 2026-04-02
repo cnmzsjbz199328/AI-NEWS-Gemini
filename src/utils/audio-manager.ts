@@ -16,6 +16,11 @@ export class AudioManager {
   private queueManager: AudioQueueManager
   private onStateChange?: (state: AudioPlaybackInfo) => void
   private onSpeakerChange?: (speaker: Speaker | null, text: string, action: 'start' | 'end') => void
+  private onQueueComplete?: () => void
+
+  setQueueCompleteCallback(callback: () => void): void {
+    this.onQueueComplete = callback
+  }
 
   constructor() {
     this.audioPlayer = new AudioPlayer()
@@ -100,7 +105,13 @@ export class AudioManager {
     }
     
     this.notifyStateChange()
-    setTimeout(() => this.tryPlayNext(), 100)
+    setTimeout(() => {
+      this.tryPlayNext()
+      // Fire completion callback if nothing else is queued
+      if (!this.queueManager.getNextItem() && !this.audioPlayer.isPlaying()) {
+        this.onQueueComplete?.()
+      }
+    }, 100)
   }
 
   // 状态查询
