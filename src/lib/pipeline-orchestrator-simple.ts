@@ -43,16 +43,16 @@ export class PipelineOrchestrator {
       console.log(`[Orchestrator] Task ${taskId}: Starting audio generation...`);
 
       // Generate moderator intro audio
-      await this.generateAndSaveAudio(taskId, 'moderator_intro', script.moderator_intro, voiceConfig.speaker_id);
+      await this.generateAndSaveAudio(taskId, 'moderator_intro', script.moderator_intro, 'moderator');
 
       // Generate conversation audio in parallel
-      const conversationPromises = script.conversation.map((turn, index) => 
+      const conversationPromises = script.conversation.map((turn, index) =>
         this.generateAndSaveAudio(taskId, 'conversation', turn.text, turn.speaker, index)
       );
       await Promise.all(conversationPromises);
 
       // Generate moderator outro audio
-      await this.generateAndSaveAudio(taskId, 'moderator_outro', script.moderator_outro, voiceConfig.speaker_id);
+      await this.generateAndSaveAudio(taskId, 'moderator_outro', script.moderator_outro, 'moderator');
 
       console.log(`[Orchestrator] Task ${taskId}: All audio generation requests are complete.`);
       // The final status update to READY_TO_PLAY is handled within TaskManager.addAudioSegment

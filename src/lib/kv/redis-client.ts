@@ -213,28 +213,34 @@ class ResilientAdapter implements StorageAdapter {
 }
 
 // ─── Singleton factory ────────────────────────────────────────────────────────
+// Use globalThis so the singleton is shared across all Next.js route module
+// contexts within the same Node.js process (critical for in-memory store).
 
-let _client: StorageAdapter | null = null
+declare global {
+  // eslint-disable-next-line no-var
+  var __storageClient: StorageAdapter | undefined
+}
 
 export function getStorageClient(): StorageAdapter {
-  if (_client) return _client
+  if (globalThis.__storageClient) return globalThis.__storageClient
+
+  let client: StorageAdapter
 
   if (process.env.USE_MEMORY_STORE === 'true') {
     console.warn('[Storage] USE_MEMORY_STORE=true — using in-memory store')
-    _client = new MemoryAdapter()
-    return _client
-  }
-
-  const url = process.env.KV_REST_API_URL
-  const token = process.env.KV_REST_API_TOKEN
-
-  if (url && token) {
-    // Wrap in ResilientAdapter: tries Redis, auto-falls-back on network failure
-    _client = new ResilientAdapter(new Redis({ url, token }))
+    client = new MemoryAdapter()
   } else {
-    console.warn('[Storage] KV credentials not set — using in-memory store (local dev)')
-    _client = new MemoryAdapter()
+    const url = process.env.KV_REST_API_URL
+    const token = process.env.KV_REST_API_TOKEN
+
+    if (url && token) {
+      client = new ResilientAdapter(new Redis({ url, token }))
+    } else {
+      console.warn('[Storage] KV credentials not set — using in-memory store (local dev)')
+      client = new MemoryAdapter()
+    }
   }
 
-  return _client
+  globalThis.__storageClient = client
+  return client
 }
