@@ -47,6 +47,5 @@ export const DEBATE_SPEED_OPTIONS = {
 
 // TTS服务选项
 export const TTS_SERVICE_OPTIONS = {
-  indexTTS: 'IndexTTS-2 (推荐)',
-  cosyVoice: 'CosyVoice'
+  googleTTS: 'Google Cloud TTS',
 } as const

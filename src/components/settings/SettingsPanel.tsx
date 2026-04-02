@@ -26,7 +26,7 @@ interface AppSettings {
   language: 'en' | 'zh' | 'auto'
   debateSpeed: 'slow' | 'normal' | 'fast'
   showDebugInfo: boolean
-  ttsService: 'indexTTS' | 'cosyVoice'
+  ttsService: 'googleTTS'
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -37,7 +37,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   language: 'auto',
   debateSpeed: 'normal',
   showDebugInfo: false,
-  ttsService: 'indexTTS'
+  ttsService: 'googleTTS'
 }
 
 export default function SettingsPanel({ 

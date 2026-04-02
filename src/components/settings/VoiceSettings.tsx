@@ -172,8 +172,8 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({ onFileUpload, disabled 
 }
 
 interface VoiceSettingsProps {
-  ttsService: 'indexTTS' | 'cosyVoice'
-  onTtsServiceChange: (service: 'indexTTS' | 'cosyVoice') => void
+  ttsService: 'googleTTS'
+  onTtsServiceChange: (service: 'googleTTS') => void
   voices: VoiceConfig[]
   onVoiceUpload: (voiceConfig: VoiceConfig) => void
   onVoiceDelete: (voiceId: string) => void
@@ -362,7 +362,7 @@ export default function VoiceSettings({
         <h3 className="text-sm font-medium text-gray-700">TTS服务偏好</h3>
         <Select
           value={ttsService}
-          onChange={(value) => onTtsServiceChange(value as 'indexTTS' | 'cosyVoice')}
+          onChange={(value) => onTtsServiceChange(value as 'googleTTS')}
           options={ttsServiceOptions}
         />
         <p className="text-xs text-gray-500">
