@@ -12,7 +12,7 @@ export interface AudioPlayerEvents {
   onLoadStart?: () => void
   onLoadedData?: (duration: number) => void
   onCanPlayThrough?: () => void
-  onPlay?: () => void
+  onPlayStart?: () => void  // fires when audio.play() actually resolves (audio.onplay)
   onEnded?: () => void
   onError?: (error: MediaError | null) => void
 }
@@ -27,74 +27,34 @@ export class AudioPlayer {
   async playBlob(audioBlob: Blob, events: AudioPlayerEvents): Promise<void> {
     this.cleanup()
 
-    console.log(`[AudioPlayer] 🎵 Starting blob playback, size: ${audioBlob.size} bytes, type: ${audioBlob.type}`)
-
     const audioUrl = URL.createObjectURL(audioBlob)
     this.currentBlobUrl = audioUrl
-    
+
     const audio = new Audio(audioUrl)
     this.audio = audio
 
     return new Promise((resolve, reject) => {
-      // 设置事件监听器
-      audio.onloadstart = () => {
-        console.log(`[AudioPlayer] 📡 Audio loading started`)
-        events.onLoadStart?.()
-      }
-
-      audio.onloadeddata = () => {
-        console.log(`[AudioPlayer] 📊 Audio data loaded, duration: ${audio.duration}s`)
-        events.onLoadedData?.(audio.duration)
-      }
-
-      audio.oncanplaythrough = () => {
-        console.log(`[AudioPlayer] ✅ Audio can play through`)
-        events.onCanPlayThrough?.()
-      }
+      audio.onloadstart = () => events.onLoadStart?.()
+      audio.onloadeddata = () => events.onLoadedData?.(audio.duration)
+      audio.oncanplaythrough = () => events.onCanPlayThrough?.()
 
       audio.onplay = () => {
-        console.log(`[AudioPlayer] ▶️ Audio play started, duration: ${audio.duration}s, currentTime: ${audio.currentTime}s`)
-        events.onPlay?.()
-        
-        // 添加时间更新监听来跟踪播放进度
-        const timeUpdateListener = () => {
-          console.log(`[AudioPlayer] ⏱️ Playing: ${audio.currentTime.toFixed(1)}s / ${audio.duration.toFixed(1)}s`)
-        }
-        audio.addEventListener('timeupdate', timeUpdateListener)
-        
-        // 保存监听器引用以便在结束时清理
-        ;(audio as any)._timeUpdateListener = timeUpdateListener
+        events.onPlayStart?.()  // fires at actual playback start
       }
 
       audio.onended = () => {
-        console.log(`[AudioPlayer] 🏁 Audio playback completed`)
-        
-        // 清理时间更新监听器
-        const timeUpdateListener = (audio as any)._timeUpdateListener
-        if (timeUpdateListener) {
-          audio.removeEventListener('timeupdate', timeUpdateListener)
-        }
-        
         this.cleanup()
         events.onEnded?.()
         resolve()
       }
 
       audio.onerror = () => {
-        const errorDetails = {
-          error: audio.error,
-          code: audio.error?.code,
-          message: audio.error?.message,
-          networkState: audio.networkState,
-          readyState: audio.readyState
-        }
-        console.error(`[AudioPlayer] ❌ Audio playback error:`, errorDetails)
+        console.error(`[AudioPlayer] Playback error: code=${audio.error?.code} networkState=${audio.networkState}`)
         this.cleanup()
         events.onError?.(audio.error)
         reject(audio.error || new Error('Unknown audio error'))
       }
 
-      // 等待音频加载完成再播放
       this.waitForReadyAndPlay(audio, reject)
     })
   }
@@ -103,27 +63,21 @@ export class AudioPlayer {
    * 等待音频准备就绪并开始播放
    */
   private waitForReadyAndPlay(audio: HTMLAudioElement, reject: (reason?: any) => void): void {
-    console.log(`[AudioPlayer] ⏳ Waiting for audio to be ready...`)
-
-    // 超时保护
     const timeout = setTimeout(() => {
-      console.error(`[AudioPlayer] ⏰ Audio load timeout`)
+      console.error(`[AudioPlayer] Audio load timeout`)
       this.cleanup()
       reject(new Error('Audio load timeout'))
     }, 10000)
 
     const checkReady = () => {
-      if (audio.readyState >= 4) { // HAVE_ENOUGH_DATA
+      if (audio.readyState >= 4) {
         clearTimeout(timeout)
-        console.log(`[AudioPlayer] ✅ Audio ready, starting playback`)
-        
         audio.play().catch(error => {
-          console.error(`[AudioPlayer] ❌ audio.play() rejected:`, error)
+          console.error(`[AudioPlayer] audio.play() rejected:`, error)
           this.cleanup()
           reject(error)
         })
       } else {
-        console.log(`[AudioPlayer] ⏳ Audio not ready yet (readyState: ${audio.readyState}), waiting...`)
         setTimeout(checkReady, 100)
       }
     }
@@ -142,32 +96,20 @@ export class AudioPlayer {
     this.cleanup()
   }
 
-  /**
-   * 获取播放时间
-   */
   getCurrentTime(): number {
     return this.audio?.currentTime || 0
   }
 
-  /**
-   * 获取音频时长
-   */
   getDuration(): number {
     return this.audio?.duration || 0
   }
 
-  /**
-   * 检查是否正在播放
-   */
   isPlaying(): boolean {
-    return this.audio !== null && 
-           !this.audio.paused && 
+    return this.audio !== null &&
+           !this.audio.paused &&
            !this.audio.ended
   }
 
-  /**
-   * 清理资源
-   */
   private cleanup(): void {
     if (this.audio) {
       this.audio.pause()

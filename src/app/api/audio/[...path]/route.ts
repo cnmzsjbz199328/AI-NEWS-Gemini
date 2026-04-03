@@ -26,8 +26,6 @@ export async function GET(request: NextRequest, { params }: { params: { path: st
     return new NextResponse('Missing Hugging Face URL', { status: 400 });
   }
 
-  console.log(`[Audio Proxy] 代理请求: ${hfUrl}`);
-
   try {
     const hfToken = process.env.HF_TOKEN || process.env.hf_token;
     if (!hfToken) {

@@ -1,6 +1,6 @@
 /**
  * Audio Manager - 简洁版音频管理器
- * 
+ *
  * 职责：
  * 1. 作为音频播放的统一接口
  * 2. 协调各个模块的工作
@@ -17,18 +17,13 @@ export class AudioManager {
   private onStateChange?: (state: AudioPlaybackInfo) => void
   private onSpeakerChange?: (speaker: Speaker | null, text: string, action: 'start' | 'end') => void
   private onQueueComplete?: () => void
-
-  setQueueCompleteCallback(callback: () => void): void {
-    this.onQueueComplete = callback
-  }
+  private _isLoading = false  // mutex: true from playItem() entry until onComplete() entry
 
   constructor() {
     this.audioPlayer = new AudioPlayer()
     this.queueManager = new AudioQueueManager()
-    console.log('[AudioManager] Initialized successfully')
   }
 
-  // 设置回调函数
   setStateChangeCallback(callback: (state: AudioPlaybackInfo) => void): void {
     this.onStateChange = callback
   }
@@ -37,7 +32,10 @@ export class AudioManager {
     this.onSpeakerChange = callback
   }
 
-  // 队列操作
+  setQueueCompleteCallback(callback: () => void): void {
+    this.onQueueComplete = callback
+  }
+
   addAudioItem(item: AudioItem): void {
     this.queueManager.addItem(item)
     this.notifyStateChange()
@@ -45,36 +43,23 @@ export class AudioManager {
   }
 
   setQueueAndPlay(items: AudioItem[]): void {
-    console.log(`[AudioManager] Setting queue with ${items.length} items`)
     this.queueManager.setQueue(items)
     this.notifyStateChange()
     this.tryPlayNext()
   }
 
-  // 播放控制
   async tryPlayNext(): Promise<void> {
-    if (this.audioPlayer.isPlaying()) {
-      console.log(`[AudioManager] ⏸️ Player already playing, skipping`)
-      return
-    }
+    if (this.audioPlayer.isPlaying() || this._isLoading) return
 
     const nextItem = this.queueManager.getNextItem()
-    if (!nextItem) {
-      console.log(`[AudioManager] 📭 No next item in queue`)
-      return
-    }
+    if (!nextItem) return
 
-    console.log(`[AudioManager] ▶️ Found next item: ${nextItem.speaker} seq:${nextItem.sequenceNumber}`)
     await this.playItem(nextItem)
   }
 
   private async playItem(item: AudioItem): Promise<void> {
-    console.log(`[AudioManager] Playing ${item.speaker}, seq: ${item.sequenceNumber}`)
-    
+    this._isLoading = true
     this.queueManager.markAsPlaying(item.sequenceNumber)
-    
-    // 通知开始播放
-    this.onSpeakerChange?.(item.speaker, item.text || '', 'start')
     this.notifyStateChange()
 
     try {
@@ -91,35 +76,38 @@ export class AudioManager {
 
   private async playWithBlob(item: AudioItem): Promise<void> {
     return this.audioPlayer.playBlob(item.audioBlob!, {
+      onPlayStart: () => {
+        // fire speaker-start only when audio actually begins — Phase 1 sync fix
+        this.onSpeakerChange?.(item.speaker, item.text || '', 'start')
+        this.notifyStateChange()
+      },
       onEnded: () => this.onComplete(item.sequenceNumber),
       onError: () => this.onComplete(item.sequenceNumber)
     })
   }
 
   private onComplete(sequenceNumber: number): void {
+    this._isLoading = false  // release mutex
     const currentItem = this.queueManager.getCurrentItem()
     if (currentItem) {
-      console.log(`[AudioManager] Completed ${currentItem.speaker}`)
       this.onSpeakerChange?.(currentItem.speaker, currentItem.text || '', 'end')
       this.queueManager.markAsCompleted(sequenceNumber)
     }
-    
+
     this.notifyStateChange()
     setTimeout(() => {
       this.tryPlayNext()
-      // Fire completion callback if nothing else is queued
       if (!this.queueManager.getNextItem() && !this.audioPlayer.isPlaying()) {
         this.onQueueComplete?.()
       }
     }, 100)
   }
 
-  // 状态查询
   getPlaybackState(): AudioPlaybackInfo {
     const queueStatus = this.queueManager.getStatus()
     const currentItem = this.queueManager.getCurrentItem()
     const isPlaying = this.audioPlayer.isPlaying()
-    
+
     return {
       currentSequence: queueStatus.currentSequence,
       queueLength: queueStatus.queueLength,
@@ -128,9 +116,8 @@ export class AudioManager {
     }
   }
 
-  // 控制操作
   stopAll(): void {
-    console.log('[AudioManager] Stopping all')
+    this._isLoading = false
     this.audioPlayer.stop()
     this.onSpeakerChange?.(null, '', 'end')
     this.notifyStateChange()
@@ -142,7 +129,6 @@ export class AudioManager {
     this.notifyStateChange()
   }
 
-  // 私有方法
   private notifyStateChange(): void {
     this.onStateChange?.(this.getPlaybackState())
   }
@@ -169,7 +155,6 @@ export class AudioManager {
   }
 }
 
-// 单例模式
 let instance: AudioManager | null = null
 
 export function getAudioManager(): AudioManager {

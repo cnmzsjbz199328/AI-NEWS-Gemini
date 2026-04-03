@@ -34,7 +34,6 @@ export class TaskManager {
     if (!forceNew) {
       const existingTaskId = await TaskStorageService.findExistingTask(newsTopic, debateRounds, language);
       if (existingTaskId) {
-        console.log(`[TaskManager] 🔄 Reusing existing task: ${existingTaskId}`);
         const existingTask = await this.getTaskById(existingTaskId);
         if (existingTask) {
           return existingTask;
@@ -62,11 +61,10 @@ export class TaskManager {
     };
 
     await TaskStorageService.createTaskRecord(storedTask);
-    
+
     // Immediately index the task by topic to prevent duplicate creation
     await TaskStorageService.indexTaskByTopic(taskId, newsTopic, debateRounds, language);
-    
-    console.log(`[TaskManager] Task created: ${taskId} (expecting ${expectedAudioCount} audio items)`);
+
     return this.mapStoredTaskToPipelineTask(storedTask);
   }
 
@@ -102,7 +100,6 @@ export class TaskManager {
   public static async updateTask(taskId: string, updates: Partial<Omit<StoredTask, 'id'>>): Promise<boolean> {
     try {
       await TaskStorageService.updateTaskRecord(taskId, updates);
-      console.log(`[TaskManager] Task ${taskId} updated:`, updates);
       return true;
     } catch (error) {
       console.error(`[TaskManager] Failed to update task ${taskId}:`, error);
@@ -156,12 +153,9 @@ export class TaskManager {
       throw new Error(`[TaskManager] Task ${taskId} vanished after adding audio.`);
     }
 
-    console.log(`[TaskManager] 🎵 Audio added to ${taskId}: (${completedCount}/${taskRecord.expectedAudioCount})`);
-
     const isComplete = completedCount >= taskRecord.expectedAudioCount;
 
     if (isComplete) {
-      console.log(`[TaskManager] 🎉 All audio collected for task ${taskId}, marking as complete.`);
       await Promise.all([
         this.updateTaskStatus(taskId, 'READY_TO_PLAY'),
         TaskStorageService.markAudioCollectionComplete(taskId),

@@ -26,35 +26,30 @@ export class PipelineOrchestrator {
     let taskId: string | null = null;
     try {
       // 1. Create and persist the initial task
-      console.log(`[Orchestrator] Creating task for topic: "${newsTopic}"`);
       const task = await TaskManager.createTask(newsTopic, debateRounds, voiceConfig, language);
       taskId = task.id;
-      console.log(`[Orchestrator] Task ${taskId} created.`);
+      if (!taskId) throw new Error('Task creation failed: taskId is null');
 
       // 2. Generate the debate script
       await TaskManager.updateTaskStatus(taskId, 'GENERATING_TEXT');
-      console.log(`[Orchestrator] Task ${taskId}: Generating script...`);
       const script = await TextGenerationService.generateDebateScript(newsTopic, debateRounds, language);
       await TaskManager.saveTaskScript(taskId, script);
-      console.log(`[Orchestrator] Task ${taskId}: Script generated and saved.`);
 
       // 3. Generate audio for each part of the script
       await TaskManager.updateTaskStatus(taskId, 'GENERATING_AUDIO');
-      console.log(`[Orchestrator] Task ${taskId}: Starting audio generation...`);
 
       // Generate moderator intro audio
       await this.generateAndSaveAudio(taskId, 'moderator_intro', script.moderator_intro, 'moderator');
 
       // Generate conversation audio in parallel
       const conversationPromises = script.conversation.map((turn, index) =>
-        this.generateAndSaveAudio(taskId, 'conversation', turn.text, turn.speaker, index)
+        this.generateAndSaveAudio(taskId!, 'conversation', turn.text, turn.speaker, index)
       );
       await Promise.all(conversationPromises);
 
       // Generate moderator outro audio
       await this.generateAndSaveAudio(taskId, 'moderator_outro', script.moderator_outro, 'moderator');
 
-      console.log(`[Orchestrator] Task ${taskId}: All audio generation requests are complete.`);
       // The final status update to READY_TO_PLAY is handled within TaskManager.addAudioSegment
 
     } catch (error) {

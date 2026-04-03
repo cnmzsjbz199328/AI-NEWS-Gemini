@@ -11,10 +11,7 @@ export function SpeakerAvatar({ speaker, speakersState, title }: SpeakerAvatarPr
     const speakerState = speakersState[speaker]
     const animationState = speakerState.animationState
     
-    console.log(`[UI] getSpeakerImage for ${speaker}: animationState = ${animationState}`)
-    
     if (animationState === 'speaking') {
-      console.log(`[UI] ${speaker} using ANIMATED image (state: ${animationState}) - AUDIO PLAYING`)
       switch (speaker) {
         case 'moderator':
           return "https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/ezgif.com-video-to-gif-converter.gif"
@@ -24,7 +21,6 @@ export function SpeakerAvatar({ speaker, speakersState, title }: SpeakerAvatarPr
           return "https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/dog-ezgif.com-video-to-gif-converter%20(1).gif"
       }
     } else {
-      console.log(`[UI] ${speaker} using STATIC image (state: ${animationState}) - ${animationState === 'thinking' ? 'THINKING' : 'IDLE'}`)
       switch (speaker) {
         case 'moderator':
           return "https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/1.png"

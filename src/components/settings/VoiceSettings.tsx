@@ -210,9 +210,8 @@ export default function VoiceSettings({
       // 如果选择的是预设音色，直接使用ID
       if (voices.find(v => v.id === voiceId && v.isDefault)) {
         voiceManager.setVoiceForRole(role, voiceId as PresetVoiceId)
-        console.log(`Updated ${role} to voice ${voiceId}`)
       } else {
-        console.log(`Cannot set custom voice ${voiceId} for role ${role} - not yet supported`)
+        // Custom voice not yet supported
       }
     } catch (error) {
       console.error('Failed to update voice mapping:', error)
@@ -224,14 +223,12 @@ export default function VoiceSettings({
     if (isPlaying === voiceId) {
       // 如果正在播放同一个音色，则停止播放
       setIsPlaying(null)
-      console.log(`Stopped previewing voice: ${voiceId}`)
       return
     }
 
     try {
       setIsPlaying(voiceId)
-      console.log(`Previewing voice: ${voiceId}`)
-      
+
       // 查找音色配置
       const voice = voices.find(v => v.id === voiceId)
       if (voice && voice.audioUrl) {

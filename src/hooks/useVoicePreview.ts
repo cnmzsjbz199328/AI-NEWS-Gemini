@@ -15,47 +15,20 @@ export function useVoicePreview() {
       setPreviewingVoice(voiceId)
       setError(null)
       
-      console.log('HandleVoicePreview called with:', { 
-        voiceId, 
-        text, 
-        audioUrl,
-        voiceConfig: {
-          id: voiceConfig?.id,
-          hasAudioFile: !!voiceConfig?.audioFile,
-          audioUrl: voiceConfig?.audioUrl,
-          audioFileType: voiceConfig?.audioFile?.type,
-          audioFileName: voiceConfig?.audioFile?.name,
-          audioFileSize: voiceConfig?.audioFile?.size
-        }
-      })
-      
       // 🔧 检查缓存，避免重复生成
       const cacheKey = `${voiceId}_${text}`
       const cachedAudio = audioCache.get(cacheKey)
       if (cachedAudio) {
-        console.log('🎯 Using cached generated audio for:', cacheKey)
         setPreviewingVoice(null)
         return cachedAudio // 返回缓存的音频URL
       }
-      
-      console.log('🎵 Generating new audio for:', cacheKey)
-      
+
       let voiceData: string
       
       if (voiceConfig?.audioFile) {
         // 如果有audioFile，直接使用它
-        console.log('Using audioFile from voiceConfig')
-        console.log('AudioFile details:', {
-          name: voiceConfig.audioFile.name,
-          size: voiceConfig.audioFile.size,
-          type: voiceConfig.audioFile.type,
-          lastModified: voiceConfig.audioFile.lastModified
-        })
-        
         try {
           const arrayBuffer = await voiceConfig.audioFile.arrayBuffer()
-          console.log('ArrayBuffer created, size:', arrayBuffer.byteLength)
-          
           const uint8Array = new Uint8Array(arrayBuffer)
           let binaryString = ''
           for (let i = 0; i < uint8Array.length; i++) {
@@ -63,33 +36,17 @@ export function useVoicePreview() {
           }
           const base64 = btoa(binaryString)
           voiceData = base64
-          console.log('Successfully converted audioFile to base64, length:', base64.length)
         } catch (fileError) {
-          console.error('Error reading audioFile:', fileError)
-          if (fileError instanceof Error) {
-            console.error('FileError details:', {
-              name: fileError.name,
-              message: fileError.message,
-              stack: fileError.stack
-            })
-          }
           throw new Error('无法读取音色文件数据')
         }
       } else if (voiceConfig?.id && !voiceConfig.audioFile) {
         // 如果没有audioFile但有id，尝试从存储中恢复
-        console.log('No audioFile found, trying to recover from storage for id:', voiceConfig.id)
         try {
           // 动态导入VoiceStorageManager
           const { VoiceStorageManager } = await import('../storage/voice-storage')
           const recoveredFile = await VoiceStorageManager.getVoiceFile(voiceConfig.id)
           
           if (recoveredFile) {
-            console.log('Successfully recovered file from storage:', {
-              name: recoveredFile.name,
-              size: recoveredFile.size,
-              type: recoveredFile.type
-            })
-            
             const arrayBuffer = await recoveredFile.arrayBuffer()
             const uint8Array = new Uint8Array(arrayBuffer)
             let binaryString = ''
@@ -98,13 +55,10 @@ export function useVoicePreview() {
             }
             const base64 = btoa(binaryString)
             voiceData = base64
-            console.log('Successfully converted recovered file to base64, length:', base64.length)
           } else {
-            console.error('No file found in storage for id:', voiceConfig.id)
             throw new Error('无法从存储中恢复音色文件')
           }
         } catch (storageError) {
-          console.error('Error recovering file from storage:', storageError)
           throw new Error('无法读取音色文件数据')
         }
       } else if (audioUrl || voiceConfig?.audioUrl) {
@@ -113,8 +67,6 @@ export function useVoicePreview() {
         if (!urlToUse) {
           throw new Error('音色文件URL不可用')
         }
-        
-        console.log('Using local audioUrl (blob URL):', urlToUse)
         
         try {
           const response = await fetch(urlToUse)
@@ -132,25 +84,13 @@ export function useVoicePreview() {
           }
           const base64 = btoa(binaryString)
           voiceData = base64
-          console.log('Successfully converted local audioUrl to base64, length:', base64.length)
         } catch (fetchError) {
-          console.error('Error fetching local audioUrl:', fetchError)
           throw new Error('无法读取音色文件数据')
         }
       } else {
-        console.error('No audioFile or audioUrl provided')
-        console.error('voiceConfig details:', {
-          hasVoiceConfig: !!voiceConfig,
-          audioFile: voiceConfig?.audioFile,
-          audioUrl: voiceConfig?.audioUrl,
-          id: voiceConfig?.id,
-          name: voiceConfig?.name,
-          passedAudioUrl: audioUrl
-        })
         throw new Error('音色文件不可用，请重新上传音色')
       }
-      
-      console.log('About to send API request with voiceData length:', voiceData.length)
+
       // 调用预览API生成音频
       const response = await fetch('/api/voice/preview', {
         method: 'POST',
@@ -177,14 +117,12 @@ export function useVoicePreview() {
 
       // 🔧 缓存生成的音频URL
       audioCache.set(cacheKey, generatedAudioUrl)
-      console.log('✅ Audio generated and cached for:', cacheKey)
 
       // 返回生成的音频URL，让调用者决定是否播放
       setPreviewingVoice(null)
       return generatedAudioUrl
       
     } catch (error) {
-      console.error('Voice preview error:', error)
       setError(`预览失败: ${error instanceof Error ? error.message : '未知错误'}`)
       setPreviewingVoice(null)
       return null
@@ -201,7 +139,6 @@ export function useVoicePreview() {
       URL.revokeObjectURL(url)
     })
     audioCache.clear()
-    console.log('🗑️ Audio cache cleared')
   }, [])
 
   return {

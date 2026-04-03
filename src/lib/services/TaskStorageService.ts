@@ -129,7 +129,6 @@ export class TaskStorageService {
         // Verify the task still exists and is either complete or in progress (not failed)
         const task = await this.getTaskRecord(latestTaskId);
         if (task && ['PENDING_TEXT', 'GENERATING_TEXT', 'GENERATING_AUDIO', 'READY_TO_PLAY', 'DONE'].includes(task.status)) {
-          console.log(`[TaskStorageService] 🔄 Found existing task for topic (${task.status}): ${latestTaskId}`);
           return latestTaskId;
         }
       }
@@ -145,7 +144,6 @@ export class TaskStorageService {
     return this.withRetry(async () => {
       const topicHash = generateTopicHash(newsTopic, debateRounds, language);
       await redis.set(KV_KEYS.LATEST_TASK(topicHash), taskId, { ex: TASK_EXPIRATION_SECONDS });
-      console.log(`[TaskStorageService] 📇 Indexed task ${taskId} for topic hash: ${topicHash}`);
     });
   }
 
@@ -159,9 +157,7 @@ export class TaskStorageService {
       // Use Redis SCAN to find all task keys with the correct pattern
       const pattern = 'ainews:v2:task:*';
       const keys = await redis.keys(pattern);
-      
-      console.log(`[TaskStorageService] Found ${keys.length} task keys matching pattern: ${pattern}`);
-      
+
       // Extract task IDs from the keys (remove the prefix)
       return keys.map(key => key.replace('ainews:v2:task:', '')).filter(Boolean);
     });

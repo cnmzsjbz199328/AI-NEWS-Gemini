@@ -77,7 +77,6 @@ export class WorkerManager {
     worker.isIdle = false
     worker.currentTaskId = taskId
 
-    console.log(`Worker ${workerType} assigned to task: ${taskId}`)
     return true
   }
 
@@ -95,7 +94,6 @@ export class WorkerManager {
     worker.currentTaskId = null
     worker.lastCompletedAt = Date.now()
 
-    console.log(`Worker ${workerType} released`)
     return true
   }
 
@@ -129,7 +127,6 @@ export class WorkerManager {
     }
 
     worker.errorCount = 0
-    console.log(`Worker ${workerType} error count reset`)
     return true
   }
 
@@ -144,7 +141,6 @@ export class WorkerManager {
     }
 
     worker.errorCount++
-    console.log(`Worker ${workerType} error count incremented to: ${worker.errorCount}`)
     return true
   }
 
@@ -157,7 +153,6 @@ export class WorkerManager {
       worker.currentTaskId = null
       worker.errorCount = 0
     })
-    console.log('All workers reset')
   }
 
   /**

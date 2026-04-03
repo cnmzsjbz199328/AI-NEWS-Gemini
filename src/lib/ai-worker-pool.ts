@@ -80,11 +80,9 @@ export class AIWorkerPool {
     this.activeJobs.set(workerType, workerTask)
 
     try {
-      console.log(`🤖 Starting one-shot generation for task ${task.id} with ${workerType}`)
-      
       // 获取AI提供者
       const provider = getAIProviderForWorker(workerType)
-      
+
       // 构建一次性生成的完整提示词
       const promptManager = PromptManager.getInstance()
       const fullPrompt = promptManager.buildOneShotDebatePrompt({
@@ -93,8 +91,6 @@ export class AIWorkerPool {
         language: task.language
       })
 
-      console.log(`📝 Generated prompt for ${task.id} (${fullPrompt.length} characters)`)
-
       // 调用AI进行一次性生成
       const response = await this.callAIWithTimeout(provider, fullPrompt)
       
@@ -102,7 +98,6 @@ export class AIWorkerPool {
       const script = await this.parseAndValidateResponse(response, task.id)
       
       const duration = Date.now() - startTime
-      console.log(`✅ One-shot generation completed for task ${task.id} in ${duration}ms`)
 
       return {
         taskId: task.id,
@@ -115,9 +110,7 @@ export class AIWorkerPool {
     } catch (error) {
       const duration = Date.now() - startTime
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      
-      console.error(`❌ One-shot generation failed for task ${task.id}:`, errorMessage)
-      
+
       return {
         taskId: task.id,
         success: false,
@@ -156,7 +149,6 @@ export class AIWorkerPool {
       }
 
       const jsonText = jsonMatch[0]
-      console.log(`🔍 Extracted JSON for task ${taskId} (${jsonText.length} characters)`)
 
       // 验证JSON格式
       const promptManager = PromptManager.getInstance()
@@ -168,19 +160,11 @@ export class AIWorkerPool {
 
       // 解析为DebateScript对象
       const script: DebateScript = JSON.parse(jsonText)
-      
-      console.log(`✅ Successfully parsed script for task ${taskId}:`, {
-        hasIntro: !!script.moderator_intro,
-        conversationLength: script.conversation?.length || 0,
-        hasOutro: !!script.moderator_outro
-      })
 
       return script
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown parsing error'
-      console.error(`❌ Failed to parse AI response for task ${taskId}:`, errorMessage)
-      console.error(`Raw response:`, response.substring(0, 500) + '...')
       throw new Error(`Failed to parse AI response: ${errorMessage}`)
     }
   }
@@ -189,7 +173,6 @@ export class AIWorkerPool {
    * 取消所有活跃任务
    */
   public cancelAllTasks(): void {
-    console.log(`🛑 Cancelling ${this.activeJobs.size} active AI tasks`)
     this.activeJobs.clear()
   }
 

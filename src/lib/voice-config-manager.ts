@@ -82,7 +82,6 @@ export class VoiceConfigManager {
   constructor() {
     // 从localStorage加载用户配置，如果没有则使用默认配置
     this.roleVoiceMapping = this.loadFromStorage() || DEFAULT_ROLE_VOICE_MAPPING
-    console.log('[VoiceConfigManager] Initialized with mapping:', this.roleVoiceMapping)
   }
 
   /**
@@ -110,8 +109,6 @@ export class VoiceConfigManager {
     
     this.roleVoiceMapping[role] = voiceId
     this.saveToStorage()
-    
-    console.log(`[VoiceConfigManager] Updated ${role} voice to ${voiceId}`)
   }
 
   /**
@@ -134,7 +131,6 @@ export class VoiceConfigManager {
   resetToDefault(): void {
     this.roleVoiceMapping = { ...DEFAULT_ROLE_VOICE_MAPPING }
     this.saveToStorage()
-    console.log('[VoiceConfigManager] Reset to default mapping')
   }
 
   /**
@@ -156,7 +152,6 @@ export class VoiceConfigManager {
       })
       
       if (!isValid) {
-        console.warn('[VoiceConfigManager] Invalid saved configuration, using defaults')
         return null
       }
       

@@ -23,8 +23,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    console.log(`[API /mark-played] Marking task ${taskId} as played`)
-    
     // 获取任务
     const task = await TaskManager.getTaskById(taskId)
     
@@ -37,8 +35,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     // 更新任务状态为已完成
     await TaskManager.updateTaskStatus(taskId, 'DONE')
-    
-    console.log(`[API /mark-played] Task ${taskId} successfully marked as played`)
 
     return NextResponse.json({
       success: true,

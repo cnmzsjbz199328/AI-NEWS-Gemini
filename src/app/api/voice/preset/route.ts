@@ -18,7 +18,6 @@ export async function GET(request: NextRequest) {
     }
 
     const audioUrl = PRESET_VOICES[voiceId as keyof typeof PRESET_VOICES]
-    console.log(`[PresetVoice] Downloading ${voiceId} from ${audioUrl}`)
 
     // 从R2存储下载音频文件
     const response = await fetch(audioUrl, {

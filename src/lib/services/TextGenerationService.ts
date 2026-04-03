@@ -3,7 +3,7 @@
  * 包括调用AI、处理结果和重试机制
  */
 
-import { PipelineTask, AIWorkerType, DebateScript } from '@/types'
+import { PipelineTask, AIWorkerType, DebateScript, SupportedLanguage, VoiceConfig } from '@/types'
 import { aiWorkerPool, WorkerResult } from '../ai-worker-pool';
 
 export interface TextGenerationResult {
@@ -37,7 +37,7 @@ export class TextGenerationService {
       // Fill in other required fields with default/mock values
       script: null,
       audioPlaylist: null,
-      voiceConfig: { provider: 'XTTS', speaker_id: 'larry', speed: 1.1, language: 'en', cleanup_voice: false },
+      voiceConfig: { moderator: { voiceId: 'en-US-Neural2-D' }, tom: { voiceId: 'en-US-Neural2-J' }, mark: { voiceId: 'en-US-Neural2-A' } } as VoiceConfig,
       assignedWorker: null,
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -57,21 +57,10 @@ export class TextGenerationService {
    * 执行文本生成任务
    */
   public async execute(task: PipelineTask, workerType: AIWorkerType): Promise<TextGenerationResult> {
-    console.log(`🔄 Starting text generation for ${task.id} with ${workerType} (retry: ${task.retryCount || 0})`)
-    
     try {
-      console.log(`📞 Calling aiWorkerPool.assignTask for ${task.id}`)
       const result: WorkerResult = await aiWorkerPool.assignTask(task, workerType)
-      
-      console.log(`📋 AI task result for ${task.id}:`, {
-        success: result.success,
-        hasScript: !!result.script,
-        error: result.error,
-        duration: result.duration
-      })
-      
+
       if (result.success && result.script) {
-        console.log(`✅ Text generation completed for task: ${task.id}`)
         return {
           success: true,
           script: result.script,
@@ -81,9 +70,7 @@ export class TextGenerationService {
       } else {
         const currentRetryCount = task.retryCount || 0
         const shouldRetry = currentRetryCount < this.maxRetries
-        
-        console.log(`❌ Text generation failed for task: ${task.id}`, result.error)
-        
+
         return {
           success: false,
           error: result.error,
@@ -96,9 +83,7 @@ export class TextGenerationService {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       const currentRetryCount = task.retryCount || 0
       const shouldRetry = currentRetryCount < this.maxRetries
-      
-      console.log(`💥 Exception in text generation for ${task.id}:`, errorMessage)
-      
+
       return {
         success: false,
         error: errorMessage,

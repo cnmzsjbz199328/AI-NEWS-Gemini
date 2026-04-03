@@ -12,8 +12,6 @@ interface StartPipelineRequest {
 }
 
 export async function POST(request: NextRequest) {
-  console.log('[API /start] Received request to start pipeline');
-  
   try {
     const body: StartPipelineRequest = await request.json();
 
@@ -36,7 +34,6 @@ export async function POST(request: NextRequest) {
     const { id: taskId } = task;
 
     if (task.status === 'READY_TO_PLAY' && !forceNew) {
-      console.log(`[API /start] ♻️ Returning existing completed task: ${taskId}`);
       return NextResponse.json({
         success: true,
         message: 'Existing completed task found and reused.',
@@ -44,8 +41,6 @@ export async function POST(request: NextRequest) {
         reused: true
       });
     }
-
-    console.log(`[API /start] Task ${taskId} created. Triggering background orchestration.`);
 
     PipelineOrchestrator.run(newsTopic, debateRounds, voiceConfig, language).catch(err => {
       console.error(`[API /start] Uncaught error in background pipeline for task ${taskId}:`, err);

@@ -38,9 +38,7 @@ export class NewsService {
       // 添加时间戳参数避免缓存
       const timestamp = Date.now();
       const rssUrl = `${RSS_CONFIG.API_URL}${encodeURIComponent(RSS_CONFIG.ABC_RSS_URL)}&_t=${timestamp}`;
-      
-      console.log('[NEWS SERVICE] Fetching ABC news from URL:', rssUrl);
-      
+
       const response = await fetch(rssUrl);
       
       if (!response.ok) {
@@ -48,8 +46,7 @@ export class NewsService {
       }
 
       const data = await response.json();
-      console.log('[NEWS SERVICE] ABC RSS API response status:', data.status);
-      
+
       if (data.status !== 'ok' || !data.items) {
         throw new Error('Failed to parse ABC RSS feed.');
       }
@@ -67,9 +64,7 @@ export class NewsService {
       // 添加时间戳参数避免缓存
       const timestamp = Date.now();
       const rssUrl = `${RSS_CONFIG.API_URL}${encodeURIComponent(RSS_CONFIG.BBC_RSS_URL)}&_t=${timestamp}`;
-      
-      console.log('[NEWS SERVICE] Fetching BBC news from URL:', rssUrl);
-      
+
       const response = await fetch(rssUrl);
       
       if (!response.ok) {
@@ -77,8 +72,7 @@ export class NewsService {
       }
 
       const data = await response.json();
-      console.log('[NEWS SERVICE] BBC RSS API response status:', data.status);
-      
+
       if (data.status !== 'ok' || !data.items) {
         throw new Error('Failed to parse BBC RSS feed.');
       }
@@ -94,8 +88,6 @@ export class NewsService {
   private processNewsItems(items: any[], source: string, maxCount: number): NewsItem[] {
     const newsItems: NewsItem[] = [];
     
-    console.log(`[NEWS SERVICE] Processing ${source} RSS items, total count:`, items.length);
-    
     for (let i = 0; i < Math.min(maxCount, items.length); i++) {
       const item = items[i];
       const title = item.title || 'No title';
@@ -105,13 +97,6 @@ export class NewsService {
 
       const cleanDescription = TextUtils.cleanDescription(description);
       const date = TextUtils.formatDate(pubDate);
-      
-      console.log(`[NEWS SERVICE] ${source} Item ${i + 1}:`, {
-        title: title.substring(0, 50) + '...',
-        pubDate,
-        formattedDate: date,
-        source
-      });
 
       newsItems.push({
         title,

@@ -26,7 +26,6 @@ export class NotificationService {
     }
     
     this.listeners.get(eventType)!.push(listener)
-    console.log(`Subscribed to event: ${eventType}`)
   }
 
   /**
@@ -41,7 +40,6 @@ export class NotificationService {
     const index = eventListeners.indexOf(listener)
     if (index > -1) {
       eventListeners.splice(index, 1)
-      console.log(`Unsubscribed from event: ${eventType}`)
     }
   }
 
@@ -53,8 +51,6 @@ export class NotificationService {
     if (!eventListeners || eventListeners.length === 0) {
       return
     }
-
-    console.log(`Publishing event: ${event.type} for task: ${event.taskId}`)
 
     // 并行执行所有监听器
     const promises = eventListeners.map(async (listener) => {
@@ -121,7 +117,6 @@ export class NotificationService {
    */
   public clearAllListeners(): void {
     this.listeners.clear()
-    console.log('All event listeners cleared')
   }
 
   /**
@@ -141,8 +136,6 @@ export class NotificationService {
 // WebSocket广播功能 - 简化实现，避免循环依赖
 const broadcastToWebSocket = async (taskId: string): Promise<void> => {
   // 这里可以实现简单的广播逻辑
-  // 暂时使用console.log作为占位符
-  console.log(`[WebSocket] Task ${taskId} updated`)
 }
 
 /**

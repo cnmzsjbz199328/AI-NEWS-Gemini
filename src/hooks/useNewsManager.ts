@@ -27,12 +27,7 @@ export function useNewsManager(): UseNewsManagerReturn {
       }
       
       const newsItems: NewsItem[] = await response.json()
-      console.log('[NEWS DEBUG] Fetched news items:', newsItems.map(item => ({
-        title: item.title.substring(0, 50) + '...',
-        date: item.date,
-        description: item.description.substring(0, 50) + '...'
-      })))
-      
+
       setNews(newsItems)
       setActiveNewsIndex(0)
     } catch (error) {

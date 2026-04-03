@@ -6,11 +6,8 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('Debug POST called')
-    
     const body = await request.json()
-    console.log('Body parsed:', body)
-    
+
     return NextResponse.json({
       success: true,
       received: body,

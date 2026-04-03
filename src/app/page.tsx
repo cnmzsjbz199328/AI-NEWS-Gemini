@@ -16,8 +16,6 @@ import { usePlaybackController } from '@/hooks/usePlaybackController'
 
 
 export default function HomePage() {
-  console.log('[UI] ===== MAIN PAGE COMPONENT RENDERED =====')
-  
   const [state, setState] = useState<AppState>({
     conversation: [],
     currentNewsIndex: 0,
@@ -79,7 +77,6 @@ export default function HomePage() {
 
   // 音频播放控制
   const updateSpeakerAnimationState = useCallback((speaker: Speaker, animationState: 'speaking' | 'static') => {
-    console.log(`[LOG-CHAIN] 3. page.tsx received state update. Speaker: ${speaker}, State: ${animationState}`);
     setState(prevState => {
       const newState = {
         ...prevState,
@@ -91,7 +88,6 @@ export default function HomePage() {
           }
         }
       }
-      console.log(`[LOG-CHAIN] 4. page.tsx is setting new state.`, newState.speakersState);
       return newState;
     })
   }, [])
@@ -99,7 +95,6 @@ export default function HomePage() {
   // 更新对话记录的回调
   const updateConversation = useCallback((speaker: Speaker, text: string, action: 'add' | 'remove') => {
     if (action === 'add') {
-      console.log(`[LOG-CHAIN] 3b. page.tsx received conversation update for ${speaker}.`);
       const newEntry = {
         id: `${speaker}-${Date.now()}`,
         speaker,
@@ -130,8 +125,6 @@ export default function HomePage() {
 
   // 监控状态变化的useEffect
   useEffect(() => {
-    console.log(`[UI] State changed - conversation length: ${state.conversation.length}`);
-    console.log(`[UI] Speaker states:`, state.speakersState);
   }, [state.speakersState, state.conversation])
 
   return (

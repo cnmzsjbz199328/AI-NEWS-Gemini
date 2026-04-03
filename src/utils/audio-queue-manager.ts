@@ -22,7 +22,6 @@ export class AudioQueueManager {
    * 添加音频项目到队列
    */
   addItem(item: AudioItem): void {
-    console.log(`[QueueManager] Adding audio item for ${item.speaker}, sequence: ${item.sequenceNumber}`)
     const updatedItem = { ...item, state: 'ready' as AudioPlaybackState }
     this.audioQueue.set(item.sequenceNumber, updatedItem)
   }
@@ -31,7 +30,6 @@ export class AudioQueueManager {
    * 批量设置队列
    */
   setQueue(items: AudioItem[]): void {
-    console.log(`[QueueManager] Setting queue with ${items.length} items`)
     this.audioQueue.clear()
     this.currentPlayingSequence = -1
 
@@ -49,7 +47,6 @@ export class AudioQueueManager {
     const nextItem = this.audioQueue.get(nextSequence)
 
     if (!nextItem || nextItem.state !== 'ready') {
-      console.log(`[QueueManager] No ready audio for sequence ${nextSequence}`)
       return null
     }
 
@@ -69,7 +66,6 @@ export class AudioQueueManager {
     item.state = 'playing'
     this.audioQueue.set(sequenceNumber, item)
     this.currentPlayingSequence = sequenceNumber
-    console.log(`[QueueManager] Marked sequence ${sequenceNumber} as playing`)
     return true
   }
 
@@ -85,7 +81,6 @@ export class AudioQueueManager {
 
     item.state = 'completed'
     this.audioQueue.set(sequenceNumber, item)
-    console.log(`[QueueManager] Marked sequence ${sequenceNumber} as completed`)
     return true
   }
 
@@ -120,7 +115,6 @@ export class AudioQueueManager {
    * 清空队列
    */
   clear(): void {
-    console.log('[QueueManager] Clearing queue')
     this.audioQueue.clear()
     this.currentPlayingSequence = -1
   }

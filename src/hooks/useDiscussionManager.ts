@@ -31,8 +31,6 @@ export function useDiscussionManager({
   }, [setState])
 
   const startPipelineAPI = useCallback(async (title: string, description: string, forceNew: boolean = false) => {
-    console.log('[UI] Starting unified script pipeline for:', title, { forceNew })
-    
     const newsTopic = `Title: ${title}. Summary: ${description}`
     
     const requestBody = {
@@ -47,8 +45,6 @@ export function useDiscussionManager({
       forceNew // Add forceNew parameter
     }
     
-    console.log('[UI] Sending request to pipeline API:', requestBody)
-    
     const response = await fetch('/api/pipeline/start', {
       method: 'POST',
       headers: {
@@ -57,17 +53,13 @@ export function useDiscussionManager({
       body: JSON.stringify(requestBody)
     })
 
-    console.log('[UI] Pipeline API response status:', response.status)
-    
     if (!response.ok) {
       const error = await response.json()
-      console.error('[UI] Pipeline API error:', error)
       throw new Error(`Pipeline API error: ${error.error}`)
     }
 
     const result = await response.json()
-    console.log('[UI] Pipeline started successfully:', result)
-    
+
     // Handle reused vs new tasks
     if (result.reused) {
       updateStatus('Found existing discussion - replaying content...')
@@ -79,8 +71,6 @@ export function useDiscussionManager({
   }, [updateStatus])
 
   const waitForPipelineCompletion = useCallback(async (): Promise<void> => {
-    console.log('[UI] Waiting for pipeline completion...')
-    
     const pollInterval = 2000 // 2 seconds
     const maxWaitTime = 300000 // 5 minutes max wait
     const startTime = Date.now()
@@ -90,19 +80,11 @@ export function useDiscussionManager({
         try {
           const response = await fetch('/api/pipeline/status')
           if (!response.ok) {
-            console.warn('[UI] Failed to fetch pipeline status:', response.status)
             return
           }
           
           const status = await response.json()
-          console.log('[UI] Pipeline status check:', {
-            isActive: status.isActive,
-            completedTasks: status.completedTasks,
-            totalTasks: status.totalTasks,
-            progressPercentage: status.progressPercentage,
-            tasksCount: status.tasks?.length || 0
-          })
-          
+
           // Update status with progress
           if (status.totalTasks > 0) {
             updateStatus(`Processing discussion... ${status.progressPercentage}% complete (${status.completedTasks}/${status.totalTasks} tasks)`)
@@ -112,7 +94,6 @@ export function useDiscussionManager({
           const readyTasks = status.tasks?.filter((task: any) => task.status === 'READY_TO_PLAY') || [];
           
           if (readyTasks.length > 0) {
-            console.log('[UI] Found READY_TO_PLAY tasks, pipeline processing completed!', readyTasks.map((t: any) => t.id));
             clearInterval(pollIntervalId)
             resolve()
             return
@@ -120,7 +101,6 @@ export function useDiscussionManager({
           
           // Also check traditional progress percentage for backwards compatibility
           if (status.progressPercentage === 100) {
-            console.log('[UI] Pipeline processing completed (100%)!')
             clearInterval(pollIntervalId)
             resolve()
             return
@@ -128,14 +108,13 @@ export function useDiscussionManager({
           
           // Check for timeout
           if (Date.now() - startTime > maxWaitTime) {
-            console.warn('[UI] Pipeline wait timeout after 5 minutes')
             clearInterval(pollIntervalId)
             reject(new Error('Pipeline completion timeout'))
             return
           }
           
         } catch (error) {
-          console.error('[UI] Error checking pipeline status:', error)
+          // continue polling
         }
       }
       
@@ -148,20 +127,15 @@ export function useDiscussionManager({
   }, [updateStatus])
 
   const startDiscussion = useCallback(async (forceNew: boolean = false) => {
-    console.log('[UI] startDiscussion called!', { forceNew })
     if (state.isDebating || news.length === 0) {
-      console.log('[UI] Early return - isDebating:', state.isDebating, 'news.length:', news.length)
       return
     }
-
-    console.log('[UI] Starting discussion...', { forceNew })
 
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
       await audioContext.resume()
-      console.log('[UI] Audio context enabled successfully')
     } catch (error) {
-      console.warn('[UI] Failed to enable audio context:', error)
+      // audio context may already be running
     }
 
     const currentNews = news[activeNewsIndex]
@@ -186,7 +160,6 @@ export function useDiscussionManager({
       
       // If content was reused, skip waiting for pipeline completion
       if (result && result.reused) {
-        console.log('[UI] Content was reused, playback should start immediately')
         updateStatus('Discussion ready. Playback starting...')
       } else {
         // Wait for pipeline to complete for new content
@@ -195,7 +168,6 @@ export function useDiscussionManager({
       }
       
     } catch (e: any) {
-      console.error('[UI] Discussion error:', e)
       updateError(`An error occurred: ${e.message}`)
       // Set isDebating to false on error to allow retry
       setState((prev: AppState) => ({ 

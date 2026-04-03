@@ -45,13 +45,7 @@ export const createGeminiProvider = (): AIProvider => {
         
         const result = await chat.sendMessage({ message: prompt })
         const responseText = result.text?.trim()
-        
-        console.log('Gemini API response:', {
-          hasText: !!responseText,
-          textLength: responseText?.length || 0,
-          textPreview: responseText?.substring(0, 500)
-        })
-        
+
         return responseText || ''
       } catch (error) {
         console.error('Gemini API error:', error)
@@ -128,13 +122,7 @@ export const createRekaProvider = (): AIProvider => {
         });
 
         const content = completion.choices[0]?.message?.content?.trim();
-        
-        console.log('Reka API response:', {
-          hasContent: !!content,
-          contentLength: content?.length || 0,
-          contentPreview: content?.substring(0, 50)
-        });
-        
+
         return content || '';
         
       } catch (error) {

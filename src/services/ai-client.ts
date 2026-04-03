@@ -65,8 +65,6 @@ export async function generateAIResponse(
  */
 export async function generateSpeech(text: string, speaker: Speaker): Promise<Blob | null> {
   try {
-    console.log(`[AI-Client] Requesting speech generation for ${speaker}: "${text.substring(0, 30)}..."`)
-    
     const response = await fetch('/api/speech/generate', {
       method: 'POST',
       headers: {
@@ -85,8 +83,7 @@ export async function generateSpeech(text: string, speaker: Speaker): Promise<Bl
     }
 
     const audioBlob = await response.blob()
-    console.log(`[AI-Client] Speech generation successful for ${speaker}, size: ${audioBlob.size} bytes`)
-    
+
     return audioBlob
   } catch (error) {
     console.error(`[AI-Client] Speech generation failed for ${speaker}:`, error)

@@ -69,8 +69,6 @@ export default function SettingsPanel({
     const presets = voiceManager.getAllPresetVoices()
     setPresetVoices(presets)
     
-    console.log('Loaded preset voices:', presets)
-    console.log('Loaded user voices:', userVoices)
   }, [])
 
   // 合并预设音色和用户音色供组件使用

@@ -10,12 +10,8 @@ import { TaskManager } from '@/lib/managers/TaskManager';
  */
 export async function GET() {
   try {
-    console.log('[API /status] Fetching pipeline status from KV...');
-    
     const status = await TaskManager.getPipelineStatus();
-    
-    console.log(`[API /status] Status summary: ${status.totalTasks} total, ${status.completedTasks} completed, ${status.progressPercentage}% progress, active: ${status.isActive}`);
-    
+
     // Format response for compatibility with existing frontend
     const response = {
       isActive: status.isActive,
