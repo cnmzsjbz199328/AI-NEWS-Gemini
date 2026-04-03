@@ -1,6 +1,14 @@
 interface PipelineStatusWidgetProps {
-  pipelineStatus: any
+  pipelineStatus: any // eslint-disable-line @typescript-eslint/no-explicit-any
   isVisible: boolean
+}
+
+const getTaskBgClass = (status: string): string => {
+  if (status.includes('GENERATING')) return 'bg-[#333]'
+  if (status === 'READY_TO_PLAY')    return 'bg-[#006600]'
+  if (status === 'DONE')             return 'bg-[#666]'
+  if (status === 'FAILED')           return 'bg-[#660000]'
+  return 'bg-[#444]'
 }
 
 export function PipelineStatusWidget({ pipelineStatus, isVisible }: PipelineStatusWidgetProps) {
@@ -9,36 +17,20 @@ export function PipelineStatusWidget({ pipelineStatus, isVisible }: PipelineStat
   }
 
   return (
-    <div className="pipeline-status-widget" style={{
-      position: 'fixed',
-      top: '10px',
-      right: '10px',
-      background: 'rgba(0,0,0,0.8)',
-      color: 'white',
-      padding: '10px',
-      borderRadius: '8px',
-      fontSize: '12px',
-      zIndex: 1000,
-      minWidth: '200px'
-    }}>
+    <div className="fixed top-3 right-3 z-[1000] min-w-[200px] bg-black/80 backdrop-blur-md text-white text-xs p-3 rounded-xl border border-white/10 shadow-2xl">
       <div><strong>流水线状态</strong></div>
       <div>总任务: {pipelineStatus.totalTasks}</div>
       <div>已完成: {pipelineStatus.completedTasks}</div>
       <div>进度: {pipelineStatus.progressPercentage}%</div>
       <div>活跃状态: {pipelineStatus.isActive ? '运行中' : '已停止'}</div>
       {pipelineStatus.tasks && pipelineStatus.tasks.length > 0 && (
-        <div style={{ marginTop: '5px', fontSize: '10px' }}>
+        <div className="mt-1 text-[10px]">
           <strong>当前任务:</strong>
-          {pipelineStatus.tasks.map((task: any) => (
-            <div key={task.id} style={{ 
-              padding: '2px', 
-              background: task.status.includes('GENERATING') ? '#333' : 
-                         task.status === 'READY_TO_PLAY' ? '#006600' : 
-                         task.status === 'DONE' ? '#666' : 
-                         task.status === 'FAILED' ? '#660000' : '#444',
-              margin: '1px 0',
-              borderRadius: '2px'
-            }}>
+          {pipelineStatus.tasks.map((task: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
+            <div
+              key={task.id}
+              className={`px-0.5 py-px rounded my-px ${getTaskBgClass(task.status)}`}
+            >
               {task.status}: {task.newsTopic}
             </div>
           ))}
