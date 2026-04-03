@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* AITV Logo 左上角渐变字样式 */
 .aitv-logo {
   position: fixed;
@@ -32,7 +36,7 @@ body {
 .ai-news-commentary {
   display: flex;
   flex-direction: column;
-  font-family: 'Arial', sans-serif;
+  font-family: 'Google Sans', 'Arial', sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   padding: 20px;
@@ -348,35 +352,6 @@ body {
   gap: 10px;
 }
 
-.controls button {
-  outline: none;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  width: auto;
-  padding: 12px 24px;
-  height: 48px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.2s;
-}
-
-.controls button:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-
-.controls button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Add this animation to your global CSS file */
 @keyframes scroll-vertical {
   0% {
     transform: translateY(0);
@@ -393,4 +368,3 @@ body {
 .scrolling-container:hover {
   animation-play-state: paused;
 }
-
