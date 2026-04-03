@@ -1,4 +1,4 @@
-export { default as SettingsPanel } from './SettingsPanel'
+export { default as SettingsPanel, type AppSettings, resolveLanguage } from './SettingsPanel'
 export { default as SettingsTabs } from './SettingsTabs'
 export { default as GeneralSettings } from './GeneralSettings'
 export { default as VoiceSettings } from './VoiceSettings'

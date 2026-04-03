@@ -94,19 +94,19 @@ export type AIWorkerType = 'Gemini' | 'Mistral' | 'Reka';
 export interface VoiceConfig {
   moderator: {
     voiceId: string;
-    style?: string;
+    ssmlGender?: 'MALE' | 'FEMALE' | 'NEUTRAL';
     speed?: number;
     pitch?: number;
   };
   tom: {
     voiceId: string;
-    style?: string;
+    ssmlGender?: 'MALE' | 'FEMALE' | 'NEUTRAL';
     speed?: number;
     pitch?: number;
   };
   mark: {
     voiceId: string;
-    style?: string;
+    ssmlGender?: 'MALE' | 'FEMALE' | 'NEUTRAL';
     speed?: number;
     pitch?: number;
   };

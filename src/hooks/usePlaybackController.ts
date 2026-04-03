@@ -7,13 +7,15 @@ interface UsePlaybackControllerProps {
   onSpeakerStateChange: (speaker: Speaker, state: 'speaking' | 'idle') => void
   onConversationUpdate?: (speaker: Speaker, text: string, action: 'add' | 'remove') => void
   onPlaybackComplete?: () => void
+  audioEnabled?: boolean  // if false, pipeline is processed but audio is not played
 }
 
 export function usePlaybackController({
   pipelineStatus,
   onSpeakerStateChange,
   onConversationUpdate,
-  onPlaybackComplete
+  onPlaybackComplete,
+  audioEnabled = true,
 }: UsePlaybackControllerProps) {
   const processedTasksRef = useRef(new Set<string>())
   const audioManager = useRef(getAudioManager())
@@ -56,8 +58,7 @@ export function usePlaybackController({
 
       if (task.audioPlaylist && task.script) {
         const audioItems = await createAudioQueue(task.audioPlaylist, task.script)
-
-        if (audioItems.length > 0) {
+        if (audioItems.length > 0 && audioEnabled) {
           audioManager.current.setQueueAndPlay(audioItems)
         }
       }
@@ -136,6 +137,7 @@ export function usePlaybackController({
       }
       return await response.blob()
     } catch (error) {
+      console.error(`[PC] fetchAudioBlob failed for ${String(audioUrl).substring(0, 60)}:`, error)
       return null
     }
   }, [])
@@ -191,11 +193,6 @@ export function usePlaybackController({
       processedTasksRef.current.add(replayKey)
       await playTask(taskToReplay)
 
-    } else if (!taskToReplay) {
-      // 如果没有准备好的任务，并且AudioManager认为还在播放，重置其状态
-      if (playbackState.isPlaying) {
-        audioManager.current.stopAll()
-      }
     }
   }, [pipelineStatus, playTask])
 

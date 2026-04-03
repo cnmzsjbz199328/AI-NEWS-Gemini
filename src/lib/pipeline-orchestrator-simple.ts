@@ -39,16 +39,16 @@ export class PipelineOrchestrator {
       await TaskManager.updateTaskStatus(taskId, 'GENERATING_AUDIO');
 
       // Generate moderator intro audio
-      await this.generateAndSaveAudio(taskId, 'moderator_intro', script.moderator_intro, 'moderator');
+      await this.generateAndSaveAudio(taskId, 'moderator_intro', script.moderator_intro, 'moderator', undefined, voiceConfig);
 
       // Generate conversation audio in parallel
       const conversationPromises = script.conversation.map((turn, index) =>
-        this.generateAndSaveAudio(taskId!, 'conversation', turn.text, turn.speaker, index)
+        this.generateAndSaveAudio(taskId!, 'conversation', turn.text, turn.speaker, index, voiceConfig)
       );
       await Promise.all(conversationPromises);
 
       // Generate moderator outro audio
-      await this.generateAndSaveAudio(taskId, 'moderator_outro', script.moderator_outro, 'moderator');
+      await this.generateAndSaveAudio(taskId, 'moderator_outro', script.moderator_outro, 'moderator', undefined, voiceConfig);
 
       // The final status update to READY_TO_PLAY is handled within TaskManager.addAudioSegment
 
@@ -64,14 +64,15 @@ export class PipelineOrchestrator {
    * A helper method to generate a single audio segment and save it via the TaskManager.
    */
   private static async generateAndSaveAudio(
-    taskId: string, 
+    taskId: string,
     type: 'moderator_intro' | 'conversation' | 'moderator_outro',
-    text: string, 
-    speaker: string, 
-    index?: number
+    text: string,
+    speaker: string,
+    index?: number,
+    voiceConfig?: VoiceConfig
   ): Promise<void> {
     try {
-      const audioUrl = await AudioGenerationService.generateAudio(text, speaker);
+      const audioUrl = await AudioGenerationService.generateAudio(text, speaker, voiceConfig);
       await TaskManager.addAudioSegment(taskId, type, audioUrl, text, speaker, index);
     } catch (error) {
       // Log the error for the specific segment but don't fail the entire pipeline.

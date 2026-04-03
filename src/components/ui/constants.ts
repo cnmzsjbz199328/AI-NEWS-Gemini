@@ -49,3 +49,23 @@ export const DEBATE_SPEED_OPTIONS = {
 export const TTS_SERVICE_OPTIONS = {
   googleTTS: 'Google Cloud TTS',
 } as const
+
+// Google Cloud TTS Neural2 可用语音列表
+export const GOOGLE_TTS_VOICES = [
+  { value: 'en-US-Neural2-A', label: 'Neural2-A (男性，成熟)', gender: 'MALE' as const },
+  { value: 'en-US-Neural2-C', label: 'Neural2-C (女性，专业)', gender: 'FEMALE' as const },
+  { value: 'en-US-Neural2-D', label: 'Neural2-D (男性，权威)', gender: 'MALE' as const },
+  { value: 'en-US-Neural2-E', label: 'Neural2-E (女性，清晰)', gender: 'FEMALE' as const },
+  { value: 'en-US-Neural2-F', label: 'Neural2-F (女性，温和)', gender: 'FEMALE' as const },
+  { value: 'en-US-Neural2-G', label: 'Neural2-G (女性，活泼)', gender: 'FEMALE' as const },
+  { value: 'en-US-Neural2-H', label: 'Neural2-H (女性，自然)', gender: 'FEMALE' as const },
+  { value: 'en-US-Neural2-I', label: 'Neural2-I (男性，低沉)', gender: 'MALE' as const },
+  { value: 'en-US-Neural2-J', label: 'Neural2-J (男性，年轻)', gender: 'MALE' as const },
+]
+
+// 默认每角色 TTS 语音配置（对应 tts-service.ts 中的硬编码值）
+export const DEFAULT_TTS_VOICE_CONFIG = {
+  moderator: { voiceId: 'en-US-Neural2-D', ssmlGender: 'MALE' as const, speed: 1.0, pitch: 0.0 },
+  tom:       { voiceId: 'en-US-Neural2-J', ssmlGender: 'MALE' as const, speed: 1.1, pitch: 2.0 },
+  mark:      { voiceId: 'en-US-Neural2-A', ssmlGender: 'MALE' as const, speed: 0.9, pitch: -1.0 },
+}

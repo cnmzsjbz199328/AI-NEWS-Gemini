@@ -1,18 +1,13 @@
-import { Volume2, Clock, Palette, Globe } from 'lucide-react'
+import { Volume2, Clock, Globe } from 'lucide-react'
 import Switch from '../ui/Switch'
 import Select from '../ui/Select'
 import Slider from '../ui/Slider'
-import { 
-  THEME_OPTIONS, 
-  LANGUAGE_OPTIONS, 
-  DEBATE_SPEED_OPTIONS 
-} from '../ui/constants'
+import { LANGUAGE_OPTIONS, DEBATE_SPEED_OPTIONS } from '../ui/constants'
 
 interface GeneralAppSettings {
   audioEnabled: boolean
   autoRotateNews: boolean
   rotationInterval: number
-  theme: 'light' | 'dark' | 'auto'
   language: 'en' | 'zh' | 'auto'
   debateSpeed: 'slow' | 'normal' | 'fast'
 }
@@ -23,7 +18,6 @@ interface GeneralSettingsProps {
 }
 
 export default function GeneralSettings({ settings, onUpdateSetting }: GeneralSettingsProps) {
-  const themeOptions = Object.entries(THEME_OPTIONS).map(([value, label]) => ({ value, label }))
   const languageOptions = Object.entries(LANGUAGE_OPTIONS).map(([value, label]) => ({ value, label }))
   const debateSpeedOptions = Object.entries(DEBATE_SPEED_OPTIONS).map(([value, label]) => ({ value, label }))
 
@@ -43,7 +37,7 @@ export default function GeneralSettings({ settings, onUpdateSetting }: GeneralSe
           />
 
           <div className="space-y-2">
-            <label className="text-sm text-gray-400">辩论速度</label>
+            <label className="text-sm text-gray-400">辩论速度（影响生成轮次）</label>
             <Select
               value={settings.debateSpeed}
               onChange={(value) => onUpdateSetting('debateSpeed', value as 'slow' | 'normal' | 'fast')}
@@ -73,27 +67,11 @@ export default function GeneralSettings({ settings, onUpdateSetting }: GeneralSe
                 value={settings.rotationInterval}
                 onChange={(value) => onUpdateSetting('rotationInterval', value)}
                 min={3}
-                max={10}
+                max={30}
                 unit="秒"
               />
             </div>
           )}
-        </div>
-      </div>
-
-      {/* 外观设置 */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-medium text-gray-200 flex items-center gap-2">
-          <Palette className="w-4 h-4" />
-          外观设置
-        </h3>
-        <div className="space-y-2">
-          <label className="text-sm text-gray-400">主题</label>
-          <Select
-            value={settings.theme}
-            onChange={(value) => onUpdateSetting('theme', value as 'light' | 'dark' | 'auto')}
-            options={themeOptions}
-          />
         </div>
       </div>
 

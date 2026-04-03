@@ -1,11 +1,21 @@
 import { useState, useCallback } from 'react'
-import { AppState, NewsItem } from '@/types'
+import { AppState, NewsItem, VoiceConfig, SupportedLanguage } from '@/types'
+import { DEFAULT_TTS_VOICE_CONFIG } from '@/components/ui/constants'
+
+const DEBATE_ROUNDS: Record<'slow' | 'normal' | 'fast', number> = {
+  slow: 1,
+  normal: 2,
+  fast: 3,
+}
 
 interface UseDiscussionManagerProps {
   state: AppState
   setState: React.Dispatch<React.SetStateAction<AppState>>
   news: NewsItem[]
   activeNewsIndex: number
+  ttsVoiceConfig?: VoiceConfig
+  language?: SupportedLanguage
+  debateSpeed?: 'slow' | 'normal' | 'fast'
 }
 
 interface UseDiscussionManagerReturn {
@@ -19,7 +29,10 @@ export function useDiscussionManager({
   state,
   setState,
   news,
-  activeNewsIndex
+  activeNewsIndex,
+  ttsVoiceConfig,
+  language = 'en-US',
+  debateSpeed = 'normal',
 }: UseDiscussionManagerProps): UseDiscussionManagerReturn {
   
   const updateStatus = useCallback((msg: string) => {
@@ -32,17 +45,13 @@ export function useDiscussionManager({
 
   const startPipelineAPI = useCallback(async (title: string, description: string, forceNew: boolean = false) => {
     const newsTopic = `Title: ${title}. Summary: ${description}`
-    
+
     const requestBody = {
-      newsTopic, // Changed from newsTopics array to single topic
-      debateRounds: 1,
-      voiceConfig: {
-        tom: { voiceId: 'cosy-en-male-energetic' },
-        mark: { voiceId: 'cosy-en-female-calm' },
-        moderator: { voiceId: 'cosy-en-neutral-professional' }
-      },
-      language: 'en-US',
-      forceNew // Add forceNew parameter
+      newsTopic,
+      debateRounds: DEBATE_ROUNDS[debateSpeed],
+      voiceConfig: ttsVoiceConfig ?? DEFAULT_TTS_VOICE_CONFIG,
+      language,
+      forceNew
     }
     
     const response = await fetch('/api/pipeline/start', {
@@ -68,7 +77,7 @@ export function useDiscussionManager({
     }
     
     return result // Return result to access reused flag
-  }, [updateStatus])
+  }, [updateStatus, ttsVoiceConfig, language, debateSpeed])
 
   const waitForPipelineCompletion = useCallback(async (): Promise<void> => {
     const pollInterval = 2000 // 2 seconds

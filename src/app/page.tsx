@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { ConversationEntry, NewsItem, Speaker, AppState, SpeakersState, AudioPlaybackInfo } from '@/types'
-import { SettingsPanel } from '@/components/settings'
+import { ConversationEntry, NewsItem, Speaker, AppState } from '@/types'
+import { DEFAULT_TTS_VOICE_CONFIG } from '@/components/ui/constants'
+import { SettingsPanel, AppSettings, resolveLanguage } from '@/components/settings'
 import Button from '@/components/ui/Button'
 
 import { NewsDisplay } from '@/components/news/NewsDisplay'
@@ -27,89 +28,79 @@ export default function HomePage() {
     currentMessage: null,
     currentSpeaker: 'none',
     speakersState: {
-      moderator: { 
-        animationState: 'static', 
-        generationState: 'idle' 
-      },
-      tom: { 
-        animationState: 'static', 
-        generationState: 'idle' 
-      },
-      mark: { 
-        animationState: 'static', 
-        generationState: 'idle' 
-      }
+      moderator: { animationState: 'static', generationState: 'idle' },
+      tom:       { animationState: 'static', generationState: 'idle' },
+      mark:      { animationState: 'static', generationState: 'idle' },
     },
     audioQueue: [],
     currentPlayingAudio: undefined,
     nextSequenceNumber: 1,
-    // Legacy properties for compatibility
     status: 'Ready to start discussion',
     news: [],
     newsError: '',
     activeNewsIndex: 0
   })
 
-  // 设置面板状态
   const [isSettingsPanelVisible, setIsSettingsPanelVisible] = useState(false)
-  
+  const [appSettings, setAppSettings] = useState<AppSettings>({
+    audioEnabled: true,
+    autoRotateNews: true,
+    rotationInterval: 5,
+    language: 'auto',
+    debateSpeed: 'normal',
+    showDebugInfo: false,
+    ttsVoiceConfig: DEFAULT_TTS_VOICE_CONFIG,
+  })
 
-
-  // 使用自定义hooks
   const { news, newsError, activeNewsIndex, fetchNews, setActiveNewsIndex } = useNewsManager()
   const { pipelineStatus } = usePipelineStatus(state.isDebating)
   const { startDiscussion, updateStatus, updateError } = useDiscussionManager({
     state,
     setState,
     news,
-    activeNewsIndex
+    activeNewsIndex,
+    ttsVoiceConfig: appSettings.ttsVoiceConfig,
+    language: resolveLanguage(appSettings.language),
+    debateSpeed: appSettings.debateSpeed,
   })
 
-  // 自动新闻轮播
   const handleNewsRotation = useCallback(() => {
     setActiveNewsIndex((activeNewsIndex + 1) % news.length)
   }, [activeNewsIndex, news.length, setActiveNewsIndex])
-  
+
   useNewsAutoRotation({
     newsLength: news.length,
     isDebating: state.isDebating,
-    onRotateNews: handleNewsRotation
+    onRotateNews: handleNewsRotation,
+    enabled: appSettings.autoRotateNews,
+    intervalSeconds: appSettings.rotationInterval,
   })
 
-  // 音频播放控制
   const updateSpeakerAnimationState = useCallback((speaker: Speaker, animationState: 'speaking' | 'static') => {
-    setState(prevState => {
-      const newState = {
-        ...prevState,
-        speakersState: {
-          ...prevState.speakersState,
-          [speaker]: {
-            ...prevState.speakersState[speaker],
-            animationState
-          }
-        }
+    setState(prevState => ({
+      ...prevState,
+      speakersState: {
+        ...prevState.speakersState,
+        [speaker]: { ...prevState.speakersState[speaker], animationState }
       }
-      return newState;
-    })
+    }))
   }, [])
 
-  // 更新对话记录的回调
   const updateConversation = useCallback((speaker: Speaker, text: string, action: 'add' | 'remove') => {
     if (action === 'add') {
-      const newEntry = {
-        id: `${speaker}-${Date.now()}`,
-        speaker,
-        text,
-        timestamp: new Date()
-      }
       setState(prevState => ({
         ...prevState,
-        conversation: [...prevState.conversation, newEntry]
+        conversation: [...prevState.conversation, {
+          id: `${speaker}-${Date.now()}`,
+          speaker,
+          text,
+          timestamp: new Date()
+        }]
       }))
     }
   }, [])
 
-  const { isPlaying, currentSpeaker, replayLastTask, stopAllPlayback } = usePlaybackController({
+  const { isPlaying, replayLastTask, stopAllPlayback } = usePlaybackController({
     pipelineStatus,
     onSpeakerStateChange: (speaker, speakingState) => {
       updateSpeakerAnimationState(speaker, speakingState === 'speaking' ? 'speaking' : 'static')
@@ -117,43 +108,40 @@ export default function HomePage() {
     onConversationUpdate: updateConversation,
     onPlaybackComplete: useCallback(() => {
       setState(prev => ({ ...prev, isDebating: false, status: 'Discussion complete. Ready to start again.' }))
-    }, [])
+    }, []),
+    audioEnabled: appSettings.audioEnabled,
   })
 
-  // TODO: Managers are disabled after architecture refactoring to one-shot generation
-  // The new architecture uses PipelineScheduler for all generation logic
-  // Frontend now only needs to interact with the pipeline API
-
-  // 监控状态变化的useEffect
   useEffect(() => {
   }, [state.speakersState, state.conversation])
 
   return (
     <div className={`flex min-h-screen ${isSettingsPanelVisible ? 'settings-panel-open' : ''}`}>
       {/* 设置面板 */}
-      <SettingsPanel 
+      <SettingsPanel
         isVisible={isSettingsPanelVisible}
         onToggle={() => setIsSettingsPanelVisible(!isSettingsPanelVisible)}
+        onSettingsChange={setAppSettings}
       />
-      
+
       {/* 主内容区域 */}
       <div className="flex-1 ai-news-commentary">
       <div className="aitv-logo">AITV</div>
-      
+
       <div id="status">{state.error || state.status}</div>
-      
+
       <div className="main-content">
-        <SpeakerAvatar 
-          speaker="moderator" 
-          speakersState={state.speakersState} 
-          title="Moderator" 
+        <SpeakerAvatar
+          speaker="moderator"
+          speakersState={state.speakersState}
+          title="Moderator"
         />
-        
+
         <div className="studio-container">
-          <SpeakerAvatar 
-            speaker="tom" 
-            speakersState={state.speakersState} 
-            title="Tom" 
+          <SpeakerAvatar
+            speaker="tom"
+            speakersState={state.speakersState}
+            title="Tom"
           />
 
           <div className="news-panel">
@@ -166,7 +154,7 @@ export default function HomePage() {
               </span>
             </div>
             <div id="news-content">
-              <NewsDisplay 
+              <NewsDisplay
                 news={news}
                 newsError={newsError}
                 activeNewsIndex={activeNewsIndex}
@@ -175,21 +163,22 @@ export default function HomePage() {
             </div>
           </div>
 
-          <SpeakerAvatar 
-            speaker="mark" 
-            speakersState={state.speakersState} 
-            title="Mark" 
+          <SpeakerAvatar
+            speaker="mark"
+            speakersState={state.speakersState}
+            title="Mark"
           />
         </div>
       </div>
 
       <div id="transcript">
-        <PipelineStatusWidget 
+        <PipelineStatusWidget
           pipelineStatus={pipelineStatus}
           isVisible={state.isDebating}
+          showDebugInfo={appSettings.showDebugInfo}
         />
-        
-        <TranscriptArea 
+
+        <TranscriptArea
           speakersState={state.speakersState}
           conversation={state.conversation}
         />

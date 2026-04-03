@@ -2,53 +2,70 @@
 
 import { useState, useEffect } from 'react'
 import { Settings, X } from 'lucide-react'
-import { VoiceConfig } from '../../types/voice'
-import { VoiceStorageManager } from '../../storage/voice-storage'
-import { getVoiceConfigManager, VoiceConfig as PresetVoiceConfig } from '../../lib/voice-config-manager'
+import { VoiceConfig } from '../../types'
+import { SupportedLanguage } from '../../types'
 import { useAutoCollapse } from '../../hooks/useAutoCollapse'
+import { DEFAULT_TTS_VOICE_CONFIG } from '../ui/constants'
 import SettingsTabs from './SettingsTabs'
 import GeneralSettings from './GeneralSettings'
 import VoiceSettings from './VoiceSettings'
 import AdvancedSettings from './AdvancedSettings'
 
-interface SettingsPanelProps {
-  isVisible: boolean
-  onToggle: () => void
-  autoCollapse?: boolean
-  autoCollapseDelay?: number
-}
+const SETTINGS_STORAGE_KEY = 'ai-news-app-settings'
 
-interface AppSettings {
+export interface AppSettings {
   audioEnabled: boolean
   autoRotateNews: boolean
   rotationInterval: number
-  theme: 'light' | 'dark' | 'auto'
   language: 'en' | 'zh' | 'auto'
   debateSpeed: 'slow' | 'normal' | 'fast'
   showDebugInfo: boolean
-  ttsService: 'googleTTS'
+  ttsVoiceConfig: VoiceConfig
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
   audioEnabled: true,
   autoRotateNews: true,
   rotationInterval: 5,
-  theme: 'auto',
   language: 'auto',
   debateSpeed: 'normal',
   showDebugInfo: false,
-  ttsService: 'googleTTS'
+  ttsVoiceConfig: DEFAULT_TTS_VOICE_CONFIG,
 }
 
-export default function SettingsPanel({ 
-  isVisible, 
-  onToggle, 
-  autoCollapse = true, 
-  autoCollapseDelay = 5000 
+function loadSettings(): AppSettings {
+  if (typeof window === 'undefined') return DEFAULT_SETTINGS
+  try {
+    const stored = localStorage.getItem(SETTINGS_STORAGE_KEY)
+    if (!stored) return DEFAULT_SETTINGS
+    return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) }
+  } catch {
+    return DEFAULT_SETTINGS
+  }
+}
+
+// Resolved language mapped to SupportedLanguage for the pipeline
+export function resolveLanguage(lang: 'en' | 'zh' | 'auto'): SupportedLanguage {
+  if (lang === 'zh') return 'zh-CN'
+  return 'en-US'
+}
+
+interface SettingsPanelProps {
+  isVisible: boolean
+  onToggle: () => void
+  autoCollapse?: boolean
+  autoCollapseDelay?: number
+  onSettingsChange?: (settings: AppSettings) => void
+}
+
+export default function SettingsPanel({
+  isVisible,
+  onToggle,
+  autoCollapse = true,
+  autoCollapseDelay = 5000,
+  onSettingsChange,
 }: SettingsPanelProps) {
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS)
-  const [voices, setVoices] = useState<VoiceConfig[]>([])
-  const [presetVoices, setPresetVoices] = useState<PresetVoiceConfig[]>([])
   const [activeTab, setActiveTab] = useState<'general' | 'voice' | 'advanced'>('general')
 
   const { handleUserInteraction } = useAutoCollapse({
@@ -58,66 +75,23 @@ export default function SettingsPanel({
     onCollapse: onToggle
   })
 
-  // 初始化音色数据
+  // 初始化：从 localStorage 加载设置
   useEffect(() => {
-    // 加载用户上传的音色
-    const userVoices = VoiceStorageManager.getVoiceConfigs()
-    setVoices(userVoices)
-    
-    // 加载预设音色
-    const voiceManager = getVoiceConfigManager()
-    const presets = voiceManager.getAllPresetVoices()
-    setPresetVoices(presets)
-    
+    setSettings(loadSettings())
   }, [])
 
-  // 合并预设音色和用户音色供组件使用
-  const allVoices: VoiceConfig[] = [
-    // 将预设音色转换为VoiceConfig格式
-    ...presetVoices.map(preset => ({
-      id: preset.id,
-      name: preset.name,
-      description: preset.description,
-      character: 'moderator' as const, // 预设音色可以被任何角色使用
-      gender: preset.gender as 'male' | 'female',
-      language: preset.language,
-      audioUrl: preset.url,
-      isDefault: true,
-      uploadedAt: new Date().toISOString(),
-      fileSize: 0,
-    })),
-    // 用户上传的音色
-    ...voices
-  ]
-
-  // 更新设置
-  const updateSetting = <K extends keyof AppSettings>(
-    key: K,
-    value: AppSettings[K]
-  ) => {
-    setSettings(prev => ({
-      ...prev,
-      [key]: value
-    }))
-  }
-
-  // 音色上传处理
-  const handleVoiceUpload = (voiceConfig: VoiceConfig) => {
-    const success = VoiceStorageManager.saveVoiceConfig(voiceConfig)
-    if (success) {
-      setVoices(prev => [...prev.filter(v => v.character !== voiceConfig.character), voiceConfig])
+  // 持久化 + 通知父组件
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings))
     }
+    onSettingsChange?.(settings)
+  }, [settings, onSettingsChange])
+
+  const updateSetting = <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
+    setSettings(prev => ({ ...prev, [key]: value }))
   }
 
-  // 音色删除处理
-  const handleVoiceDelete = (voiceId: string) => {
-    const success = VoiceStorageManager.deleteVoiceConfig(voiceId)
-    if (success) {
-      setVoices(prev => prev.filter(v => v.id !== voiceId))
-    }
-  }
-
-  // 重置设置
   const resetSettings = () => {
     setSettings(DEFAULT_SETTINGS)
   }
@@ -174,21 +148,17 @@ export default function SettingsPanel({
                   audioEnabled: settings.audioEnabled,
                   autoRotateNews: settings.autoRotateNews,
                   rotationInterval: settings.rotationInterval,
-                  theme: settings.theme,
                   language: settings.language,
-                  debateSpeed: settings.debateSpeed
+                  debateSpeed: settings.debateSpeed,
                 }}
-                onUpdateSetting={(key, value) => updateSetting(key as keyof AppSettings, value as any)}
+                onUpdateSetting={(key, value) => updateSetting(key as keyof AppSettings, value as AppSettings[keyof AppSettings])}
               />
             )}
 
             {activeTab === 'voice' && (
               <VoiceSettings
-                ttsService={settings.ttsService}
-                onTtsServiceChange={(service) => updateSetting('ttsService', service)}
-                voices={allVoices}
-                onVoiceUpload={handleVoiceUpload}
-                onVoiceDelete={handleVoiceDelete}
+                ttsVoiceConfig={settings.ttsVoiceConfig}
+                onTtsVoiceConfigChange={(config) => updateSetting('ttsVoiceConfig', config)}
               />
             )}
 

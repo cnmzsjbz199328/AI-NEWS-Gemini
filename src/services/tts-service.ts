@@ -5,7 +5,7 @@
 
 import { Speaker } from '@/types'
 
-interface VoiceConfig {
+interface TTSVoiceConfig {
   name: string
   languageCode: string
   ssmlGender: 'MALE' | 'FEMALE' | 'NEUTRAL'
@@ -13,7 +13,15 @@ interface VoiceConfig {
   pitch: number
 }
 
-const SPEAKER_VOICE_CONFIG: Record<Speaker, VoiceConfig> = {
+// Per-call overrides from user settings
+interface SpeakerVoiceOverride {
+  voiceId?: string
+  ssmlGender?: 'MALE' | 'FEMALE' | 'NEUTRAL'
+  speed?: number
+  pitch?: number
+}
+
+const SPEAKER_VOICE_CONFIG: Record<Speaker, TTSVoiceConfig> = {
   moderator: {
     name: 'en-US-Neural2-D', // authoritative male voice (free tier)
     languageCode: 'en-US',
@@ -40,20 +48,20 @@ const SPEAKER_VOICE_CONFIG: Record<Speaker, VoiceConfig> = {
 export class TTSService {
   constructor(private apiKey: string) {}
 
-  async synthesizeSpeech(speaker: Speaker, text: string): Promise<Uint8Array> {
-    const voiceConfig = SPEAKER_VOICE_CONFIG[speaker]
+  async synthesizeSpeech(speaker: Speaker, text: string, override?: SpeakerVoiceOverride): Promise<Uint8Array> {
+    const defaults = SPEAKER_VOICE_CONFIG[speaker]
 
     const requestBody = {
       input: { text },
       voice: {
-        languageCode: voiceConfig.languageCode,
-        name: voiceConfig.name,
-        ssmlGender: voiceConfig.ssmlGender,
+        languageCode: defaults.languageCode,
+        name: override?.voiceId ?? defaults.name,
+        ssmlGender: override?.ssmlGender ?? defaults.ssmlGender,
       },
       audioConfig: {
         audioEncoding: 'MP3',
-        speakingRate: voiceConfig.speakingRate,
-        pitch: voiceConfig.pitch,
+        speakingRate: override?.speed ?? defaults.speakingRate,
+        pitch: override?.pitch ?? defaults.pitch,
       },
     }
 
@@ -84,8 +92,8 @@ export class TTSService {
   /**
    * Returns a base64 data URL suitable for storing in KV and playing directly in the browser.
    */
-  async synthesizeToDataUrl(speaker: Speaker, text: string): Promise<string> {
-    const audioBytes = await this.synthesizeSpeech(speaker, text)
+  async synthesizeToDataUrl(speaker: Speaker, text: string, override?: SpeakerVoiceOverride): Promise<string> {
+    const audioBytes = await this.synthesizeSpeech(speaker, text, override)
     const base64 = btoa(Array.from(audioBytes, b => String.fromCharCode(b)).join(''))
     return `data:audio/mp3;base64,${base64}`
   }
