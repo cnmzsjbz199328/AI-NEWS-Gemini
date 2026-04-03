@@ -31,7 +31,7 @@ export default function GeneralSettings({ settings, onUpdateSetting }: GeneralSe
     <div className="space-y-6">
       {/* 音频设置 */}
       <div className="space-y-3">
-        <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+        <h3 className="text-sm font-medium text-gray-200 flex items-center gap-2">
           <Volume2 className="w-4 h-4" />
           音频设置
         </h3>
@@ -43,7 +43,7 @@ export default function GeneralSettings({ settings, onUpdateSetting }: GeneralSe
           />
 
           <div className="space-y-2">
-            <label className="text-sm text-gray-600">辩论速度</label>
+            <label className="text-sm text-gray-400">辩论速度</label>
             <Select
               value={settings.debateSpeed}
               onChange={(value) => onUpdateSetting('debateSpeed', value as 'slow' | 'normal' | 'fast')}
@@ -55,7 +55,7 @@ export default function GeneralSettings({ settings, onUpdateSetting }: GeneralSe
 
       {/* 新闻设置 */}
       <div className="space-y-3">
-        <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+        <h3 className="text-sm font-medium text-gray-200 flex items-center gap-2">
           <Clock className="w-4 h-4" />
           新闻设置
         </h3>
@@ -68,7 +68,7 @@ export default function GeneralSettings({ settings, onUpdateSetting }: GeneralSe
 
           {settings.autoRotateNews && (
             <div className="space-y-2">
-              <label className="text-sm text-gray-600">轮换间隔</label>
+              <label className="text-sm text-gray-400">轮换间隔</label>
               <Slider
                 value={settings.rotationInterval}
                 onChange={(value) => onUpdateSetting('rotationInterval', value)}
@@ -83,12 +83,12 @@ export default function GeneralSettings({ settings, onUpdateSetting }: GeneralSe
 
       {/* 外观设置 */}
       <div className="space-y-3">
-        <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+        <h3 className="text-sm font-medium text-gray-200 flex items-center gap-2">
           <Palette className="w-4 h-4" />
           外观设置
         </h3>
         <div className="space-y-2">
-          <label className="text-sm text-gray-600">主题</label>
+          <label className="text-sm text-gray-400">主题</label>
           <Select
             value={settings.theme}
             onChange={(value) => onUpdateSetting('theme', value as 'light' | 'dark' | 'auto')}
@@ -99,7 +99,7 @@ export default function GeneralSettings({ settings, onUpdateSetting }: GeneralSe
 
       {/* 语言设置 */}
       <div className="space-y-3">
-        <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+        <h3 className="text-sm font-medium text-gray-200 flex items-center gap-2">
           <Globe className="w-4 h-4" />
           语言设置
         </h3>

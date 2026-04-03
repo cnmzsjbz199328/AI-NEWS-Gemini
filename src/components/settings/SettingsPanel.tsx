@@ -132,10 +132,11 @@ export default function SettingsPanel({
           transition-all
           duration-500
           ease-in-out
-          bg-white
+          bg-gray-900/95
+          backdrop-blur-xl
           border-r
-          border-gray-200
-          shadow-lg
+          border-white/10
+          shadow-2xl
           ${isVisible ? 'w-80' : 'w-0'}
         `}
         onMouseEnter={handleUserInteraction}
@@ -145,16 +146,16 @@ export default function SettingsPanel({
       >
         <div className="w-80 h-full flex flex-col">
           {/* 面板头部 */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <div className="flex items-center justify-between p-4 border-b border-white/10">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
               <Settings className="w-5 h-5" />
               设置
             </h2>
             <button
               onClick={onToggle}
-              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-1 hover:bg-white/10 rounded-full transition-colors"
             >
-              <X className="w-5 h-5 text-gray-600" />
+              <X className="w-5 h-5 text-gray-400" />
             </button>
           </div>
 
@@ -200,10 +201,10 @@ export default function SettingsPanel({
           </div>
 
           {/* 面板底部 */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-white/10">
             <button
               onClick={resetSettings}
-              className="w-full px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-md transition-colors"
+              className="w-full px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/10 rounded-md transition-colors"
             >
               重置为默认设置
             </button>
@@ -217,14 +218,14 @@ export default function SettingsPanel({
           onClick={onToggle}
           className="
             fixed top-4 left-4 z-50
-            p-3 bg-white border border-gray-200 rounded-full shadow-lg
-            hover:bg-gray-50 hover:shadow-xl
+            p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-full shadow-lg
+            hover:bg-white/20 hover:shadow-xl
             transition-all duration-200
-            focus:outline-none focus:ring-2 focus:ring-blue-500
+            focus:outline-none focus:ring-2 focus:ring-white/40
           "
           title="打开设置"
         >
-          <Settings className="w-5 h-5 text-gray-600" />
+          <Settings className="w-5 h-5 text-white" />
         </button>
       )}
     </div>
