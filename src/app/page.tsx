@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { ConversationEntry, NewsItem, Speaker, AppState, SpeakersState, AudioPlaybackInfo } from '@/types'
 import { SettingsPanel } from '@/components/settings'
+import Button from '@/components/ui/Button'
 
 import { NewsDisplay } from '@/components/news/NewsDisplay'
 import { SpeakerAvatar } from '@/components/ui/SpeakerAvatar'
@@ -195,53 +196,32 @@ export default function HomePage() {
       </div>
 
         <div className="controls">
-          <button 
-            onClick={() => startDiscussion(true)} 
+          <Button
+            variant="success"
+            size="lg"
+            onClick={() => startDiscussion(true)}
             disabled={state.isDebating}
-            style={{ 
-              marginRight: '10px',
-              backgroundColor: '#4CAF50',
-              color: 'white',
-              padding: '10px 20px',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: state.isDebating ? 'not-allowed' : 'pointer'
-            }}
           >
             🆕 Begin New Discussion
-          </button>
-          
-          <button 
-            onClick={() => startDiscussion(false)} 
+          </Button>
+
+          <Button
+            variant="info"
+            size="lg"
+            onClick={() => startDiscussion(false)}
             disabled={state.isDebating}
-            style={{ 
-              marginRight: '10px',
-              backgroundColor: '#2196F3',
-              color: 'white',
-              padding: '10px 20px',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: state.isDebating ? 'not-allowed' : 'pointer'
-            }}
           >
             🔄 Start (Reuse if Available)
-          </button>
-          
-          <button 
-            onClick={stopAllPlayback} 
+          </Button>
+
+          <Button
+            variant="danger"
+            size="lg"
+            onClick={stopAllPlayback}
             disabled={state.isDebating && !isPlaying}
-            style={{ 
-              backgroundColor: '#f44336',
-              color: 'white',
-              padding: '10px 20px',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: (!isPlaying && !state.isDebating) ? 'not-allowed' : 'pointer',
-              opacity: (!isPlaying && !state.isDebating) ? 0.5 : 1
-            }}
           >
             🛑 Stop All Playback
-          </button>
+          </Button>
         </div>
       </div>
 
