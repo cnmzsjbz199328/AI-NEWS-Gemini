@@ -37,6 +37,7 @@ export class TextGenerationService {
       // Fill in other required fields with default/mock values
       script: null,
       audioPlaylist: null,
+      slides: null,
       voiceConfig: { moderator: { voiceId: 'en-US-Neural2-D' }, tom: { voiceId: 'en-US-Neural2-J' }, mark: { voiceId: 'en-US-Neural2-A' } } as VoiceConfig,
       assignedWorker: null,
       createdAt: Date.now(),

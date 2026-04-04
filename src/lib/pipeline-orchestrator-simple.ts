@@ -1,6 +1,8 @@
 import { TaskManager } from './managers/TaskManager';
 import { TextGenerationService } from './services/TextGenerationService';
 import { AudioGenerationService } from './services/AudioGenerationService';
+import { SlideGenerationService } from './services/SlideGenerationService';
+import { TaskStorageService } from './services/TaskStorageService';
 import { VoiceConfig, SupportedLanguage, PipelineTask } from '@/types';
 
 /**
@@ -34,6 +36,14 @@ export class PipelineOrchestrator {
       await TaskManager.updateTaskStatus(taskId, 'GENERATING_TEXT');
       const script = await TextGenerationService.generateDebateScript(newsTopic, debateRounds, language);
       await TaskManager.saveTaskScript(taskId, script);
+
+      // 2b. Generate slides (non-blocking — audio pipeline not blocked on failure)
+      const slides = await SlideGenerationService.generateSlides(script);
+      if (slides) {
+        await TaskStorageService.saveSlides(taskId, slides);
+      } else {
+        console.error(`[Orchestrator] Slide generation failed for task ${taskId}, continuing without slides`);
+      }
 
       // 3. Generate audio for each part of the script
       await TaskManager.updateTaskStatus(taskId, 'GENERATING_AUDIO');

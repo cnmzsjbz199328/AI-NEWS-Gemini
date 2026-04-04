@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { ConversationEntry, NewsItem, Speaker, AppState } from '@/types'
+import { ConversationEntry, NewsItem, Speaker, AppState, SlideData } from '@/types'
 import { DEFAULT_TTS_VOICE_CONFIG } from '@/components/ui/constants'
 import { SettingsPanel, AppSettings, resolveLanguage } from '@/components/settings'
 import Button from '@/components/ui/Button'
@@ -10,6 +10,7 @@ import { NewsDisplay } from '@/components/news/NewsDisplay'
 import { SpeakerAvatar } from '@/components/ui/SpeakerAvatar'
 import { TranscriptArea } from '@/components/ui/TranscriptArea'
 import { PipelineStatusWidget } from '@/components/ui/PipelineStatusWidget'
+import { SlidePanel } from '@/components/ui/SlidePanel'
 import { useNewsManager } from '@/hooks/useNewsManager'
 import { usePipelineStatus } from '@/hooks/usePipelineStatus'
 import { useDiscussionManager } from '@/hooks/useDiscussionManager'
@@ -42,6 +43,7 @@ export default function HomePage() {
   })
 
   const [isSettingsPanelVisible, setIsSettingsPanelVisible] = useState(false)
+  const [currentSlide, setCurrentSlide] = useState<SlideData | null>(null)
   const [appSettings, setAppSettings] = useState<AppSettings>({
     audioEnabled: true,
     autoRotateNews: true,
@@ -110,6 +112,7 @@ export default function HomePage() {
       setState(prev => ({ ...prev, isDebating: false, status: 'Discussion complete. Ready to start again.' }))
     }, []),
     audioEnabled: appSettings.audioEnabled,
+    onSlideChange: setCurrentSlide,
   })
 
   useEffect(() => {
@@ -145,6 +148,14 @@ export default function HomePage() {
           />
 
           <div className="news-panel">
+            <SlidePanel
+              currentSlide={currentSlide}
+              activeSpeaker={
+                (Object.keys(state.speakersState) as Speaker[]).find(
+                  s => state.speakersState[s].animationState === 'speaking'
+                )
+              }
+            />
             <div className="news-navigation">
               <span className="news-indicator">
                 {news.length > 0 ? `${activeNewsIndex + 1} / ${news.length}` : 'Loading...'}

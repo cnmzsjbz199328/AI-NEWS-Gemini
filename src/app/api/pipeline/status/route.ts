@@ -30,7 +30,8 @@ export async function GET() {
         createdAt: task.createdAt,
         hasScript: !!task.script,
         audioPlaylist: task.audioPlaylist, // Include for playback
-        script: task.script // Include for playback
+        script: task.script,              // Include for playback
+        slides: task.slides ?? null,      // Include for slide display
       })),
       nextPlayableTask: null, // Legacy field
       timestamp: Date.now(),

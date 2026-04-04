@@ -1,7 +1,7 @@
 import { getStorageClient } from '@/lib/kv/redis-client';
 import { KV_KEYS, generateTopicHash } from '@/lib/kv/kv-keys';
 import { StoredTask, StoredAudioCollection, StoredAudioItem } from '@/lib/kv/kv-schemas';
-import { DebateScript } from '@/types';
+import { DebateScript, SlidePlaylist } from '@/types';
 
 const TASK_EXPIRATION_SECONDS = 86400 * 7; // 7 days
 
@@ -81,6 +81,16 @@ export class TaskStorageService {
 
   static async getScript(taskId: string): Promise<DebateScript | null> {
     return this.withRetry(() => redis.get<DebateScript>(KV_KEYS.SCRIPT(taskId)));
+  }
+
+  // --- Slides Operations ---
+
+  static async saveSlides(taskId: string, slides: SlidePlaylist): Promise<void> {
+    await this.withRetry(() => redis.set(KV_KEYS.SLIDES(taskId), slides, { ex: TASK_EXPIRATION_SECONDS }));
+  }
+
+  static async getSlides(taskId: string): Promise<SlidePlaylist | null> {
+    return this.withRetry(() => redis.get<SlidePlaylist>(KV_KEYS.SLIDES(taskId)));
   }
 
   // --- Audio Collection Operations ---

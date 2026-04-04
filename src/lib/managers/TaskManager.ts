@@ -1,9 +1,10 @@
-import { 
-  PipelineTask, 
-  PipelineTaskStatus, 
-  VoiceConfig, 
+import {
+  PipelineTask,
+  PipelineTaskStatus,
+  VoiceConfig,
   DebateScript,
   AudioPlaylist,
+  SlidePlaylist,
   SupportedLanguage
 } from '@/types';
 import { TaskStorageService } from '@/lib/services/TaskStorageService';
@@ -77,14 +78,16 @@ export class TaskManager {
       return null;
     }
 
-    const [script, audioCollection] = await Promise.all([
+    const [script, audioCollection, slides] = await Promise.all([
       TaskStorageService.getScript(taskId),
-      TaskStorageService.getAudioCollection(taskId)
+      TaskStorageService.getAudioCollection(taskId),
+      TaskStorageService.getSlides(taskId),
     ]);
 
     const pipelineTask = this.mapStoredTaskToPipelineTask(storedTask);
     pipelineTask.script = script ?? null;
-    
+    pipelineTask.slides = slides ?? null;
+
     if (audioCollection?.isComplete) {
       pipelineTask.audioPlaylist = this.buildAudioPlaylist(audioCollection);
     } else {
@@ -177,8 +180,9 @@ export class TaskManager {
       id: storedTask.id,
       newsTopic: storedTask.newsTopic,
       status: storedTask.status,
-      script: null, // Should be populated by the caller
+      script: null,       // Should be populated by the caller
       audioPlaylist: null, // Should be populated by the caller
+      slides: null,        // Should be populated by the caller
       voiceConfig: storedTask.voiceConfig,
       assignedWorker: storedTask.assignedWorker as any,
       debateRounds: storedTask.debateRounds,

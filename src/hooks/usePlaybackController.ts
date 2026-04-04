@@ -1,13 +1,15 @@
 import { useEffect, useCallback, useRef, useState } from 'react'
 import { getAudioManager } from '@/utils/audio-manager'
-import { Speaker, AudioItem } from '@/types'
+import { Speaker, AudioItem, SlideData } from '@/types'
+import { findSlideForSpeakerText } from '@/utils/slideUtils'
 
 interface UsePlaybackControllerProps {
-  pipelineStatus: any
+  pipelineStatus: any // eslint-disable-line @typescript-eslint/no-explicit-any
   onSpeakerStateChange: (speaker: Speaker, state: 'speaking' | 'idle') => void
   onConversationUpdate?: (speaker: Speaker, text: string, action: 'add' | 'remove') => void
   onPlaybackComplete?: () => void
   audioEnabled?: boolean  // if false, pipeline is processed but audio is not played
+  onSlideChange?: (slide: SlideData | null) => void
 }
 
 export function usePlaybackController({
@@ -16,9 +18,11 @@ export function usePlaybackController({
   onConversationUpdate,
   onPlaybackComplete,
   audioEnabled = true,
+  onSlideChange,
 }: UsePlaybackControllerProps) {
   const processedTasksRef = useRef(new Set<string>())
   const audioManager = useRef(getAudioManager())
+  const currentTaskRef = useRef<any>(null) // eslint-disable-line @typescript-eslint/no-explicit-any
   const [isPlayingState, setIsPlayingState] = useState(false)
 
   // Wire AudioManager callbacks
@@ -31,6 +35,17 @@ export function usePlaybackController({
       if (action === 'start' && speaker) {
         onSpeakerStateChange(speaker, 'speaking')
         onConversationUpdate?.(speaker, text, 'add')
+
+        // Update slide for the current turn
+        if (onSlideChange) {
+          const task = currentTaskRef.current
+          if (task?.slides && task?.script) {
+            const slide = findSlideForSpeakerText(task.slides, task.script, speaker, text)
+            onSlideChange(slide)
+          } else {
+            onSlideChange(null)
+          }
+        }
       } else if (action === 'end') {
         if (speaker) {
           onSpeakerStateChange(speaker, 'idle')
@@ -38,6 +53,7 @@ export function usePlaybackController({
           const speakers: Speaker[] = ['moderator', 'tom', 'mark']
           speakers.forEach(s => onSpeakerStateChange(s, 'idle'))
         }
+        onSlideChange?.(null)
       }
     })
 
@@ -46,7 +62,8 @@ export function usePlaybackController({
     })
   }, [onSpeakerStateChange, onConversationUpdate, onPlaybackComplete])
 
-  const playTask = useCallback(async (task: any) => {
+  const playTask = useCallback(async (task: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    currentTaskRef.current = task
     try {
       // 立即标记任务为已播放，防止重复处理
       try {

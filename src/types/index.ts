@@ -133,6 +133,24 @@ export interface AudioPlaylist {
   moderator_outro: string; // 音频文件URL或路径
 }
 
+// Slide 数据结构 — 与 demo.html SCRIPT[].slide 对齐
+export interface SlideData {
+  tag: string;           // 如 "TOM · ANALYSIS"
+  title: string;         // 3–7 词标题
+  points: string[];      // 2–4 条要点，每条 ≤80 字符
+  stat: string | null;   // 关键数据统计，可为 null
+}
+
+// Slide 播放列表容器 — 结构镜像 DebateScript
+export interface SlidePlaylist {
+  moderator_intro: SlideData;
+  conversation: {
+    speaker: Speaker;
+    slide: SlideData;
+  }[];
+  moderator_outro: SlideData;
+}
+
 // 流水线任务定义
 export interface PipelineTask {
   id: string;
@@ -140,6 +158,7 @@ export interface PipelineTask {
   status: PipelineTaskStatus;
   script: DebateScript | null;
   audioPlaylist: AudioPlaylist | null;
+  slides: SlidePlaylist | null; // Slide 内容，生成失败时为 null
   voiceConfig: VoiceConfig;
   assignedWorker: AIWorkerType | null;
   debateRounds: number;

@@ -14,6 +14,9 @@ export const KV_KEYS = {
   // Script Data (JSON String)
   SCRIPT: (taskId: string) => `ainews:v2:script:${taskId}`,
 
+  // Slide Playlist (JSON String)
+  SLIDES: (taskId: string) => `ainews:v2:slides:${taskId}`,
+
   // News Topic Index (String -> TaskId mapping)
   NEWS_TOPIC_INDEX: (topicHash: string) => `ainews:v2:topic_index:${topicHash}`,
   
