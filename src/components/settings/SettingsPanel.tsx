@@ -98,21 +98,6 @@ export default function SettingsPanel({
 
   return (
     <>
-      {/* Settings toggle button — always visible in top-left */}
-      <button
-        onClick={onToggle}
-        className="
-          fixed top-4 left-4 z-[210]
-          p-2.5 bg-white/8 backdrop-blur-md border border-white/15 rounded-full shadow-lg
-          hover:bg-white/15 hover:shadow-xl
-          transition-all duration-200
-          focus:outline-none focus:ring-2 focus:ring-white/30
-        "
-        title="Settings"
-      >
-        <Settings className="w-4 h-4 text-white/70" />
-      </button>
-
       {/* Backdrop */}
       <div
         className="fixed inset-0 z-[199] bg-black/50 backdrop-blur-sm transition-opacity duration-400"

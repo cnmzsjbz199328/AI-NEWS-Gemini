@@ -10,8 +10,8 @@ interface UseNewsAutoRotationProps {
 
 export function useNewsAutoRotation({ newsLength, isDebating, onRotateNews, enabled = true, intervalSeconds = 5 }: UseNewsAutoRotationProps) {
   useEffect(() => {
-    if (!enabled || newsLength === 0) return
-    const interval = setInterval(onRotateNews, isDebating ? 30000 : intervalSeconds * 1000)
+    if (!enabled || newsLength === 0 || isDebating) return
+    const interval = setInterval(onRotateNews, intervalSeconds * 1000)
     return () => clearInterval(interval)
   }, [newsLength, isDebating, onRotateNews, enabled, intervalSeconds])
 }

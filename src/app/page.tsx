@@ -5,8 +5,8 @@ import { ConversationEntry, NewsItem, Speaker, AppState, SlideData } from '@/typ
 import { DEFAULT_TTS_VOICE_CONFIG } from '@/components/ui/constants'
 import { SettingsPanel, AppSettings, resolveLanguage } from '@/components/settings'
 import Button from '@/components/ui/Button'
+import { Settings } from 'lucide-react'
 
-import { NewsDisplay } from '@/components/news/NewsDisplay'
 import { SpeakerAvatar } from '@/components/ui/SpeakerAvatar'
 import { TranscriptArea } from '@/components/ui/TranscriptArea'
 import { PipelineStatusWidget } from '@/components/ui/PipelineStatusWidget'
@@ -137,7 +137,16 @@ export default function HomePage() {
         {/* Header */}
         <header className="flex justify-between items-center px-8 py-4 shrink-0">
           <div className="aitv-logo">AITV</div>
-          <div className="text-xs text-slate-400 font-body">{state.error || state.status}</div>
+          <div className="flex items-center gap-4">
+            <div className="text-xs text-slate-400 font-body">{state.error || state.status}</div>
+            <button
+              onClick={() => setIsSettingsPanelVisible(!isSettingsPanelVisible)}
+              className="p-2 bg-white/8 backdrop-blur-md border border-white/15 rounded-full hover:bg-white/15 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/30"
+              title="Settings"
+            >
+              <Settings className="w-4 h-4 text-white/70" />
+            </button>
+          </div>
         </header>
 
         {/* Studio — left avatars + right content */}
@@ -150,13 +159,10 @@ export default function HomePage() {
             <SpeakerAvatar speaker="moderator" speakersState={state.speakersState} title="Moderator" />
           </div>
 
-          {/* Right: slide + news + transcript */}
+          {/* Right: news+slide + transcript */}
           <div className="content-column">
 
-            {/* Slide panel */}
-            <SlidePanel currentSlide={currentSlide} activeSpeaker={activeSpeaker} />
-
-            {/* News panel */}
+            {/* Unified news + slide panel */}
             <div className="news-panel">
               <PipelineStatusWidget
                 pipelineStatus={pipelineStatus}
@@ -171,14 +177,13 @@ export default function HomePage() {
                   {state.isDebating ? `Discussing Topic ${activeNewsIndex + 1}` : 'Auto-rotating topics'}
                 </span>
               </div>
-              <div id="news-content">
-                <NewsDisplay
-                  news={news}
-                  newsError={newsError}
-                  activeNewsIndex={activeNewsIndex}
-                  onRefreshNews={fetchNews}
-                />
-              </div>
+              <SlidePanel
+                currentSlide={currentSlide}
+                activeSpeaker={activeSpeaker}
+                activeNewsItem={news[activeNewsIndex] ?? null}
+                newsError={newsError}
+                onRefreshNews={fetchNews}
+              />
             </div>
 
             {/* Transcript */}
