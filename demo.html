@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html class="dark" lang="zh">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AITV - AI News Commentary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "surface-container":         "#221e26",
+          "surface-dim":               "#16121a",
+          "on-primary-container":      "#00285d",
+          "primary":                   "#adc6ff",
+          "on-secondary":              "#432c00",
+          "secondary":                 "#ffd799",
+          "tertiary":                  "#ffb690",
+          "outline":                   "#8c909f",
+          "on-surface":                "#e9dfec",
+          "surface-container-lowest":  "#110d15",
+          "surface-container-high":    "#2d2831",
+          "surface-variant":           "#38333c",
+          "surface":                   "#16121a",
+          "error":                     "#ffb4ab",
+          "on-primary":                "#002e6a",
+          "on-surface-variant":        "#c2c6d6",
+          "outline-variant":           "#424754",
+          "background":                "#16121a",
+          "secondary-container":       "#feb300",
+          "primary-container":         "#4d8eff",
+          "on-tertiary":               "#552100",
+        },
+        fontFamily: {
+          "headline": ["Space Grotesk"],
+          "body":     ["Manrope"],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    background-color: #16121a;
+    color: #e9dfec;
+    font-family: 'Manrope', sans-serif;
+    overflow: hidden;
+    margin: 0;
+  }
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .spotlight-radial {
+    background: radial-gradient(circle at 60% 0%,
+      rgba(173,198,255,0.13) 0%, transparent 60%);
+  }
+
+  /* ── Avatar sizing (controlled via JS) ── */
+  .avatar-img {
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    transition:
+      width  0.45s cubic-bezier(.34,1.56,.64,1),
+      height 0.45s cubic-bezier(.34,1.56,.64,1),
+      filter 0.35s ease,
+      box-shadow 0.4s ease,
+      opacity 0.35s ease;
+  }
+  .avatar-img.idle {
+    width: 72px; height: 72px;
+    filter: grayscale(85%) brightness(0.55);
+    opacity: 0.7;
+    box-shadow: none;
+  }
+  .avatar-img.speaking {
+    width: 144px; height: 144px;
+    filter: grayscale(0%) brightness(1);
+    opacity: 1;
+  }
+  /* Glow ring rendered as box-shadow — set per speaker in JS */
+  .avatar-glow {
+    border-radius: 50%;
+    transition:
+      width  0.45s cubic-bezier(.34,1.56,.64,1),
+      height 0.45s cubic-bezier(.34,1.56,.64,1),
+      box-shadow 0.4s ease,
+      opacity 0.4s ease;
+  }
+  .avatar-glow.idle    { width:72px; height:72px; box-shadow:none; opacity:0; }
+  .avatar-glow.speaking{ opacity:1; }
+
+  /* Speaking label badge */
+  .spk-badge {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    animation: pulse-badge 1.4s ease-in-out infinite;
+  }
+  .spk-badge.hidden { opacity:0; transform:translateX(-50%) scale(0.7); pointer-events:none; }
+  @keyframes pulse-badge {
+    0%,100% { opacity:1; transform:translateX(-50%) scale(1); }
+    50%      { opacity:0.65; transform:translateX(-50%) scale(1.1); }
+  }
+
+  /* ── Slide area ── */
+  .slide-panel {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    max-height: 320px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  }
+  /* Background image layer */
+  .slide-bg {
+    position: absolute; inset: 0;
+    object-fit: cover;
+    width: 100%; height: 100%;
+    filter: grayscale(80%) brightness(0.3);
+    transition: filter 1s ease, opacity 1s ease;
+  }
+  /* Dark gradient overlay always present */
+  .slide-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg,
+      rgba(17,13,21,0.92) 0%,
+      rgba(17,13,21,0.75) 60%,
+      rgba(17,13,21,0.55) 100%);
+  }
+  /* Content layer */
+  .slide-content {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center;
+    padding: 32px 36px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+  }
+  .slide-content.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  /* Idle placeholder */
+  .slide-idle {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 10px;
+    opacity: 1;
+    transition: opacity 0.35s ease;
+  }
+  .slide-idle.hidden { opacity: 0; pointer-events: none; }
+
+  /* Accent bar on left */
+  .slide-accent-bar {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 4px; border-radius: 0 2px 2px 0;
+    transition: background 0.4s ease;
+  }
+  /* Bullet points */
+  .slide-point {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 13px; color: rgba(233,223,236,0.85);
+    line-height: 1.5;
+    margin-bottom: 8px;
+    transform: translateX(-6px);
+    opacity: 0;
+    animation: point-in 0.4s ease forwards;
+  }
+  .slide-point::before {
+    content: '▸';
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-size: 11px;
+  }
+  @keyframes point-in {
+    to { transform: translateX(0); opacity: 1; }
+  }
+  /* LIVE badge */
+  .live-badge { animation: live-blink 2s ease-in-out infinite; }
+  @keyframes live-blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* Status dot */
+  .status-dot { animation: sdot 2.2s ease-in-out infinite; }
+  @keyframes sdot { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background:rgba(173,198,255,0.2); border-radius:10px; }
+</style>
+</head>
+
+<body class="min-h-screen flex flex-col relative overflow-hidden">
+
+<!-- Atmosphere -->
+<div class="fixed inset-0 spotlight-radial pointer-events-none z-0"></div>
+<div class="fixed top-1/3 -left-40 w-72 h-72 bg-primary/5  blur-[130px] rounded-full pointer-events-none"></div>
+<div class="fixed bottom-0 -right-40 w-96 h-96 bg-secondary/5 blur-[130px] rounded-full pointer-events-none"></div>
+
+<!-- ══ HEADER ══ -->
+<header class="flex justify-between items-center w-full px-8 py-4 z-50 shrink-0">
+  <!-- Logo -->
+  <div class="font-['Space_Grotesk'] text-xl font-bold tracking-tight">
+    <span class="bg-gradient-to-r from-primary to-primary-container bg-clip-text text-transparent">AITV</span>
+    <span class="ml-2 text-[9px] font-['Manrope'] uppercase tracking-[0.22em] text-slate-500 align-middle">
+      AI News Commentary
+    </span>
+  </div>
+
+  <!-- Centre status -->
+  <div class="flex flex-col items-center gap-1">
+    <div class="flex items-center gap-2 text-slate-300 text-xs font-['Manrope']">
+      <span class="w-2 h-2 rounded-full bg-slate-600" id="statusDot"></span>
+      <span id="statusText">Ready to start discussion</span>
+    </div>
+    <div class="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest
+                text-primary/60 bg-primary/8 border border-primary/15 rounded-full px-3 py-0.5">
+      <span id="newsCounter">1 / 5</span>
+      <span class="text-slate-600">·</span>
+      <span id="rotateLabel">Auto-rotating topics</span>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="flex items-center gap-2 text-slate-400">
+    <button onclick="toggleSettings()"
+      class="hover:text-primary transition-colors duration-200 p-1.5 rounded-full hover:bg-white/5">
+      <span class="material-symbols-outlined text-[20px]">settings</span>
+    </button>
+  </div>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main class="flex-grow flex items-stretch px-8 pb-32 gap-10 z-10 overflow-hidden">
+
+  <!-- LEFT: Avatar column -->
+  <div class="w-[200px] shrink-0 flex flex-col items-center justify-center gap-2
+              border-r border-outline-variant/10 pr-8" id="avatarPanel">
+
+    <!-- Mark -->
+    <div class="flex flex-col items-center gap-2" id="wrap-mark">
+      <div class="relative flex items-center justify-center">
+        <!-- glow backdrop -->
+        <div class="avatar-glow idle absolute" id="glow-mark"
+             style="width:72px;height:72px;"></div>
+        <img id="img-mark" class="avatar-img idle relative z-10"
+          src="https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/2.png"
+          alt="Mark"/>
+        <div id="badge-mark"
+          class="spk-badge hidden absolute -bottom-3 left-1/2 -translate-x-1/2
+                 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tight z-20"
+          style="background:#ffb690;color:#341100">Speaking</div>
+      </div>
+      <span class="font-['Space_Grotesk'] text-xs font-medium tracking-widest uppercase
+                   transition-colors duration-400" id="label-mark"
+            style="color:#555">Mark</span>
+    </div>
+
+    <!-- Tom -->
+    <div class="flex flex-col items-center gap-2" id="wrap-tom">
+      <div class="relative flex items-center justify-center">
+        <div class="avatar-glow idle absolute" id="glow-tom"
+             style="width:72px;height:72px;"></div>
+        <img id="img-tom" class="avatar-img idle relative z-10"
+          src="https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/3.png"
+          alt="Tom"/>
+        <div id="badge-tom"
+          class="spk-badge hidden absolute -bottom-3 left-1/2 -translate-x-1/2
+                 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tight z-20"
+          style="background:#ffd799;color:#432c00">Speaking</div>
+      </div>
+      <span class="font-['Space_Grotesk'] text-xs font-medium tracking-widest uppercase
+                   transition-colors duration-400" id="label-tom"
+            style="color:#555">Tom</span>
+    </div>
+
+    <!-- Moderator -->
+    <div class="flex flex-col items-center gap-2" id="wrap-moderator">
+      <div class="relative flex items-center justify-center">
+        <div class="avatar-glow idle absolute" id="glow-moderator"
+             style="width:72px;height:72px;"></div>
+        <img id="img-moderator" class="avatar-img idle relative z-10"
+          src="https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/1.png"
+          alt="Moderator"/>
+        <div id="badge-moderator"
+          class="spk-badge hidden absolute -bottom-3 left-1/2 -translate-x-1/2
+                 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tight z-20"
+          style="background:#adc6ff;color:#001a42">Speaking</div>
+      </div>
+      <span class="font-['Space_Grotesk'] text-xs font-medium tracking-widest uppercase
+                   transition-colors duration-400" id="label-moderator"
+            style="color:#555">Moderator</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: Slide + transcript -->
+  <div class="flex-grow flex flex-col justify-between py-6 min-w-0 gap-5">
+
+    <!-- ── SLIDE PANEL ── -->
+    <div class="slide-panel" id="slidePanel">
+
+      <!-- Background image -->
+      <img class="slide-bg" id="slideBg"
+        src="" alt=""
+        onerror="this.style.display='none'"/>
+
+      <!-- Dark overlay -->
+      <div class="slide-overlay"></div>
+
+      <!-- Accent bar -->
+      <div class="slide-accent-bar" id="slideAccent" style="background:#555"></div>
+
+      <!-- IDLE state (no one speaking) -->
+      <div class="slide-idle" id="slideIdle">
+        <div class="text-[10px] uppercase tracking-[0.22em] text-slate-600 font-bold">
+          Awaiting Discussion
+        </div>
+        <div class="font-['Space_Grotesk'] text-2xl font-bold text-slate-400/40">
+          AITV Studio
+        </div>
+        <div class="text-[10px] text-slate-700 tracking-widest uppercase mt-1">
+          Press "New Discussion" to begin
+        </div>
+      </div>
+
+      <!-- SLIDE content (shown when speaking) -->
+      <div class="slide-content" id="slideContent">
+
+        <!-- Speaker tag + category -->
+        <div class="flex items-center gap-3 mb-3">
+          <span class="text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-full"
+                id="slideTag"
+                style="background:rgba(173,198,255,0.15);color:#adc6ff">
+            MODERATOR · INTRO
+          </span>
+          <div class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full live-badge" id="slideDot"
+                  style="background:#adc6ff"></span>
+            <span class="text-[9px] uppercase tracking-widest font-bold"
+                  id="slideLive" style="color:rgba(173,198,255,0.6)">Live Commentary</span>
+          </div>
+        </div>
+
+        <!-- Slide title -->
+        <h3 class="font-['Space_Grotesk'] text-xl font-bold text-slate-100 mb-3 leading-snug"
+            id="slideTitle">Today's Top Stories</h3>
+
+        <!-- Horizontal rule -->
+        <div class="h-px mb-4 w-16 rounded-full" id="slideDivider"
+             style="background:#adc6ff;opacity:0.4"></div>
+
+        <!-- Bullet points -->
+        <div id="slideBullets" class="space-y-0"></div>
+
+        <!-- Key stat / quote (optional) -->
+        <div id="slideStat"
+          class="mt-4 px-3 py-2 rounded-lg text-xs font-bold tracking-wide"
+          style="display:none;border:1px solid rgba(255,255,255,0.1);color:#e9dfec;background:rgba(255,255,255,0.05)">
+        </div>
+      </div>
+
+      <!-- News source watermark -->
+      <div class="absolute bottom-3 right-4 text-[9px] text-slate-600
+                  font-['Manrope'] uppercase tracking-widest" id="slideSource">
+        BBC News
+      </div>
+    </div>
+
+    <!-- ── TRANSCRIPT BAR ── -->
+    <div class="bg-surface-container-lowest/80 backdrop-blur-2xl
+                px-7 py-4 rounded-xl relative overflow-hidden
+                border border-outline-variant/10 shadow-lg flex-shrink-0">
+      <div class="absolute top-0 left-0 w-[3px] h-full rounded-l-xl transition-colors duration-400"
+           id="transcriptAccent" style="background:#555"></div>
+      <p class="text-sm font-['Manrope'] font-light leading-relaxed text-on-surface italic">
+        <span class="font-bold not-italic mr-2 transition-colors duration-300"
+              id="transcriptSpeaker" style="color:#777">AITV:</span>
+        <span id="transcriptBody">
+          Click <strong>New Discussion</strong> below — AI characters will debate today's top headlines.
+        </span>
+      </p>
+      <div class="mt-2.5 flex gap-5 text-[9px] uppercase tracking-[0.18em] text-slate-600 font-bold">
+        <span class="flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-secondary/50"></span>
+          Google Gemini · Script Generation
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-primary/50"></span>
+          Google TTS · Voice Synthesis
+        </span>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ══ BOTTOM NAV ══ -->
+<nav class="fixed bottom-7 left-1/2 -translate-x-1/2 z-50
+            flex items-center gap-3
+            bg-[#221e26]/80 backdrop-blur-xl
+            rounded-full px-5 py-3
+            shadow-[0_20px_60px_rgba(0,0,0,0.65)]
+            border border-outline-variant/15">
+
+  <button id="btnBegin" onclick="startDiscussion(true)"
+    class="bg-gradient-to-r from-primary to-primary-container
+           text-on-primary-container rounded-full px-7 py-2.5
+           flex items-center gap-2
+           hover:scale-105 active:scale-95 transition-all duration-200
+           font-['Manrope'] text-[11px] font-bold uppercase tracking-[0.15em]
+           shadow-lg shadow-blue-500/20
+           disabled:opacity-40 disabled:pointer-events-none">
+    <span class="material-symbols-outlined text-[16px]"
+          style="font-variation-settings:'FILL' 1">play_arrow</span>
+    New Discussion
+  </button>
+
+  <button id="btnReuse" onclick="startDiscussion(false)"
+    class="text-slate-300 px-6 py-2.5 rounded-full
+           border border-slate-500/25 hover:bg-white/5
+           hover:scale-105 active:scale-95 transition-all duration-200
+           flex items-center gap-2
+           font-['Manrope'] text-[11px] font-bold uppercase tracking-[0.15em]
+           disabled:opacity-40 disabled:pointer-events-none">
+    <span class="material-symbols-outlined text-[16px]">refresh</span>
+    Reuse
+  </button>
+
+  <div class="w-px h-6 bg-outline-variant/25 mx-1"></div>
+
+  <button id="btnStop" onclick="stopDiscussion()"
+    class="text-error px-6 py-2.5 rounded-full
+           border border-error/20 hover:bg-error/10
+           hover:scale-105 active:scale-95 transition-all duration-200
+           flex items-center gap-2
+           font-['Manrope'] text-[11px] font-bold uppercase tracking-[0.15em]">
+    <span class="material-symbols-outlined text-[16px]">stop</span>
+    Stop
+  </button>
+</nav>
+
+<!-- ══ SETTINGS DRAWER ══ -->
+<aside id="settingsDrawer"
+  class="fixed top-0 left-0 h-full w-80 z-[200]
+         bg-[#0d0a12]/97 backdrop-blur-2xl
+         border-r border-outline-variant/10 shadow-2xl
+         flex flex-col"
+  style="transform:translateX(-100%);transition:transform 0.5s cubic-bezier(.4,0,.2,1)">
+  <div class="flex items-center justify-between px-5 py-4 border-b border-outline-variant/10">
+    <h2 class="font-['Space_Grotesk'] text-sm font-semibold text-white flex items-center gap-2">
+      <span class="material-symbols-outlined text-primary text-[18px]">settings</span>
+      Settings
+    </h2>
+    <button onclick="toggleSettings()"
+      class="text-slate-500 hover:text-white transition-colors p-1 rounded-full hover:bg-white/8">
+      <span class="material-symbols-outlined text-[18px]">close</span>
+    </button>
+  </div>
+  <div class="flex border-b border-outline-variant/10 text-[10px] font-bold uppercase tracking-[0.15em] font-['Manrope']">
+    <button onclick="sTab(this,'sg')" class="stab flex-1 py-3 text-primary border-b-2 border-primary">General</button>
+    <button onclick="sTab(this,'sv')" class="stab flex-1 py-3 text-slate-500 border-b-2 border-transparent hover:text-white transition-colors">Voice</button>
+    <button onclick="sTab(this,'sa')" class="stab flex-1 py-3 text-slate-500 border-b-2 border-transparent hover:text-white transition-colors">Advanced</button>
+  </div>
+  <div class="flex-1 overflow-y-auto px-5 py-5 space-y-6 text-sm">
+    <div id="sg">
+      <p class="text-[9px] uppercase tracking-[0.18em] text-slate-500 font-bold mb-3">Audio</p>
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-slate-300">Enable Audio</span>
+        <label class="relative inline-flex cursor-pointer">
+          <input type="checkbox" checked class="sr-only peer"/>
+          <div class="w-9 h-5 bg-outline-variant rounded-full peer peer-checked:bg-primary/70
+                      after:content-[''] after:absolute after:top-0.5 after:left-0.5
+                      after:bg-white after:rounded-full after:h-4 after:w-4
+                      after:transition-all peer-checked:after:translate-x-4"></div>
+        </label>
+      </div>
+      <div class="space-y-1.5 mb-5">
+        <p class="text-[10px] text-slate-500">Debate Speed</p>
+        <select class="w-full bg-[#221e26] border border-outline-variant/30 rounded-xl px-3 py-2 text-slate-200 focus:outline-none text-sm">
+          <option>Slow</option><option selected>Normal</option><option>Fast</option>
+        </select>
+      </div>
+      <p class="text-[9px] uppercase tracking-[0.18em] text-slate-500 font-bold mb-3">News</p>
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-slate-300">Auto-rotate Topics</span>
+        <label class="relative inline-flex cursor-pointer">
+          <input type="checkbox" checked class="sr-only peer"/>
+          <div class="w-9 h-5 bg-outline-variant rounded-full peer peer-checked:bg-primary/70
+                      after:content-[''] after:absolute after:top-0.5 after:left-0.5
+                      after:bg-white after:rounded-full after:h-4 after:w-4
+                      after:transition-all peer-checked:after:translate-x-4"></div>
+        </label>
+      </div>
+      <div class="space-y-1.5 mb-5">
+        <div class="flex justify-between text-[10px] text-slate-500">
+          <span>Rotation Interval</span><span id="sliderVal">10s</span>
+        </div>
+        <input type="range" min="3" max="30" value="10" class="w-full accent-primary"
+               oninput="document.getElementById('sliderVal').textContent=this.value+'s'"/>
+      </div>
+      <p class="text-[9px] uppercase tracking-[0.18em] text-slate-500 font-bold mb-2">Language</p>
+      <select class="w-full bg-[#221e26] border border-outline-variant/30 rounded-xl px-3 py-2 text-slate-200 focus:outline-none text-sm">
+        <option selected>Auto-detect</option><option>中文</option><option>English</option>
+      </select>
+    </div>
+    <div id="sv" class="hidden"><p class="text-slate-500 text-center py-10 text-xs">Voice configuration (demo placeholder)</p></div>
+    <div id="sa" class="hidden"><p class="text-slate-500 text-center py-10 text-xs">Advanced settings (demo placeholder)</p></div>
+  </div>
+  <div class="px-5 py-3 border-t border-outline-variant/10">
+    <button class="w-full py-2 text-[10px] text-slate-600 hover:text-white hover:bg-white/5 rounded-xl transition-colors font-['Manrope'] font-bold uppercase tracking-widest">
+      Reset to Defaults
+    </button>
+  </div>
+</aside>
+<div id="settingsBg"
+  class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[199]"
+  style="opacity:0;pointer-events:none;transition:opacity 0.4s ease"
+  onclick="toggleSettings()"></div>
+
+<!-- Pipeline widget -->
+<div id="pw"
+  class="fixed top-4 right-4 z-[100] min-w-[190px]
+         bg-black/80 backdrop-blur-xl text-white text-[11px]
+         p-3 rounded-2xl border border-white/8 shadow-2xl"
+  style="opacity:0;transition:opacity 0.3s ease;pointer-events:none">
+  <div class="text-[9px] uppercase tracking-[0.18em] text-primary/80 font-bold mb-1">Pipeline</div>
+  <div class="flex justify-between text-slate-400 mb-1">
+    <span id="pwPct">Progress: 0%</span>
+    <span class="text-green-400 text-[9px]">● Active</span>
+  </div>
+  <div id="pwTasks" class="space-y-0.5"></div>
+</div>
+
+<script>
+/* ══ DATA ══ */
+const ACCENT = {
+  moderator: { hex: '#adc6ff', bg: 'rgba(173,198,255,0.15)', text: '#001a42', badge: '#adc6ff' },
+  tom:       { hex: '#ffd799', bg: 'rgba(255,215,153,0.15)', text: '#432c00', badge: '#ffd799' },
+  mark:      { hex: '#ffb690', bg: 'rgba(255,182,144,0.15)', text: '#341100', badge: '#ffb690' },
+}
+const STATIC = {
+  moderator: 'https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/1.png',
+  tom:       'https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/3.png',
+  mark:      'https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/2.png',
+}
+const ANIMATED = {
+  moderator: 'https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/ezgif.com-video-to-gif-converter.gif',
+  tom:       'https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/Moving-picture-dog-flips-hot-dog-on-nose-animated-gif.gif',
+  mark:      'https://pub-b436254f85684e9e95bebad4567b11ff.r2.dev/public/dog-ezgif.com-video-to-gif-converter%20(1).gif',
+}
+
+/* Each turn: speaker · transcript text · slide structured content */
+const SCRIPT = [
+  {
+    speaker: 'moderator',
+    text: "Welcome to AITV. I'm your AI moderator and today we're covering five major stories from around the world. Let's begin.",
+    slide: {
+      tag: 'MODERATOR · OVERVIEW', category: 'Global Broadcast',
+      title: "Today's Top 5 Stories",
+      points: [
+        "Myanmar military leader elected president",
+        "Australia faces critical fuel shortage",
+        "Artemis II reaches lunar milestone",
+        "US Attorney General dismissed by Trump",
+        "Post-Brexit marmalade rebranding"
+      ],
+      stat: null,
+      news: 0
+    }
+  },
+  {
+    speaker: 'tom',
+    text: "The election of Min Aung Hlaing has significant geopolitical implications. This fundamentally changes the regional power balance across Southeast Asia.",
+    slide: {
+      tag: 'TOM · ANALYSIS', category: 'Geopolitics',
+      title: "Myanmar: A Power Shift",
+      points: [
+        "First military president since democratic transition in 2011",
+        "ASEAN relations face immediate uncertainty",
+        "Western sanctions expected to intensify significantly"
+      ],
+      stat: "27 countries have formally condemned the election result",
+      news: 0
+    }
+  },
+  {
+    speaker: 'mark',
+    text: "I'd argue the international community's response will be the defining factor. Economic sanctions alone haven't worked historically — coordinated action is needed.",
+    slide: {
+      tag: 'MARK · COUNTER-POINT', category: 'Policy Analysis',
+      title: "Sanctions: A Limited Tool?",
+      points: [
+        "Historical precedent shows sanctions rarely change military regimes",
+        "China and Russia likely to block UN Security Council action",
+        "Humanitarian corridors must be preserved regardless"
+      ],
+      stat: "Myanmar's military exports to China grew 34% despite 2021 coup sanctions",
+      news: 0
+    }
+  },
+  {
+    speaker: 'moderator',
+    text: "Moving on — Australia is facing a critical fuel crisis. Industry leaders warn that fuel heading there won't last more than a month.",
+    slide: {
+      tag: 'MODERATOR · TRANSITION', category: 'Breaking News',
+      title: "Australia Fuel Supply Alert",
+      points: [
+        "Supply chain disruption hits energy-dependent economy",
+        "Trucking and aviation sectors most immediately affected",
+        "Government emergency reserves under pressure"
+      ],
+      stat: null,
+      news: 1
+    }
+  },
+  {
+    speaker: 'tom',
+    text: "This is a supply-chain vulnerability that energy-dependent economies simply cannot afford to ignore. The strategic reserves question is now urgent.",
+    slide: {
+      tag: 'TOM · ANALYSIS', category: 'Energy Security',
+      title: "Energy Vulnerability Exposed",
+      points: [
+        "Australia imports 90%+ of liquid fuel — structural weakness",
+        "IEA recommends 90-day reserves; Australia holds ~55 days",
+        "Renewable transition now has additional economic urgency"
+      ],
+      stat: "Fuel price spike projected at +28% in next 30 days",
+      news: 1
+    }
+  },
+  {
+    speaker: 'mark',
+    text: "The Artemis II mission is actually the brighter story here — humanity's first return to lunar orbit with a crew in over 50 years. Historic.",
+    slide: {
+      tag: 'MARK · PERSPECTIVE', category: 'Space Exploration',
+      title: "Artemis II: A Giant Leap",
+      points: [
+        "4-person crew on first crewed lunar flyby since Apollo 17 (1972)",
+        "Reid Wiseman, Victor Glover, Christina Koch, Jeremy Hansen aboard",
+        "10-day mission tests Orion capsule life support systems"
+      ],
+      stat: "Closest human approach to Moon in 52 years: 8,900 km from surface",
+      news: 2
+    }
+  },
+  {
+    speaker: 'moderator',
+    text: "And back on Earth, political turbulence continues in Washington. President Trump has removed Attorney General Pam Bondi from her post.",
+    slide: {
+      tag: 'MODERATOR · UPDATE', category: 'US Politics',
+      title: "AG Bondi Dismissed",
+      points: [
+        "Second Attorney General removed this term",
+        "Dismissal follows controversy over Epstein file handling",
+        "Senate confirmation of replacement will face scrutiny"
+      ],
+      stat: null,
+      news: 3
+    }
+  },
+  {
+    speaker: 'tom',
+    text: "The pattern of institutional reshuffling has accelerated considerably this term. Independent oversight mechanisms are being tested at every level.",
+    slide: {
+      tag: 'TOM · ANALYSIS', category: 'Institutional Integrity',
+      title: "Checks & Balances Under Strain",
+      points: [
+        "7 cabinet-level dismissals in current term — historic pace",
+        "DOJ independence increasingly questioned by legal scholars",
+        "Bipartisan concern emerging in Senate oversight committees"
+      ],
+      stat: "Presidential approval at 41% following latest dismissal",
+      news: 3
+    }
+  },
+  {
+    speaker: 'mark',
+    text: "On a lighter note — who knew that marmalade branding could become a post-Brexit flashpoint? Britain will rename the breakfast favourite under new EU alignment rules.",
+    slide: {
+      tag: 'MARK · COMMENTARY', category: 'Brexit Fallout',
+      title: "The Great Marmalade Debate",
+      points: [
+        "EU labelling law requires 'fruit jam' designation for citrus preserves",
+        "UK aligns with standard as part of post-Brexit trade framework",
+        "Paddington Bear unavailable for comment at time of publication"
+      ],
+      stat: "Britain produces 130,000 tonnes of marmalade annually",
+      news: 4
+    }
+  },
+  {
+    speaker: 'moderator',
+    text: "That wraps up today's AI-powered news commentary on AITV. Thank you for watching. We'll be back with the next discussion shortly.",
+    slide: {
+      tag: 'MODERATOR · SIGN-OFF', category: 'End of Broadcast',
+      title: "That's a Wrap",
+      points: [
+        "Myanmar · Australia · Artemis II · US Politics · Brexit",
+        "Powered by Google Gemini for script generation",
+        "Voice synthesis via Google Cloud TTS"
+      ],
+      stat: "Next broadcast: Auto-rotating to next topic",
+      news: 0
+    }
+  },
+]
+
+const NEWS_THUMBS = [
+  '', // Myanmar — no thumb
+  '', // Fuel
+  '', // Artemis
+  '', // Bondi
+  '', // Marmalade
+]
+
+/* ══ State ══ */
+let debating = false, turn = 0, timer = null
+
+/* ══ Avatar state ══ */
+function setAllIdle() {
+  ['moderator','tom','mark'].forEach(s => {
+    const img   = document.getElementById('img-'  + s)
+    const glow  = document.getElementById('glow-' + s)
+    const badge = document.getElementById('badge-' + s)
+    const lbl   = document.getElementById('label-' + s)
+    img.className   = 'avatar-img idle relative z-10'
+    img.src = STATIC[s]
+    glow.className  = 'avatar-glow idle absolute'
+    glow.style.boxShadow = 'none'
+    badge.classList.add('hidden')
+    if (lbl) lbl.style.color = '#555'
+  })
+}
+
+function setSpeaking(s) {
+  setAllIdle()
+  const a     = ACCENT[s]
+  const img   = document.getElementById('img-'  + s)
+  const glow  = document.getElementById('glow-' + s)
+  const badge = document.getElementById('badge-' + s)
+  const lbl   = document.getElementById('label-' + s)
+
+  img.className  = 'avatar-img speaking relative z-10'
+  img.src = ANIMATED[s]
+
+  // Glow: same size as speaking image + box-shadow ring
+  glow.className = 'avatar-glow speaking absolute'
+  glow.style.width     = '144px'
+  glow.style.height    = '144px'
+  glow.style.boxShadow = `0 0 0 4px ${a.hex}, 0 0 50px ${a.hex}55`
+
+  badge.classList.remove('hidden')
+  if (lbl) lbl.style.color = a.hex
+}
+
+/* ══ Slide ══ */
+function showSlide(entry) {
+  const sl = entry.slide
+  const a  = ACCENT[entry.speaker]
+
+  // Hide idle
+  document.getElementById('slideIdle').classList.add('hidden')
+
+  // Accent bar
+  document.getElementById('slideAccent').style.background = a.hex
+
+  // Tag
+  const tagEl = document.getElementById('slideTag')
+  tagEl.textContent = sl.tag
+  tagEl.style.background = a.bg
+  tagEl.style.color       = a.hex
+
+  // Dot + live label
+  document.getElementById('slideDot').style.background = a.hex
+  document.getElementById('slideLive').style.color     = a.hex + '99'
+
+  // Divider
+  document.getElementById('slideDivider').style.background = a.hex
+
+  // Title
+  document.getElementById('slideTitle').textContent = sl.title
+
+  // Bullets — staggered animation
+  const bullEl = document.getElementById('slideBullets')
+  bullEl.innerHTML = ''
+  sl.points.forEach((p, i) => {
+    const d = document.createElement('div')
+    d.className = 'slide-point'
+    d.style.color = 'rgba(233,223,236,0.85)'
+    d.style.animationDelay = (i * 0.12) + 's'
+    d.style.setProperty('--accent', a.hex)
+    // Tint the ▸ arrow
+    d.innerHTML = `<span style="color:${a.hex};flex-shrink:0;margin-top:1px;font-size:11px">▸</span><span>${p}</span>`
+    bullEl.appendChild(d)
+  })
+
+  // Stat
+  const statEl = document.getElementById('slideStat')
+  if (sl.stat) {
+    statEl.style.display = 'block'
+    statEl.style.borderColor = a.hex + '30'
+    statEl.style.color = a.hex
+    statEl.textContent = '📊 ' + sl.stat
+  } else {
+    statEl.style.display = 'none'
+  }
+
+  // Show content
+  const content = document.getElementById('slideContent')
+  content.classList.remove('visible')
+  requestAnimationFrame(() => requestAnimationFrame(() => content.classList.add('visible')))
+}
+
+function showIdleSlide() {
+  document.getElementById('slideContent').classList.remove('visible')
+  setTimeout(() => document.getElementById('slideIdle').classList.remove('hidden'), 350)
+}
+
+/* ══ Transcript ══ */
+function setTranscript(s, text) {
+  const a = ACCENT[s]
+  document.getElementById('transcriptSpeaker').textContent =
+    s.charAt(0).toUpperCase() + s.slice(1) + ':'
+  document.getElementById('transcriptSpeaker').style.color = a.hex
+  document.getElementById('transcriptAccent').style.background = a.hex
+  document.getElementById('transcriptBody').textContent = '\u201C' + text + '\u201D'
+}
+
+/* ══ Discussion loop ══ */
+function startDiscussion(isNew) {
+  if (debating) return
+  debating = true
+  if (isNew) turn = 0
+  document.getElementById('btnBegin').disabled = true
+  document.getElementById('btnReuse').disabled = true
+  const pw = document.getElementById('pw')
+  pw.style.opacity = '1'; pw.style.pointerEvents = 'auto'
+  document.getElementById('statusText').textContent = 'Discussion in progress...'
+  document.getElementById('statusDot').className =
+    'w-2 h-2 rounded-full bg-green-400 status-dot'
+  document.getElementById('rotateLabel').textContent = 'Live commentary'
+  nextTurn()
+}
+
+function nextTurn() {
+  if (!debating || turn >= SCRIPT.length) { stopDiscussion(); return }
+  const entry = SCRIPT[turn]
+  setSpeaking(entry.speaker)
+  setTranscript(entry.speaker, entry.text)
+  showSlide(entry)
+
+  // Pipeline widget
+  const pct = Math.round((turn / SCRIPT.length) * 100)
+  document.getElementById('pwPct').textContent = 'Progress: ' + pct + '%'
+  document.getElementById('pwTasks').innerHTML =
+    `<div style="background:#006600;padding:2px 5px;border-radius:4px;font-size:10px">
+       SPEAKING: ${entry.speaker.toUpperCase()}
+     </div>
+     <div style="background:#333;padding:2px 5px;border-radius:4px;margin-top:2px;font-size:10px">
+       PENDING: ${SCRIPT.length - turn - 1} turns
+     </div>`
+
+  turn++
+  timer = setTimeout(nextTurn, 4500)
+}
+
+function stopDiscussion() {
+  debating = false
+  clearTimeout(timer)
+  document.getElementById('btnBegin').disabled = false
+  document.getElementById('btnReuse').disabled = false
+  const pw = document.getElementById('pw')
+  pw.style.opacity = '0'; pw.style.pointerEvents = 'none'
+  document.getElementById('statusText').textContent = 'Ready to start discussion'
+  document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-slate-600'
+  document.getElementById('rotateLabel').textContent = 'Auto-rotating topics'
+  setAllIdle()
+  showIdleSlide()
+  // Reset transcript
+  document.getElementById('transcriptSpeaker').textContent = 'AITV:'
+  document.getElementById('transcriptSpeaker').style.color = '#555'
+  document.getElementById('transcriptAccent').style.background = '#333'
+  document.getElementById('transcriptBody').textContent =
+    'Click "New Discussion" to begin — AI characters will debate today\'s top headlines.'
+}
+
+/* ══ Settings ══ */
+let sOpen = false
+function toggleSettings() {
+  sOpen = !sOpen
+  const d  = document.getElementById('settingsDrawer')
+  const bg = document.getElementById('settingsBg')
+  d.style.transform = sOpen ? 'translateX(0)' : 'translateX(-100%)'
+  bg.style.opacity = sOpen ? '1' : '0'
+  bg.style.pointerEvents = sOpen ? 'auto' : 'none'
+}
+function sTab(btn, id) {
+  document.querySelectorAll('.stab').forEach(b => {
+    b.classList.remove('text-primary','border-primary')
+    b.classList.add('text-slate-500','border-transparent')
+  })
+  btn.classList.add('text-primary','border-primary')
+  btn.classList.remove('text-slate-500','border-transparent')
+  ;['sg','sv','sa'].forEach(t => {
+    document.getElementById(t).classList.toggle('hidden', t !== id)
+  })
+}
+</script>
+</body>
+</html>

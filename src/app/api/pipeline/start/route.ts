@@ -3,6 +3,8 @@ import { TaskManager } from '@/lib/managers/TaskManager';
 import { PipelineOrchestrator } from '@/lib/pipeline-orchestrator-simple';
 import { VoiceConfig, SupportedLanguage } from '@/types';
 
+export const maxDuration = 60; // Set timeout to 60 seconds for Vercel Hobby/Pro
+
 interface StartPipelineRequest {
   newsTopic: string;
   debateRounds?: number;
