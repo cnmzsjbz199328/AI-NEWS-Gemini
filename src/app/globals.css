@@ -352,6 +352,56 @@ body {
   gap: 10px;
 }
 
+/* ── New avatar system (demo.html style) ── */
+.avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatar-img {
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  transition:
+    width  0.45s cubic-bezier(.34,1.56,.64,1),
+    height 0.45s cubic-bezier(.34,1.56,.64,1),
+    filter 0.35s ease,
+    opacity 0.35s ease;
+}
+.avatar-img.idle {
+  width: 72px; height: 72px;
+  filter: grayscale(85%) brightness(0.55);
+  opacity: 0.7;
+}
+.avatar-img.speaking {
+  width: 144px; height: 144px;
+  filter: grayscale(0%) brightness(1);
+  opacity: 1;
+}
+
+.avatar-glow {
+  border-radius: 50%;
+  transition:
+    width  0.45s cubic-bezier(.34,1.56,.64,1),
+    height 0.45s cubic-bezier(.34,1.56,.64,1),
+    box-shadow 0.4s ease,
+    opacity 0.4s ease;
+}
+.avatar-glow.idle    { box-shadow: none; opacity: 0; }
+.avatar-glow.speaking { opacity: 1; }
+
+.spk-badge {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  animation: pulse-badge 1.4s ease-in-out infinite;
+}
+.spk-badge.hidden { opacity: 0; transform: translateX(-50%) scale(0.7); pointer-events: none; }
+@keyframes pulse-badge {
+  0%,100% { opacity: 1; transform: translateX(-50%) scale(1); }
+  50%      { opacity: 0.65; transform: translateX(-50%) scale(1.1); }
+}
+
 /* ── Slide Panel ── */
 .slide-panel {
   position: relative;
