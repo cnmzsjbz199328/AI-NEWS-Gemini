@@ -189,7 +189,7 @@ export default function HomePage() {
           <div className="text-xs text-slate-400 font-body">{state.error || state.status}</div>
         </header>
 
-        {/* Studio — left avatars + right content */}
+        {/* Studio — avatars | content | controls */}
         <div className="studio-main">
 
           {/* Left: avatar column */}
@@ -199,7 +199,7 @@ export default function HomePage() {
             <SpeakerAvatar speaker="moderator" speakersState={state.speakersState} title="Moderator" />
           </div>
 
-          {/* Right: news+slide + transcript */}
+          {/* Centre: news+slide + transcript */}
           <div className="content-column">
 
             {/* Unified news + slide panel */}
@@ -226,43 +226,42 @@ export default function HomePage() {
               />
             </div>
 
-            {/* Transcript */}
+            {/* Transcript — fixed height, no reflow */}
             <TranscriptArea
               speakersState={state.speakersState}
               conversation={state.conversation}
             />
           </div>
+
+          {/* Right: controls column */}
+          <div className="controls-column">
+            <Button
+              variant="success"
+              size="sm"
+              onClick={() => startDiscussion(true)}
+              disabled={state.isDebating}
+            >
+              🆕 New
+            </Button>
+
+            <Button
+              variant={isAutoPlayMode ? 'warning' : 'info'}
+              size="sm"
+              onClick={handleAutoPlayToggle}
+            >
+              {isAutoPlayMode ? '⏸ Auto On' : '▶▶ Auto'}
+            </Button>
+
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={handleStop}
+              disabled={!state.isDebating && !isAutoPlayMode}
+            >
+              🛑 Stop
+            </Button>
+          </div>
         </div>
-
-        {/* Floating bottom pill controls */}
-        <nav className="controls-pill">
-          <Button
-            variant="success"
-            size="lg"
-            onClick={() => startDiscussion(true)}
-            disabled={state.isDebating}
-          >
-            🆕 New Discussion
-          </Button>
-
-          <Button
-            variant={isAutoPlayMode ? 'warning' : 'info'}
-            size="lg"
-            onClick={handleAutoPlayToggle}
-            disabled={false}
-          >
-            {isAutoPlayMode ? '⏸ Auto-Play On' : '▶▶ Sequential'}
-          </Button>
-
-          <Button
-            variant="danger"
-            size="lg"
-            onClick={handleStop}
-            disabled={!state.isDebating && !isAutoPlayMode}
-          >
-            🛑 Stop
-          </Button>
-        </nav>
 
       </div>
     </div>

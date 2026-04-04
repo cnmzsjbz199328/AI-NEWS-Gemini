@@ -59,8 +59,8 @@ body {
   display: flex;
   align-items: stretch;
   flex-grow: 1;
-  gap: 32px;
-  padding: 0 32px 120px;
+  gap: 24px;
+  padding: 0 32px 32px;
   overflow: hidden;
   max-width: 1400px;
   margin: 0 auto;
@@ -69,7 +69,7 @@ body {
 }
 
 .avatar-column {
-  width: 160px;
+  width: 144px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -77,17 +77,39 @@ body {
   justify-content: center;
   gap: 24px;
   border-right: 1px solid rgba(255,255,255,0.06);
-  padding-right: 24px;
+  padding-right: 20px;
 }
 
 .content-column {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   min-width: 0;
   max-width: 960px;
   justify-content: center;
+}
+
+/* ── Right controls column — mirrors avatar column ── */
+.controls-column {
+  width: 108px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 10px;
+  border-left: 1px solid rgba(255,255,255,0.06);
+  padding-left: 20px;
+}
+
+/* Reserved space for transcript — fixed height prevents flex reflow */
+.transcript-reserved {
+  height: 88px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  overflow: hidden;
 }
 
 .news-panel-dark {
@@ -116,22 +138,9 @@ body {
   transition: background 0.4s ease;
 }
 
-/* Floating bottom pill (replaces old .controls) */
+/* Controls pill — kept for reference, layout now uses .controls-column */
 .controls-pill {
-  position: fixed;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(34,30,38,0.85);
-  backdrop-filter: blur(16px);
-  border-radius: 999px;
-  padding: 10px 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.65);
-  border: 1px solid rgba(255,255,255,0.08);
+  display: none;
 }
 
 .commentator {
