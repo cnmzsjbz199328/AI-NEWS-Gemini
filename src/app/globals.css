@@ -183,7 +183,10 @@ body {
 }
 
 .news-panel {
-  flex: 1;
+  flex-grow: 0;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
   background: rgba(34,30,38,0.7);
   backdrop-filter: blur(16px);
   border-radius: 16px;
@@ -529,7 +532,6 @@ body {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  max-height: 320px;
   border-radius: 20px;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,0.08);
