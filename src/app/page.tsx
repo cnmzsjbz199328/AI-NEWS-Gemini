@@ -5,7 +5,6 @@ import { ConversationEntry, NewsItem, Speaker, AppState, SlideData } from '@/typ
 import { DEFAULT_TTS_VOICE_CONFIG } from '@/components/ui/constants'
 import { SettingsPanel, AppSettings, resolveLanguage } from '@/components/settings'
 import Button from '@/components/ui/Button'
-import { Settings } from 'lucide-react'
 
 import { SpeakerAvatar } from '@/components/ui/SpeakerAvatar'
 import { TranscriptArea } from '@/components/ui/TranscriptArea'
@@ -136,17 +135,14 @@ export default function HomePage() {
 
         {/* Header */}
         <header className="flex justify-between items-center px-8 py-4 shrink-0">
-          <div className="aitv-logo">AITV</div>
-          <div className="flex items-center gap-4">
-            <div className="text-xs text-slate-400 font-body">{state.error || state.status}</div>
-            <button
-              onClick={() => setIsSettingsPanelVisible(!isSettingsPanelVisible)}
-              className="p-2 bg-white/8 backdrop-blur-md border border-white/15 rounded-full hover:bg-white/15 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/30"
-              title="Settings"
-            >
-              <Settings className="w-4 h-4 text-white/70" />
-            </button>
-          </div>
+          <button
+            className="aitv-logo"
+            onClick={() => setIsSettingsPanelVisible(!isSettingsPanelVisible)}
+            title="Settings"
+          >
+            AITV
+          </button>
+          <div className="text-xs text-slate-400 font-body">{state.error || state.status}</div>
         </header>
 
         {/* Studio — left avatars + right content */}

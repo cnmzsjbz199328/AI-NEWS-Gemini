@@ -46,15 +46,14 @@ export function SpeakerAvatar({ speaker, speakersState, title }: SpeakerAvatarPr
 
   return (
     <div className="avatar-wrap" id={`wrap-${speaker}`}>
-      <div className="relative flex items-center justify-center">
-        {/* Glow ring */}
+      {/* Fixed-size container — never resizes, prevents flex reflow */}
+      <div className="avatar-img-container">
+        {/* Glow ring — fixed 144×144, only box-shadow/opacity animate */}
         <div
           className={`avatar-glow absolute ${isSpeaking ? 'speaking' : 'idle'}`}
           style={isSpeaking ? {
-            width: '144px',
-            height: '144px',
             boxShadow: `0 0 0 4px ${accent.hex}, 0 0 50px ${accent.hex}55`,
-          } : { width: '72px', height: '72px' }}
+          } : {}}
         />
 
         {/* Avatar image — src is driven by getSpeakerImage (GIF/PNG logic above) */}
