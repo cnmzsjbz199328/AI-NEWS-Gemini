@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { ConversationEntry, NewsItem, Speaker, AppState, SlideData } from '@/types'
 import { DEFAULT_TTS_VOICE_CONFIG } from '@/components/ui/constants'
 import { SettingsPanel, AppSettings, resolveLanguage } from '@/components/settings'
@@ -13,7 +13,6 @@ import { SlidePanel } from '@/components/ui/SlidePanel'
 import { useNewsManager } from '@/hooks/useNewsManager'
 import { usePipelineStatus } from '@/hooks/usePipelineStatus'
 import { useDiscussionManager } from '@/hooks/useDiscussionManager'
-import { useNewsAutoRotation } from '@/hooks/useNewsAutoRotation'
 import { usePlaybackController } from '@/hooks/usePlaybackController'
 
 
@@ -35,7 +34,7 @@ export default function HomePage() {
     audioQueue: [],
     currentPlayingAudio: undefined,
     nextSequenceNumber: 1,
-    status: 'Ready to start discussion',
+    status: 'Select a news article and click New Discussion',
     news: [],
     newsError: '',
     activeNewsIndex: 0
@@ -43,9 +42,10 @@ export default function HomePage() {
 
   const [isSettingsPanelVisible, setIsSettingsPanelVisible] = useState(false)
   const [currentSlide, setCurrentSlide] = useState<SlideData | null>(null)
+  const [isAutoPlayMode, setIsAutoPlayMode] = useState(false)
   const [appSettings, setAppSettings] = useState<AppSettings>({
     audioEnabled: true,
-    autoRotateNews: true,
+    autoRotateNews: false,
     rotationInterval: 5,
     language: 'auto',
     debateSpeed: 'normal',
@@ -53,7 +53,20 @@ export default function HomePage() {
     ttsVoiceConfig: DEFAULT_TTS_VOICE_CONFIG,
   })
 
+  // Refs for use inside callbacks without stale-closure risk
+  const isAutoPlayModeRef = useRef(false)
+  isAutoPlayModeRef.current = isAutoPlayMode
+
+  const activeNewsIndexRef = useRef(0)
+  const newsLengthRef = useRef(0)
+  const autoPlayPendingRef = useRef(false)
+
   const { news, newsError, activeNewsIndex, fetchNews, setActiveNewsIndex } = useNewsManager()
+
+  // Keep refs in sync after each render
+  activeNewsIndexRef.current = activeNewsIndex
+  newsLengthRef.current = news.length
+
   const { pipelineStatus } = usePipelineStatus(state.isDebating)
   const { startDiscussion, updateStatus, updateError } = useDiscussionManager({
     state,
@@ -63,18 +76,6 @@ export default function HomePage() {
     ttsVoiceConfig: appSettings.ttsVoiceConfig,
     language: resolveLanguage(appSettings.language),
     debateSpeed: appSettings.debateSpeed,
-  })
-
-  const handleNewsRotation = useCallback(() => {
-    setActiveNewsIndex((activeNewsIndex + 1) % news.length)
-  }, [activeNewsIndex, news.length, setActiveNewsIndex])
-
-  useNewsAutoRotation({
-    newsLength: news.length,
-    isDebating: state.isDebating,
-    onRotateNews: handleNewsRotation,
-    enabled: appSettings.autoRotateNews,
-    intervalSeconds: appSettings.rotationInterval,
   })
 
   const updateSpeakerAnimationState = useCallback((speaker: Speaker, animationState: 'speaking' | 'static') => {
@@ -101,25 +102,68 @@ export default function HomePage() {
     }
   }, [])
 
-  const { isPlaying, replayLastTask, stopAllPlayback } = usePlaybackController({
+  // Called when a discussion finishes playing
+  const handlePlaybackComplete = useCallback(() => {
+    setState(prev => ({ ...prev, isDebating: false, status: 'Discussion complete.' }))
+    if (isAutoPlayModeRef.current && newsLengthRef.current > 0) {
+      // Advance to next article and signal that a new discussion should start
+      const nextIndex = (activeNewsIndexRef.current + 1) % newsLengthRef.current
+      setActiveNewsIndex(nextIndex)
+      autoPlayPendingRef.current = true
+    }
+  }, [setActiveNewsIndex])
+
+  const { isPlaying, stopAllPlayback } = usePlaybackController({
     pipelineStatus,
     onSpeakerStateChange: (speaker, speakingState) => {
       updateSpeakerAnimationState(speaker, speakingState === 'speaking' ? 'speaking' : 'static')
     },
     onConversationUpdate: updateConversation,
-    onPlaybackComplete: useCallback(() => {
-      setState(prev => ({ ...prev, isDebating: false, status: 'Discussion complete. Ready to start again.' }))
-    }, []),
+    onPlaybackComplete: handlePlaybackComplete,
     audioEnabled: appSettings.audioEnabled,
     onSlideChange: setCurrentSlide,
   })
 
+  // Auto-play: after news advances and isDebating is cleared, start the next discussion.
+  // autoPlayPendingRef guards against spurious re-triggers.
   useEffect(() => {
-  }, [state.speakersState, state.conversation])
+    if (autoPlayPendingRef.current && !state.isDebating && isAutoPlayMode && news.length > 0) {
+      autoPlayPendingRef.current = false
+      startDiscussion(true)
+    }
+  }, [state.isDebating, activeNewsIndex, isAutoPlayMode, news.length, startDiscussion])
+
+  // Toggle sequential auto-play mode
+  const handleAutoPlayToggle = useCallback(() => {
+    if (isAutoPlayMode) {
+      // Cancel auto-play — current discussion (if any) finishes normally
+      setIsAutoPlayMode(false)
+      autoPlayPendingRef.current = false
+      updateStatus('Auto-play cancelled. Discussion will finish normally.')
+    } else {
+      setIsAutoPlayMode(true)
+      if (!state.isDebating) {
+        startDiscussion(true)
+      }
+      // If already debating, auto-play will kick in after the current one finishes
+    }
+  }, [isAutoPlayMode, state.isDebating, startDiscussion, updateStatus])
+
+  // Stop everything and exit auto-play mode
+  const handleStop = useCallback(() => {
+    setIsAutoPlayMode(false)
+    autoPlayPendingRef.current = false
+    stopAllPlayback()
+    setState(prev => ({ ...prev, isDebating: false, status: 'Stopped.' }))
+  }, [stopAllPlayback])
 
   const activeSpeaker = (Object.keys(state.speakersState) as Speaker[]).find(
     s => state.speakersState[s].animationState === 'speaking'
   )
+
+  const newsStatusText = isAutoPlayMode
+    ? (state.isDebating ? `Auto-play: Discussing ${activeNewsIndex + 1} / ${news.length}` : 'Auto-play: loading next...')
+    : (state.isDebating ? `Discussing Topic ${activeNewsIndex + 1}` : 'Click New Discussion to start')
 
   return (
     <div className="flex min-h-screen">
@@ -169,8 +213,8 @@ export default function HomePage() {
                 <span className="news-indicator">
                   {news.length > 0 ? `${activeNewsIndex + 1} / ${news.length}` : 'Loading...'}
                 </span>
-                <span className="news-status">
-                  {state.isDebating ? `Discussing Topic ${activeNewsIndex + 1}` : 'Auto-rotating topics'}
+                <span className={`news-status ${isAutoPlayMode ? 'auto-play-active' : ''}`}>
+                  {newsStatusText}
                 </span>
               </div>
               <SlidePanel
@@ -202,19 +246,19 @@ export default function HomePage() {
           </Button>
 
           <Button
-            variant="info"
+            variant={isAutoPlayMode ? 'warning' : 'info'}
             size="lg"
-            onClick={() => startDiscussion(false)}
-            disabled={state.isDebating}
+            onClick={handleAutoPlayToggle}
+            disabled={false}
           >
-            🔄 Reuse
+            {isAutoPlayMode ? '⏸ Auto-Play On' : '▶▶ Sequential'}
           </Button>
 
           <Button
             variant="danger"
             size="lg"
-            onClick={stopAllPlayback}
-            disabled={state.isDebating && !isPlaying}
+            onClick={handleStop}
+            disabled={!state.isDebating && !isAutoPlayMode}
           >
             🛑 Stop
           </Button>

@@ -1,7 +1,7 @@
 import React from 'react'
 
 interface ButtonProps {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'success' | 'info' | 'danger'
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'success' | 'info' | 'danger' | 'warning'
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   disabled?: boolean
   loading?: boolean
@@ -31,6 +31,7 @@ const Button: React.FC<ButtonProps> = ({
     success:   'bg-[#4CAF50] text-white hover:bg-[#43A047] focus:ring-[#A5D6A7]',
     info:      'bg-[#2196F3] text-white hover:bg-[#1E88E5] focus:ring-[#90CAF9]',
     danger:    'bg-[#f44336] text-white hover:bg-[#E53935] focus:ring-[#EF9A9A]',
+    warning:   'bg-[#FF9800] text-white hover:bg-[#FB8C00] focus:ring-[#FFCC80]',
   }
 
   const sizeClasses = {
