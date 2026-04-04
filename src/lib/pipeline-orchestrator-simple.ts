@@ -24,13 +24,17 @@ export class PipelineOrchestrator {
    * @param voiceConfig The voice configuration for TTS.
    * @param language The language of the debate.
    */
-  public static async run(newsTopic: string, debateRounds: number, voiceConfig: VoiceConfig, language: SupportedLanguage): Promise<void> {
+  public static async run(newsTopic: string, debateRounds: number, voiceConfig: VoiceConfig, language: SupportedLanguage, existingTaskId?: string): Promise<void> {
     let taskId: string | null = null;
     try {
-      // 1. Create and persist the initial task
-      const task = await TaskManager.createTask(newsTopic, debateRounds, voiceConfig, language);
-      taskId = task.id;
-      if (!taskId) throw new Error('Task creation failed: taskId is null');
+      // 1. Use the task already created by the API, or create one if not provided
+      if (existingTaskId) {
+        taskId = existingTaskId;
+      } else {
+        const task = await TaskManager.createTask(newsTopic, debateRounds, voiceConfig, language);
+        taskId = task.id;
+        if (!taskId) throw new Error('Task creation failed: taskId is null');
+      }
 
       // 2. Generate the debate script
       await TaskManager.updateTaskStatus(taskId, 'GENERATING_TEXT');

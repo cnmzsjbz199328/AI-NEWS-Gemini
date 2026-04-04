@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    PipelineOrchestrator.run(newsTopic, debateRounds, voiceConfig, language).catch(err => {
+    PipelineOrchestrator.run(newsTopic, debateRounds, voiceConfig, language, taskId).catch(err => {
       console.error(`[API /start] Uncaught error in background pipeline for task ${taskId}:`, err);
     });
 
