@@ -118,91 +118,86 @@ export default function HomePage() {
   useEffect(() => {
   }, [state.speakersState, state.conversation])
 
+  const activeSpeaker = (Object.keys(state.speakersState) as Speaker[]).find(
+    s => state.speakersState[s].animationState === 'speaking'
+  )
+
   return (
-    <div className={`flex min-h-screen ${isSettingsPanelVisible ? 'settings-panel-open' : ''}`}>
-      {/* 设置面板 */}
+    <div className="flex min-h-screen">
+      {/* Settings panel */}
       <SettingsPanel
         isVisible={isSettingsPanelVisible}
         onToggle={() => setIsSettingsPanelVisible(!isSettingsPanelVisible)}
         onSettingsChange={setAppSettings}
       />
 
-      {/* 主内容区域 */}
+      {/* Main content */}
       <div className="flex-1 ai-news-commentary">
-      <div className="aitv-logo">AITV</div>
 
-      <div id="status">{state.error || state.status}</div>
+        {/* Header */}
+        <header className="flex justify-between items-center px-8 py-4 shrink-0">
+          <div className="aitv-logo">AITV</div>
+          <div className="text-xs text-slate-400 font-body">{state.error || state.status}</div>
+        </header>
 
-      <div className="main-content">
-        <SpeakerAvatar
-          speaker="moderator"
-          speakersState={state.speakersState}
-          title="Moderator"
-        />
+        {/* Studio — left avatars + right content */}
+        <div className="studio-main">
 
-        <div className="studio-container">
-          <SpeakerAvatar
-            speaker="tom"
-            speakersState={state.speakersState}
-            title="Tom"
-          />
-
-          <div className="news-panel">
-            <SlidePanel
-              currentSlide={currentSlide}
-              activeSpeaker={
-                (Object.keys(state.speakersState) as Speaker[]).find(
-                  s => state.speakersState[s].animationState === 'speaking'
-                )
-              }
-            />
-            <div className="news-navigation">
-              <span className="news-indicator">
-                {news.length > 0 ? `${activeNewsIndex + 1} / ${news.length}` : 'Loading...'}
-              </span>
-              <span className="news-status">
-                {state.isDebating ? `Discussing Topic ${activeNewsIndex + 1}` : 'Auto-rotating topics'}
-              </span>
-            </div>
-            <div id="news-content">
-              <NewsDisplay
-                news={news}
-                newsError={newsError}
-                activeNewsIndex={activeNewsIndex}
-                onRefreshNews={fetchNews}
-              />
-            </div>
+          {/* Left: avatar column */}
+          <div className="avatar-column">
+            <SpeakerAvatar speaker="mark"      speakersState={state.speakersState} title="Mark" />
+            <SpeakerAvatar speaker="tom"       speakersState={state.speakersState} title="Tom" />
+            <SpeakerAvatar speaker="moderator" speakersState={state.speakersState} title="Moderator" />
           </div>
 
-          <SpeakerAvatar
-            speaker="mark"
-            speakersState={state.speakersState}
-            title="Mark"
-          />
+          {/* Right: slide + news + transcript */}
+          <div className="content-column">
+
+            {/* Slide panel */}
+            <SlidePanel currentSlide={currentSlide} activeSpeaker={activeSpeaker} />
+
+            {/* News panel */}
+            <div className="news-panel">
+              <PipelineStatusWidget
+                pipelineStatus={pipelineStatus}
+                isVisible={state.isDebating}
+                showDebugInfo={appSettings.showDebugInfo}
+              />
+              <div className="news-navigation">
+                <span className="news-indicator">
+                  {news.length > 0 ? `${activeNewsIndex + 1} / ${news.length}` : 'Loading...'}
+                </span>
+                <span className="news-status">
+                  {state.isDebating ? `Discussing Topic ${activeNewsIndex + 1}` : 'Auto-rotating topics'}
+                </span>
+              </div>
+              <div id="news-content">
+                <NewsDisplay
+                  news={news}
+                  newsError={newsError}
+                  activeNewsIndex={activeNewsIndex}
+                  onRefreshNews={fetchNews}
+                />
+              </div>
+            </div>
+
+            {/* Transcript */}
+            <TranscriptArea
+              speakersState={state.speakersState}
+              conversation={state.conversation}
+            />
+          </div>
         </div>
-      </div>
 
-      <div id="transcript">
-        <PipelineStatusWidget
-          pipelineStatus={pipelineStatus}
-          isVisible={state.isDebating}
-          showDebugInfo={appSettings.showDebugInfo}
-        />
-
-        <TranscriptArea
-          speakersState={state.speakersState}
-          conversation={state.conversation}
-        />
-      </div>
-
-        <div className="controls">
+        {/* Floating bottom pill controls */}
+        <nav className="controls-pill">
           <Button
             variant="success"
             size="lg"
             onClick={() => startDiscussion(true)}
             disabled={state.isDebating}
           >
-            🆕 Begin New Discussion
+            🆕 New Discussion
           </Button>
 
           <Button
@@ -211,7 +206,7 @@ export default function HomePage() {
             onClick={() => startDiscussion(false)}
             disabled={state.isDebating}
           >
-            🔄 Start (Reuse if Available)
+            🔄 Reuse
           </Button>
 
           <Button
@@ -220,11 +215,11 @@ export default function HomePage() {
             onClick={stopAllPlayback}
             disabled={state.isDebating && !isPlaying}
           >
-            🛑 Stop All Playback
+            🛑 Stop
           </Button>
-        </div>
-      </div>
+        </nav>
 
+      </div>
     </div>
   )
 }

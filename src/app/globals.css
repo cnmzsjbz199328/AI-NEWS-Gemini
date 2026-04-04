@@ -62,6 +62,81 @@ body {
   gap: 30px;
 }
 
+/* ── New demo-style layout ── */
+.studio-main {
+  display: flex;
+  align-items: stretch;
+  flex-grow: 1;
+  gap: 32px;
+  padding: 0 32px 120px;
+  overflow: hidden;
+}
+
+.avatar-column {
+  width: 160px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  padding-right: 24px;
+}
+
+.content-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  justify-content: center;
+}
+
+.news-panel-dark {
+  background: rgba(34,30,38,0.7);
+  backdrop-filter: blur(16px);
+  border-radius: 16px;
+  padding: 16px 20px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.transcript-bar {
+  background: rgba(17,13,21,0.8);
+  backdrop-filter: blur(16px);
+  padding: 14px 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.transcript-bar-accent {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  transition: background 0.4s ease;
+}
+
+/* Floating bottom pill (replaces old .controls) */
+.controls-pill {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(34,30,38,0.85);
+  backdrop-filter: blur(16px);
+  border-radius: 999px;
+  padding: 10px 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.65);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
 .commentator {
   width: 200px;
   text-align: center;
@@ -112,15 +187,13 @@ body {
 
 .news-panel {
   flex: 1;
-  max-width: 600px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(34,30,38,0.7);
+  backdrop-filter: blur(16px);
+  border-radius: 16px;
+  padding: 16px 20px;
+  border: 1px solid rgba(255,255,255,0.06);
   position: relative;
   overflow: hidden;
-  height: 350px;
 }
 
 .news-header {
@@ -136,22 +209,22 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding: 10px 15px;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 10px;
-  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 .news-indicator {
   font-weight: bold;
-  color: #2c3e50;
-  font-size: 14px;
+  color: rgba(233,223,236,0.7);
+  font-size: 12px;
 }
 
 .news-status {
-  font-size: 12px;
-  color: #7f8c8d;
+  font-size: 11px;
+  color: rgba(233,223,236,0.4);
   font-style: italic;
 }
 
