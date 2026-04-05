@@ -24,14 +24,14 @@ const Button: React.FC<ButtonProps> = ({
   const baseClasses = 'inline-flex items-center justify-center font-medium rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
 
   const variantClasses = {
-    primary:   'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-    secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500',
-    outline:   'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-gray-500',
-    ghost:     'text-gray-700 hover:bg-gray-100 focus:ring-gray-500',
-    success:   'bg-[#4CAF50] text-white hover:bg-[#43A047] focus:ring-[#A5D6A7]',
-    info:      'bg-[#2196F3] text-white hover:bg-[#1E88E5] focus:ring-[#90CAF9]',
-    danger:    'bg-[#f44336] text-white hover:bg-[#E53935] focus:ring-[#EF9A9A]',
-    warning:   'bg-[#FF9800] text-white hover:bg-[#FB8C00] focus:ring-[#FFCC80]',
+    primary:   'bg-white/[0.08] border border-white/20 text-white hover:bg-white/[0.14] focus:ring-white/30 backdrop-blur-sm',
+    secondary: 'bg-white/[0.05] border border-white/10 text-white/60 hover:bg-white/[0.10] focus:ring-white/20 backdrop-blur-sm',
+    outline:   'border border-white/20 text-white/80 hover:bg-white/[0.08] focus:ring-white/20 backdrop-blur-sm',
+    ghost:     'text-white/60 hover:bg-white/[0.08] focus:ring-white/20',
+    success:   'bg-white/[0.06] border border-emerald-400/30 text-emerald-300 hover:bg-emerald-500/20 hover:border-emerald-400/50 focus:ring-emerald-400/30 backdrop-blur-sm',
+    info:      'bg-white/[0.06] border border-sky-400/30 text-sky-300 hover:bg-sky-500/20 hover:border-sky-400/50 focus:ring-sky-400/30 backdrop-blur-sm',
+    danger:    'bg-white/[0.06] border border-rose-400/30 text-rose-300 hover:bg-rose-500/20 hover:border-rose-400/50 focus:ring-rose-400/30 backdrop-blur-sm',
+    warning:   'bg-white/[0.06] border border-amber-400/30 text-amber-300 hover:bg-amber-500/20 hover:border-amber-400/50 focus:ring-amber-400/30 backdrop-blur-sm',
   }
 
   const sizeClasses = {
