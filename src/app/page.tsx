@@ -42,6 +42,7 @@ export default function HomePage() {
 
   const [isSettingsPanelVisible, setIsSettingsPanelVisible] = useState(false)
   const [currentSlide, setCurrentSlide] = useState<SlideData | null>(null)
+  const [lockedNewsItem, setLockedNewsItem] = useState<NewsItem | null>(null)
   const [isAutoPlayMode, setIsAutoPlayMode] = useState(false)
   const [appSettings, setAppSettings] = useState<AppSettings>({
     audioEnabled: true,
@@ -66,6 +67,12 @@ export default function HomePage() {
   // Keep refs in sync after each render
   activeNewsIndexRef.current = activeNewsIndex
   newsLengthRef.current = news.length
+
+  useEffect(() => {
+    if (!state.isDebating) {
+      setLockedNewsItem(null)
+    }
+  }, [state.isDebating])
 
   const { pipelineStatus } = usePipelineStatus(state.isDebating)
   const { startDiscussion, updateStatus, updateError } = useDiscussionManager({
@@ -113,7 +120,7 @@ export default function HomePage() {
     }
   }, [setActiveNewsIndex])
 
-  const { isPlaying, stopAllPlayback } = usePlaybackController({
+  const { isPlaying, stopAllPlayback, markAllTasksAsProcessed } = usePlaybackController({
     pipelineStatus,
     onSpeakerStateChange: (speaker, speakingState) => {
       updateSpeakerAnimationState(speaker, speakingState === 'speaking' ? 'speaking' : 'static')
@@ -121,17 +128,28 @@ export default function HomePage() {
     onConversationUpdate: updateConversation,
     onPlaybackComplete: handlePlaybackComplete,
     audioEnabled: appSettings.audioEnabled,
-    onSlideChange: setCurrentSlide,
+    onSlideChange: (slide) => {
+      console.log(`[onSlideChange] slide="${slide?.title ?? 'null'}" | lockedNews="${lockedNewsItem?.title ?? 'null'}" | activeNews="${news[activeNewsIndex]?.title ?? 'null'}"`)
+      setCurrentSlide(slide)
+    },
   })
+
+  const handleStartDiscussion = useCallback((forceNew = true) => {
+    const item = news[activeNewsIndex] ?? null
+    console.log(`[handleStartDiscussion] idx=${activeNewsIndex} locking="${item?.title ?? 'null'}"`)
+    markAllTasksAsProcessed()  // 防止历史任务被重播
+    setLockedNewsItem(item)
+    return startDiscussion(forceNew)
+  }, [startDiscussion, news, activeNewsIndex, markAllTasksAsProcessed])
 
   // Auto-play: after news advances and isDebating is cleared, start the next discussion.
   // autoPlayPendingRef guards against spurious re-triggers.
   useEffect(() => {
     if (autoPlayPendingRef.current && !state.isDebating && isAutoPlayMode && news.length > 0) {
       autoPlayPendingRef.current = false
-      startDiscussion(true)
+      handleStartDiscussion(true)
     }
-  }, [state.isDebating, activeNewsIndex, isAutoPlayMode, news.length, startDiscussion])
+  }, [state.isDebating, activeNewsIndex, isAutoPlayMode, news.length, handleStartDiscussion])
 
   // Toggle sequential auto-play mode
   const handleAutoPlayToggle = useCallback(() => {
@@ -143,7 +161,7 @@ export default function HomePage() {
     } else {
       setIsAutoPlayMode(true)
       if (!state.isDebating) {
-        startDiscussion(true)
+        handleStartDiscussion(true)
       }
       // If already debating, auto-play will kick in after the current one finishes
     }
@@ -220,7 +238,7 @@ export default function HomePage() {
               <SlidePanel
                 currentSlide={currentSlide}
                 activeSpeaker={activeSpeaker}
-                activeNewsItem={news[activeNewsIndex] ?? null}
+                activeNewsItem={(state.isDebating && lockedNewsItem) ? lockedNewsItem : (news[activeNewsIndex] ?? null)}
                 newsError={newsError}
                 onRefreshNews={fetchNews}
               />
@@ -238,7 +256,7 @@ export default function HomePage() {
             <Button
               variant="success"
               size="sm"
-              onClick={() => startDiscussion(true)}
+              onClick={() => handleStartDiscussion(true)}
               disabled={state.isDebating}
             >
               🆕 New

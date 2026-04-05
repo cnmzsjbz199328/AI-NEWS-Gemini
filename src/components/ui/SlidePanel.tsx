@@ -99,7 +99,7 @@ export function SlidePanel({ currentSlide, activeSpeaker, activeNewsItem, newsEr
           <p className="news-item-desc">{activeNewsItem.description}</p>
         )}
         <div className="news-item-meta">
-          <span>BBC News</span>
+          <span>{activeNewsItem.source ?? 'BBC News'}</span>
           <span>{activeNewsItem.date}</span>
         </div>
       </div>

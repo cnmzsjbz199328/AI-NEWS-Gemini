@@ -33,6 +33,7 @@ export function usePlaybackController({
 
     audioManager.current.setSpeakerChangeCallback((speaker, text, action) => {
       if (action === 'start' && speaker) {
+        console.log(`[SpeakerChange] ${speaker}: "${text.substring(0, 80)}"`)
         onSpeakerStateChange(speaker, 'speaking')
         onConversationUpdate?.(speaker, text, 'add')
 
@@ -64,6 +65,7 @@ export function usePlaybackController({
 
   const playTask = useCallback(async (task: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     currentTaskRef.current = task
+    console.log(`[playTask] id=${task.id} topic="${task.newsTopic?.substring(0, 80)}"`)
     try {
       // 立即标记任务为已播放，防止重复处理
       try {
@@ -263,12 +265,22 @@ export function usePlaybackController({
     processedTasksRef.current.clear()
   }, [])
 
+  // 新讨论启动前调用：把当前所有已知任务标记为已处理，防止旧任务被重播
+  const markAllTasksAsProcessed = useCallback(() => {
+    if (!pipelineStatus?.tasks) return
+    pipelineStatus.tasks.forEach((task: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+      processedTasksRef.current.add(task.id)
+      processedTasksRef.current.add(`replay-${task.id}`)
+    })
+  }, [pipelineStatus])
+
   return {
     isPlaying: isPlayingState,
     currentSpeaker: audioManager.current.getPlaybackState().currentSpeaker,
     queueLength: audioManager.current.getPlaybackState().queueLength,
     stopPlaybackController,
     replayLastTask,
-    stopAllPlayback
+    stopAllPlayback,
+    markAllTasksAsProcessed
   }
 }

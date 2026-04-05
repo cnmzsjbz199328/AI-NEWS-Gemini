@@ -49,8 +49,7 @@ export const createGeminiProvider = (): AIProvider => {
         return responseText || ''
       } catch (error) {
         console.error('Gemini API error:', error)
-        // 返回一个备用回应而不是抛出错误
-        return `As the moderator, I believe this is an important topic that deserves careful consideration from all perspectives.`
+        throw error
       }
     }
   }

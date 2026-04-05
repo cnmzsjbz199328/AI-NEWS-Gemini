@@ -97,7 +97,7 @@ export class AudioManager {
     this.notifyStateChange()
     setTimeout(() => {
       this.tryPlayNext()
-      if (!this.queueManager.getNextItem() && !this.audioPlayer.isPlaying()) {
+      if (!this.queueManager.getNextItem() && !this.audioPlayer.isPlaying() && !this._isLoading) {
         this.onQueueComplete?.()
       }
     }, 100)
